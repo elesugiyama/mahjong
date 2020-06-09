@@ -28,8 +28,8 @@ public class DontDestroyData : MonoBehaviour {
 	/// <summary>
 	/// シナリオ：現在のシナリオ番号
 	/// </summary>
-	private string m_advScoNo;
-	public string AdvScoNo {
+	private int m_advScoNo;
+	public int AdvScoNo {
 		get { return m_advScoNo; }
 		set { m_advScoNo = value; }
 	}
@@ -37,8 +37,8 @@ public class DontDestroyData : MonoBehaviour {
 	/// <summary>
 	/// シナリオ：次シナリオ番号
 	/// </summary>
-	private string m_advNextScoNo;
-	public string AdvNextScoNo {
+	private int m_advNextScoNo;
+	public int AdvNextScoNo {
 		get { return m_advNextScoNo; }
 		set { m_advNextScoNo = value; }
 	}

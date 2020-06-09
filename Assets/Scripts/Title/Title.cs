@@ -46,19 +46,19 @@ public class Title : SceneBase {
 		base.Awake();
 		m_Mode = TITLEMODE.tMODE_INIT;
 		m_TitleButton.SetOnPointerClickCallback(ButtonTest);
-			Debug.Log("//-*awake");
+			DevLog("//-*awake");
 
 	}
 	// Update is called once per frame
 	protected override void Update () {
 		switch(m_Mode){
 		case TITLEMODE.tMODE_INIT:
-			Debug.Log("//-*tMODE_INIT");
+			DevLog("//-*tMODE_INIT");
 			m_Mode = ModeSet(TITLEMODE.tMODE_PRESSKEY_TITLE);
 			
 			break;
 		case TITLEMODE.tMODE_PRESSKEY_TITLE:
-			Debug.Log("//-*tMODE_PRESSKEY_TITLE");
+			DevLog("//-*tMODE_PRESSKEY_TITLE");
 			
 			break;
 		default:
@@ -68,7 +68,7 @@ public class Title : SceneBase {
 
 	public void ButtonTest()
 	{
-		Debug.Log("//-*ButtonTest2:");
+		DevLog("//-*ButtonTest2:");
 		SceneChange("SelectStage");
 	}
 }

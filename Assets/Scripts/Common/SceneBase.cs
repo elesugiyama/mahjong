@@ -19,6 +19,9 @@ public class SceneBase : MonoBehaviour {
 
 	private Const.Err.ERRTYPE m_errType;
 
+	//-*シーン変更
+	public bool m_isSceneChange = false;
+
 	protected virtual void Start () {}
 	protected virtual void Update () {}
 	protected virtual void Awake() {
@@ -70,6 +73,7 @@ public class SceneBase : MonoBehaviour {
 	/// </summary>
 	public virtual void SceneChange(String nextScene)
 	{
+		m_isSceneChange = false;
 		SceneManager.LoadScene (nextScene);
 	}
 	
@@ -84,5 +88,19 @@ public class SceneBase : MonoBehaviour {
 			break;
 		}
 	}
-
+	/// <summary>
+	/// デバッグログ
+	/// </summary>
+	public void DevLog(string l)
+	{
+#if true
+		Debug.Log(l);
+#endif		
+	}
+	public void DevLogError(string l)
+	{
+#if true
+		Debug.LogError(l);
+#endif		
+	}	
 }

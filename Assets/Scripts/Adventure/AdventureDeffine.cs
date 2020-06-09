@@ -30,8 +30,8 @@ namespace AdventureDefine
 			CMD_CHOICE_START,	// 選択肢開始
 			CMD_CHOICE,			// 選択肢
 			CMD_CHOICE_END,		// 選択肢終了
-			CMD_FADE_IN,		// フェードイン
-			CMD_FADE_OUT,		// フェードアウト
+			CMD_FADE_IN_B,		// フェードイン
+			CMD_FADE_OUT_B,		// フェードアウト
 			NO_CMD_SENTENCE,// シナリオ本文
 			CMD_MAX,		// コマンド総数
 		}
@@ -55,8 +55,8 @@ namespace AdventureDefine
 			{ CMD_TYPE.CMD_CHOICE_START,	"#choice_start" },	// 選択肢開始
 			{ CMD_TYPE.CMD_CHOICE_END,		"#choice_end" },	// 選択肢終了
 			{ CMD_TYPE.CMD_CHOICE,			"#choice_" },		// 選択肢
-			{ CMD_TYPE.CMD_FADE_IN,			"#blackin" },		// フェードイン
-			{ CMD_TYPE.CMD_FADE_OUT,		"#blackout" },		// フェードアウト
+			{ CMD_TYPE.CMD_FADE_IN_B,		"#blackin" },		// 黒フェードイン
+			{ CMD_TYPE.CMD_FADE_OUT_B,		"#blackout" },		// 黒フェードアウト
 			{ CMD_TYPE.CMD_SCO_END,			"#file_end" },		// シナリオ終了
 		};
 

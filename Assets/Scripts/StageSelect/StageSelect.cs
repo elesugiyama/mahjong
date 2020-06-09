@@ -71,16 +71,16 @@ public class StageSelect : SceneBase {
 	protected override void Update () {
 		switch(m_Mode){
 		case STAGESELECTMODE.mMODE_INIT:
-			Debug.Log("//-*mMODE_INIT");
+			DevLog("//-*mMODE_INIT");
 			m_Mode = ModeSet(STAGESELECTMODE.mMODE_PRESSKEY_TITLE);
 			
 			break;
 		case STAGESELECTMODE.mMODE_PRESSKEY_TITLE:
-			Debug.Log("//-*mMODE_PRESSKEY_TITLE");
+			DevLog("//-*mMODE_PRESSKEY_TITLE");
 			
 			break;
 		default:
-			Debug.Log("//-*Err:"+m_Mode);
+			DevLog("//-*Err:"+m_Mode);
 
 			break;
 		}
@@ -88,8 +88,8 @@ public class StageSelect : SceneBase {
 
 	public void ButtonSelectStageTest(int a)
 	{
-		Debug.Log("//-*ButtonTest:"+a);
-		m_gameData.AdvNextScoNo = a.ToString();
+		DevLog("//-*ButtonTest:"+a);
+		m_gameData.AdvNextScoNo = a;
 		SceneChange("Adventure");
 	}
 }

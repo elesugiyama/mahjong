@@ -37,7 +37,10 @@ public class ScreenEffect : MonoBehaviour {
 
 	private EFFECTSTATE m_state = EFFECTSTATE.WAIT;
 	private EFFECTTYPE m_type = EFFECTTYPE.NONE;
-	private List<EFFECTTYPE> m_EffectList =new List<EFFECTTYPE>();
+	private List<EFFECTTYPE> m_effectTypeList =new List<EFFECTTYPE>();
+	private bool m_isEffectFin = false;
+
+
 	void Start () {}
 	void Update () {}
 	void Awake(){
@@ -46,51 +49,71 @@ public class ScreenEffect : MonoBehaviour {
 	public void Init(){
 		m_state = EFFECTSTATE.WAIT;
 		m_type = EFFECTTYPE.NONE;
-		m_EffectList.Clear();
+		m_effectTypeList.Clear();
 	}
 	public void SetEffect(EFFECTTYPE effect)
 	{
-		if(m_EffectList == null){
-			m_EffectList = new List<EFFECTTYPE>();
+		if(m_effectTypeList == null){
+			m_effectTypeList = new List<EFFECTTYPE>();
 		}
-		m_EffectList.Add(effect);
-	}
-	private IEnumerator UpdateEffect(){
-		bool isEndFade = false;
-		while(true){
-		Debug.Log("//-*UpdateEffect********************"+m_type);
+		m_effectTypeList.Add(effect);
 
-			switch(m_type){
-			case EFFECTTYPE.FADE_IN_BLACK:
-			case EFFECTTYPE.FADE_IN_WHITE:
-			case EFFECTTYPE.FADE_OUT_BLACK:
-			case EFFECTTYPE.FADE_OUT_WHITE:
-				if(FadeInOutProcess(m_type)){
-					isEndFade = true;
+		switch(effect){
+		case EFFECTTYPE.FADE_IN_BLACK:
+			FadeInStart(false);
+			break;
+		case EFFECTTYPE.FADE_IN_WHITE:
+			FadeInStart(true);
+			break;
+		case EFFECTTYPE.FADE_OUT_BLACK:
+			FadeOutStart(false);
+			break;
+		case EFFECTTYPE.FADE_OUT_WHITE:
+			FadeOutStart(true);
+			break;
+		}
+	}
+	public IEnumerator UpdateEffect(){
+		Debug.Log("//-*UpdateEffect( null("+(m_effectTypeList == null)+") )****************");
+		if(m_effectTypeList == null) yield break;
+		Debug.Log("//-*m_effectTypeList.Count = "+m_effectTypeList.Count);
+
+		foreach (EFFECTTYPE type in m_effectTypeList)
+		{
+			while(!m_isEffectFin){
+		// Debug.Log("//-*"+type);
+				switch(type){
+				case EFFECTTYPE.FADE_IN_BLACK:
+				case EFFECTTYPE.FADE_IN_WHITE:
+				case EFFECTTYPE.FADE_OUT_BLACK:
+				case EFFECTTYPE.FADE_OUT_WHITE:
+					if(FadeInOutProcess(m_type)){
+						m_isEffectFin = true;
+					}
+					break;
+				case EFFECTTYPE.QUAKE:
+					break;
+				case EFFECTTYPE.NONE:
+				default:
+					break;
+					// yield break;
 				}
-				break;
-			case EFFECTTYPE.QUAKE:
-				break;
-			case EFFECTTYPE.NONE:
-			default:
-				break;
-				// yield break;
+				yield return null;
 			}
-			if(isEndFade){
-				EffectFinalize();
-				yield break;
-			}
-			yield return null;
 		}
+		EffectFin();
+		yield break;
 	}
 
-	private void EffectFinalize()
-	{
+	private void EffectFin(){
 		m_state = EFFECTSTATE.WAIT;
 		m_type = EFFECTTYPE.NONE;
-		m_EffectList.Clear();
-		Debug.Log("//-*EffectFinalize********************");
+		m_effectTypeList.Clear();
+		Debug.Log("//-*EffectFin()"+m_effectTypeList.Count);
+		m_effectTypeList = null;
+		m_isEffectFin = false;
 	}
+
 #region FADEINOUT
 	//-******************
 	//-*フェードインアウト
@@ -105,9 +128,9 @@ public class ScreenEffect : MonoBehaviour {
 	/// フェードイン
 	/// <param name="isWhite">白:true　黒:false</param>
 	/// </summary>
-	public IEnumerator FadeInStart(bool isWhite)
+	public void FadeInStart(bool isWhite)
 	{
-		if(m_state != EFFECTSTATE.WAIT)yield break;
+		if(m_state != EFFECTSTATE.WAIT)return;
 		m_state = EFFECTSTATE.START;
 		if(isWhite){
 			m_type = EFFECTTYPE.FADE_IN_WHITE;
@@ -118,15 +141,12 @@ public class ScreenEffect : MonoBehaviour {
 		}
 		//-*初期アルファ値設定
 		SetAlpha(FADE_ALPHA_MAX);
-
-		yield return StartCoroutine("UpdateEffect");
-		yield break;
 	}
 
 	/// <summary>
 	/// フェードアウト
 	/// </summary>
-	public IEnumerator FadeOutStart(bool isWhite)
+	public void FadeOutStart(bool isWhite)
 	{
 		m_state = EFFECTSTATE.START;
 		if(isWhite){
@@ -138,9 +158,6 @@ public class ScreenEffect : MonoBehaviour {
 		}
 		//-*初期アルファ値設定
 		SetAlpha(FADE_ALPHA_MIN);
-
-		yield return StartCoroutine("UpdateEffect");
-		yield break;
 	}
 
 	/// <summary>
@@ -178,6 +195,7 @@ public class ScreenEffect : MonoBehaviour {
 			Debug.LogError("FadeInOutProcess:typeErr:"+type);
 			break;
 		}
+		// Debug.Log(type+":setAlphaP:"+setAlphaP);
 		return false;	//-*フェード中
 	}
 

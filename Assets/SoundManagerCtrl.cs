@@ -54,6 +54,15 @@ public class SoundManagerCtrl : MonoBehaviour {
         StartCoroutine(LoadToAudioClipAndPlay(name, SOUNDETYPE.TYPE_SE));
 	}
 
+#region TODO
+//-*仮処理中
+	public void StopBgm(){
+		m_audioSourceBgm.Stop();
+	}
+	public void StopSe(){
+		m_audioSourceSe.Stop();
+	}
+#endregion	//-*todo
     //ファイルの読み込み（ダウンロード）と再生
     IEnumerator LoadToAudioClipAndPlay(string name, SOUNDETYPE type)
     {
