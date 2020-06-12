@@ -65,12 +65,13 @@
      <Compile Include="Assets\Scripts\Common\DontDestroyData.cs" />
      <Compile Include="Assets\Scripts\Common\SceneBase.cs" />
      <Compile Include="Assets\Scripts\Common\ScreenEffect.cs" />
+     <Compile Include="Assets\Scripts\Common\SoundManagerCtrl.cs" />
      <Compile Include="Assets\Scripts\Common\spriteUINumS.cs" />
+     <Compile Include="Assets\Scripts\Mahjong\MahjongBase.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageButton.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageSelect.cs" />
      <Compile Include="Assets\Scripts\Title\Title.cs" />
      <Compile Include="Assets\Scripts\Title\TitleButton.cs" />
-     <Compile Include="Assets\SoundManagerCtrl.cs" />
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>C:/app/mahjong/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>

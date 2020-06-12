@@ -57,31 +57,37 @@ public class ScreenEffect : MonoBehaviour {
 			m_effectTypeList = new List<EFFECTTYPE>();
 		}
 		m_effectTypeList.Add(effect);
-
+	}
+	private void EffectInit(EFFECTTYPE effect){
+		// Debug.Log("//-***********(ﾟ∀ﾟ)"+effect);
 		switch(effect){
 		case EFFECTTYPE.FADE_IN_BLACK:
+		Debug.Log("//-***********(・∀・)"+effect);
 			FadeInStart(false);
 			break;
 		case EFFECTTYPE.FADE_IN_WHITE:
 			FadeInStart(true);
 			break;
 		case EFFECTTYPE.FADE_OUT_BLACK:
+		Debug.Log("//-***********(ﾟ∀ﾟ)"+effect);
 			FadeOutStart(false);
 			break;
 		case EFFECTTYPE.FADE_OUT_WHITE:
 			FadeOutStart(true);
 			break;
 		}
+		m_isEffectFin = false;
 	}
-	public IEnumerator UpdateEffect(){
-		Debug.Log("//-*UpdateEffect( null("+(m_effectTypeList == null)+") )****************");
+	public IEnumerator EffectUpdate(){
 		if(m_effectTypeList == null) yield break;
-		Debug.Log("//-*m_effectTypeList.Count = "+m_effectTypeList.Count);
 
 		foreach (EFFECTTYPE type in m_effectTypeList)
 		{
+			if( m_state == EFFECTSTATE.WAIT ){
+				EffectInit(type);
+				m_state = EFFECTSTATE.START;
+			}
 			while(!m_isEffectFin){
-		// Debug.Log("//-*"+type);
 				switch(type){
 				case EFFECTTYPE.FADE_IN_BLACK:
 				case EFFECTTYPE.FADE_IN_WHITE:
@@ -89,6 +95,7 @@ public class ScreenEffect : MonoBehaviour {
 				case EFFECTTYPE.FADE_OUT_WHITE:
 					if(FadeInOutProcess(m_type)){
 						m_isEffectFin = true;
+						m_state = EFFECTSTATE.END;
 					}
 					break;
 				case EFFECTTYPE.QUAKE:
@@ -100,14 +107,18 @@ public class ScreenEffect : MonoBehaviour {
 				}
 				yield return null;
 			}
+			EffectFin();
 		}
-		EffectFin();
+		EffectAllFin();
 		yield break;
 	}
 
 	private void EffectFin(){
 		m_state = EFFECTSTATE.WAIT;
 		m_type = EFFECTTYPE.NONE;
+	}
+	private void EffectAllFin(){
+		EffectFin();
 		m_effectTypeList.Clear();
 		Debug.Log("//-*EffectFin()"+m_effectTypeList.Count);
 		m_effectTypeList = null;

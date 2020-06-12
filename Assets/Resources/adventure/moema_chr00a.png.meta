@@ -3,10 +3,10 @@ guid: cd5a26c31a38df44eae29674adb29250
 TextureImporter:
   fileIDToRecycleName:
     21300000: moema_chr00a_0
-    21300002: moema_chr00a_1
-    21300004: moema_chr00a_2
-    21300006: moema_chr00a_3
-    21300008: moema_chr00a_4
+    21300002: moema_chr00a_4
+    21300004: moema_chr00a_1
+    21300006: moema_chr00a_2
+    21300008: moema_chr00a_3
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -131,7 +131,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: moema_chr00a_1
+      name: moema_chr00a_4
       rect:
         serializedVersion: 2
         x: 58
@@ -151,7 +151,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: moema_chr00a_2
+      name: moema_chr00a_1
       rect:
         serializedVersion: 2
         x: 0
@@ -171,7 +171,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: moema_chr00a_3
+      name: moema_chr00a_2
       rect:
         serializedVersion: 2
         x: 0
@@ -191,7 +191,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: moema_chr00a_4
+      name: moema_chr00a_3
       rect:
         serializedVersion: 2
         x: 0

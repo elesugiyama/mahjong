@@ -83,8 +83,10 @@ namespace Const {
 		} 
 	}
 
+
+
 	/// <summary>
-	/// リソース関連のディレクトリ
+	/// todo:エラーダイアログ
 	/// </summary>
 	public class Err
 	{

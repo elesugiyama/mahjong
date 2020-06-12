@@ -11,23 +11,38 @@ public class AdventureBg : MonoBehaviour {
 	void Start () {}
 	void Update () {}
 
+
 	[SerializeField]
 	private Image m_bg;
 
 	/// <summary>
-	/// 画像差し替え
+	/// 画像差し替え:背景(萌日記)
 	/// </summary>
-	public bool ImageChange(String bgNo, bool isEventBg = false)
+	public bool SetImageBg(String bgName)
 	{
-		if(m_bg == null || bgNo == null) return false;
+		if(m_bg == null || bgName == null) return false;
 		String imageName = null;
-		if(isEventBg){
-			imageName = String.Concat(Dir.ADV_IMAGE_DIRECTORY, Dir.IMAGE_BGEV_BASE_NAME, bgNo);
-		}else{
-			imageName = String.Concat(Dir.ADV_IMAGE_DIRECTORY, Dir.IMAGE_BG_BASE_NAME, bgNo);
-		}
-		Debug.Log("//-*ImageChange(BG):"+imageName);
+		imageName = String.Concat(Dir.ADV_IMAGE_DIRECTORY, Dir.IMAGE_BG_BASE_NAME, bgName);
+		Debug.Log("//-*BGImage(BG):"+imageName);
+		return ChangeImage(imageName);
+	}
+
+	/// <summary>
+	/// 画像差し替え:イベント背景(萌日記)
+	/// </summary>
+	public bool SetImageEvBg(int bgNo)
+	{
+		if(m_bg == null || bgNo < 0 ) return false;
+		String imageName = null;
+		imageName = String.Concat(Dir.ADV_IMAGE_DIRECTORY, AdvDefine.CGList[bgNo]);
+		Debug.Log("//-*BGImage(Ev):"+imageName);
+		return ChangeImage(imageName);
+	}
+
+	private bool ChangeImage(string imageName)
+	{
 		var spriteImage = Resources.Load<Sprite>(imageName);
+		if(spriteImage == null) return false;
 		m_bg.GetComponent<Image>().sprite = spriteImage;
 		return true;
 	}

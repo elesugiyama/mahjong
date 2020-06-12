@@ -569,6 +569,7 @@ MonoBehaviour:
   m_screenEffect: {fileID: 0}
   m_dontDestroyObj: {fileID: 0}
   m_gameData: {fileID: 0}
+  m_isSceneChange: 0
   m_StageButton: []
   m_ScrollViewBase: {fileID: 2027870090}
   test: {fileID: 0}

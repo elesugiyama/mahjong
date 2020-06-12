@@ -14,10 +14,11 @@ using Const;
 //---------------------------------------------------------
 public class SoundManagerCtrl : MonoBehaviour {
 
-	private enum SOUNDETYPE{
+	public enum SOUNDTYPE{
 		TYPE_BGM,
 		TYPE_SE,
 		TYPE_VOICE,
+		TYPE_ALL,
 		TYPE_MAX
 	};
 
@@ -40,31 +41,29 @@ public class SoundManagerCtrl : MonoBehaviour {
 	void Start () {}
 	void Update () {}
 
-
-
-
-//-*todo：拾い物コピペ中
-    //外部からの呼び出し用メソッド
     public void PlayBgm(string name)
     {
-        StartCoroutine(LoadToAudioClipAndPlay(name, SOUNDETYPE.TYPE_BGM));
+        StartCoroutine(LoadToAudioClipAndPlay(name, SOUNDTYPE.TYPE_BGM));
     }
 	public void PlaySe(string name)
 	{
-        StartCoroutine(LoadToAudioClipAndPlay(name, SOUNDETYPE.TYPE_SE));
+        StartCoroutine(LoadToAudioClipAndPlay(name, SOUNDTYPE.TYPE_SE));
 	}
 
-#region TODO
-//-*仮処理中
 	public void StopBgm(){
-		m_audioSourceBgm.Stop();
+		if(m_audioSourceBgm != null)m_audioSourceBgm.Stop();
 	}
 	public void StopSe(){
-		m_audioSourceSe.Stop();
+		if(m_audioSourceSe != null)m_audioSourceSe.Stop();
 	}
-#endregion	//-*todo
+	public void StopAll(){
+		if(m_audioSourceBgm != null)m_audioSourceBgm.Stop();
+		if(m_audioSourceSe != null)m_audioSourceSe.Stop();
+		if(m_audioSourceVoice != null)m_audioSourceVoice.Stop();
+	}
+
     //ファイルの読み込み（ダウンロード）と再生
-    IEnumerator LoadToAudioClipAndPlay(string name, SOUNDETYPE type)
+    IEnumerator LoadToAudioClipAndPlay(string name, SOUNDTYPE type)
     {
 		String path = String.Concat(Dir.SOUND_DIRECTORY, name);
 		Debug.Log("LoadToAudioClipAndPlay."+path);
@@ -93,15 +92,15 @@ public class SoundManagerCtrl : MonoBehaviour {
 
             //ここにロード成功処理
 			switch(type){
-			case SOUNDETYPE.TYPE_BGM:
+			case SOUNDTYPE.TYPE_BGM:
 				m_audioSourceBgm.clip = audioClip;
 				m_audioSourceBgm.Play();
 				break;
-			case SOUNDETYPE.TYPE_SE:
+			case SOUNDTYPE.TYPE_SE:
 				m_audioSourceSe.clip = audioClip;
 				m_audioSourceSe.Play();
 				break;
-			case SOUNDETYPE.TYPE_VOICE:
+			case SOUNDTYPE.TYPE_VOICE:
 				m_audioSourceVoice.clip = audioClip;
 				m_audioSourceVoice.Play();
 				break;
@@ -124,6 +123,8 @@ public class SoundManagerCtrl : MonoBehaviour {
 
 
 
+#region TODO
+#endregion	//-*todo
 
 
 

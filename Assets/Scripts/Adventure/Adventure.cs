@@ -16,7 +16,7 @@ public class Adventure : SceneBase {
 	private enum ADVENTUREMODE {
 	// シナリオmode
 		aMODE_INIT,				// 0
-		aMODE_TEXT_DRAW,		// 4
+		aMODE_TEXT_READ,		// 4
 		aMODE_PAGE_WAIT,		// 5
 		aMODE_SAVE, // 22
 		aMODE_ASC_CONTINUE, // 23
@@ -25,6 +25,8 @@ public class Adventure : SceneBase {
 		aMODE_CHOICE_WAIT,		//-*選択肢待ち
 		aMODE_EFFECT_SET,		//-*エフェクト開始
 		aMODE_EFFECT_WAIT,		//-*エフェクト終了待ち
+		aMODE_GO_TO_BATTLE,		//-*麻雀へ
+		aMODE_ENDING,			//-*ゲームクリア
 		aMODE_EFFECT_ERR,		//-*エラー
 
 		aMODE_MAX,		//*最大数
@@ -92,16 +94,19 @@ public class Adventure : SceneBase {
 	//-********************
 	//-*読み込んだテキスト出力用
 	[SerializeField]
-	private Text[] m_textLine;	//-*1行目
-	List<string> m_textData = new List<string>();         //空のListを作成する
+	private Text[] m_textLine;	//-*文の表示用
+	private List<string> m_textLineData = new List<string>();	//-*1ページの本文
+	private List<string> m_textData = new List<string>();		//-*シナリオ一式(コマンド含む)
 	
 	//-*発言者名
 	[SerializeField]
 	private GameObject m_SpeakerNames;	//-*名前が画像
 
 	//-*現在の読み込み行番号
-	private int m_textLineNum;
-	private int m_pageLineNum;
+	private int m_scoLineNum;		//-*シナリオ内の〇行目
+	private int m_pageLineCount;	//-*1ページの行総数
+	private int m_pageLine;			//-*1ページの〇行目
+	private int m_messageCount; //-*現在表示中の文字数
 
 #region FLAG
 	//-*ページ区切りまで読んだか
@@ -112,13 +117,19 @@ public class Adventure : SceneBase {
 	private bool m_isEffectWait = false;
 	//-*次のシーン待ち
 	private bool m_isNextSceneWait = false;
+	//-*麻雀へ
+	private bool m_isBattleSceneWait = false;
+	//-*クリアフラグ
+	private bool m_isEnding = false;
 	//-*エラー
 	private bool m_isException = false;
 
 #endregion //-*FLAG
 
+
 	//-*フェードイン
  	private bool m_effectFadeIn = false;
+
 
 	// Use this for initialization
 	protected override void Start () {
@@ -164,12 +175,21 @@ m_isSceneChange = true;
 		
 		//-*初回フェードイン
 		if(m_isSceneChange) {
+//-***
+			// m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_OUT_BLACK);
+//-***
 			m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_IN_BLACK);
+			ScenarioReadUpdate();
 			m_isEffectWait = true;
 			m_isSceneChange = false;
 		}
 
-		m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_DRAW);
+		m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
+
+#if true
+//-*デバッグ
+		m_dev_ScoFinButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(DevPushButton);
+#endif
 
 		DevLog("//-*INIT");
 		yield break;
@@ -184,6 +204,7 @@ m_isSceneChange = true;
 		m_isEffectWait = false;
 		m_isNextSceneWait = false;
 		m_isException = false;
+		m_isEnding = false;
 	}
 
 	private IEnumerator UpdateAdventure(){
@@ -197,28 +218,47 @@ m_isSceneChange = true;
 				yield return StartCoroutine("Init");
 				DevLog("//-*aMODE_INIT A");
 				break;
-			case ADVENTUREMODE.aMODE_TEXT_DRAW:
-				ScenarioReadUpdate();
-				if( m_isPageWait ) {
-					PageWaitInit();
-					m_Mode = ModeSet(ADVENTUREMODE.aMODE_PAGE_WAIT);
-				}else
-				if( m_isChoiceWait ){
-					m_Mode = ModeSet(ADVENTUREMODE.aMODE_CHOICE_WAIT);
-				}else
-				if( m_isEffectWait ) {
-					m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
-					m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_TEXT_DRAW);
-				}else
-				if( m_isNextSceneWait ) {
-					m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
-					m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_INIT);
+			case ADVENTUREMODE.aMODE_TEXT_READ:
+				while(true){
+					ScenarioReadUpdate();	//-*シナリオ行読み込み
+					//-*読み込み中断フラグ
+					if( m_isPageWait ) {
+						PageWaitInit();
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_PAGE_WAIT);
+						break;
+					}else
+					if( m_isChoiceWait ){
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_CHOICE_WAIT);
+						break;
+					}else
+					if( m_isEffectWait ) {
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
+						m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
+						break;
+					}else
+					if( m_isNextSceneWait ) {
+						// m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_INIT);
+						m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_INIT);
+						break;
+					}else
+					if( m_isBattleSceneWait ) {
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
+						m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_GO_TO_BATTLE);
+						break;
+					}else
+					if( m_isEnding ) {
+						m_Mode = ModeSet(ADVENTUREMODE.aMODE_ENDING);
+						break;
+					}
 				}
 				break;
 			case ADVENTUREMODE.aMODE_PAGE_WAIT:
+				yield return StartCoroutine(Novel());
+				PageInit();
 				if( !m_isPageWait ) {
 					PageWaitFin();
-					m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_DRAW);
+					m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
 				}
 				break;
 			case ADVENTUREMODE.aMODE_CHOICE_WAIT:
@@ -231,10 +271,16 @@ m_isSceneChange = true;
 			case ADVENTUREMODE.aMODE_EFFECT_WAIT:
 				//-*演出終了待ち
 				DevLog("//-*aMODE_EFFECT_WAIT:"+m_Mode+"->"+m_ModeNext);
-				yield return StartCoroutine(m_screenEffect.UpdateEffect());
+				yield return StartCoroutine(m_screenEffect.EffectUpdate());
 				m_Mode = ModeSet(m_ModeNext);
 				m_ModeNext = ModeSet(ADVENTUREMODE.aMODE_MAX);
 				m_isEffectWait = false;
+				break;
+			case ADVENTUREMODE.aMODE_GO_TO_BATTLE:
+				SceneChange("InGame");
+				break;
+			case ADVENTUREMODE.aMODE_ENDING:
+				SceneChange("Title");
 				break;
 			case ADVENTUREMODE.aMODE_EFFECT_ERR:	//-*シナリオエラー
 			default:
@@ -247,30 +293,18 @@ m_isSceneChange = true;
 		}
 	}
 
-
-	// private IEnumerator EffectUpdate(){
-	// 	StartCoroutine(m_screenEffect.FadeInStart(false));
-	// 	yield break;
-	// }
-	// public void ButtonSelectStage(int a)
-	// {
-	// 	OutputDevLog("//-*ButtonTest:"+a);
-	// 	SceneManager.LoadScene ("Title");
-	// }
-
-
 	/// <summary>
 	/// シナリオファイルの読み込みと中身格納
 	/// </summary>
-	public bool LoadScenarioFile() {
-		m_gameData.AdvScoNo = m_gameData.AdvNextScoNo;
-		if(m_gameData.AdvScoNo <= 0)
+	private bool LoadScenarioFile() {
+		m_keeoData.AdvScoNo = m_keeoData.AdvNextScoNo;
+		if(m_keeoData.AdvScoNo <= 0)
 		// if(string.IsNullOrEmpty(m_gameData.AdvScoNo))
 		{
-			m_gameData.AdvScoNo = 0;
+			m_keeoData.AdvScoNo = 0;
 		}
 		// int scenarioNo = m_gameData.AdvScoNo;
-		var scenarioNo = (m_gameData.AdvScoNo).ToString();
+		var scenarioNo = (m_keeoData.AdvScoNo).ToString();
 		if( String.IsNullOrEmpty(scenarioNo) )return false;
 //-*************ファイル読み込み
 		//-*シナリオファイル名
@@ -295,17 +329,20 @@ m_isSceneChange = true;
 		} 
 //-*************
 		m_isPageWait = false;
-		m_textLineNum = 0;
+		m_scoLineNum = 0;
 		PageInit();
 
 
 		//-*デバッグ用
 		DevLog("//-*text:"+m_textData.Count);
 		int a =0;
+		string devSco = "//-*****シナリオ("+scenarioName+")*****\n";
 		foreach(string item in m_textData) {
-			DevLog("//-*"+a+":"+item);
+			// DevLog("//-*"+a+":"+item);
+			devSco += (a+":"+item+"\n");
 			a++;
 		}
+		DevLog(devSco);
 
 
 		return true;
@@ -319,7 +356,7 @@ m_isSceneChange = true;
 	{
 		//-*
 		if(m_isPageWait)return;
-		string scoLineText = m_textData[m_textLineNum];
+		string scoLineText = m_textData[m_scoLineNum];
 		var cmd = ScenarioRead(scoLineText);
 		DevLog("//-********("+cmd+")");
 		switch(cmd){
@@ -340,8 +377,8 @@ m_isSceneChange = true;
 		// 背景
 			m_bgObjBase.SetActive(true);
 			if(m_bgScript != null){
-				m_gameData.AdvBgNo = GetScoCmdNo(scoLineText,cmd);
-				m_bgScript.ImageChange( m_gameData.AdvBgNo );
+				var bgName = GetScoCmdNoString(scoLineText,cmd);
+				m_bgScript.SetImageBg( bgName );
 				// m_bgScript.ImageChange("adventure/moema_bg00");
 			}
 			break;
@@ -349,26 +386,32 @@ m_isSceneChange = true;
 		// イベント背景
 			m_bgObjBase.SetActive(true);
 			if(m_bgScript != null){
-				m_gameData.AdvBgNo = GetScoCmdNo(scoLineText,cmd);
-				m_bgScript.ImageChange( m_gameData.AdvBgNo, true );
+				var cgNo = GetScoCmdNoInteger(scoLineText,cmd);
+				m_bgScript.SetImageEvBg( cgNo );
 				// m_bgScript.ImageChange("adventure/moema_bg00");
 			}
+			//-*人物を非表示
+			m_charaObjBase.SetActive(false);
 			break;
 		case AdvDefine.CMD_TYPE.CMD_BGM:
 		// BGM再生
-			string bgmName = String.Concat(Dir.SOUND_BGM_BASE_NAME, GetScoCmdNo(scoLineText,cmd),".ogg");
-			m_gameData.SoundCtl.PlayBgm( bgmName );
+			string bgmNo = GetScoCmdNoString(scoLineText,cmd);
+#if true
+			bgmNo = "01";
+#endif
+			string bgmName = String.Concat(Dir.SOUND_BGM_BASE_NAME, bgmNo, ".ogg");
+			PlaySound(bgmName, SoundManagerCtrl.SOUNDTYPE.TYPE_BGM);
 			break;
 		case AdvDefine.CMD_TYPE.CMD_BGM_END:
 		// BGM終了
-			m_gameData.SoundCtl.StopBgm();
+			StopSound(SoundManagerCtrl.SOUNDTYPE.TYPE_BGM);
 			break;
 		case AdvDefine.CMD_TYPE.CMD_CH:
 		// キャラ
 			DevLog("//-*CMD_TYPE.CMD_CH");
 			m_charaObjBase.SetActive(true);
 			if(m_CharaScript != null){
-				var imageName = GetScoCmdNo(scoLineText, AdvDefine.CMD_TYPE.CMD_CH);;
+				var imageName = GetScoCmdNoString(scoLineText, AdvDefine.CMD_TYPE.CMD_CH);;
 				m_CharaScript.ImageCharaSet(imageName);
 				m_CharaScript.ImageFaceSet(imageName);
 			}
@@ -377,22 +420,22 @@ m_isSceneChange = true;
 		// 表情
 			if(m_CharaScript != null){
 				int imageName = -1;
-				if(int.TryParse( GetScoCmdNo(scoLineText, AdvDefine.CMD_TYPE.CMD_CH_FACE), out imageName) ){
+				if(int.TryParse( GetScoCmdNoString(scoLineText, AdvDefine.CMD_TYPE.CMD_CH_FACE), out imageName) ){
 					if(imageName < 0)return;
 					m_CharaScript.ImageFaceChangeExpression(imageName);
 				}
 			}
 			break;
+		case AdvDefine.CMD_TYPE.CMD_CH_DEL:
+			m_charaObjBase.SetActive(false);
+			break;
 		case AdvDefine.CMD_TYPE.CMD_GO_BATTLE:
+			// InGame(麻雀)へ
 			SetMahjongInGameData(scoLineText,AdvDefine.CMD_TYPE.CMD_GO_BATTLE);
-		// InGame(麻雀)へ
-			m_isNextSceneWait = true;
-#if true
-//-*todo:とりあえず次番号のシナリオへ
-m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
-		SceneChange("Title");
-
-#endif
+			m_isBattleSceneWait = true;
+			m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_OUT_BLACK);
+			//-*次番号のシナリオを格納
+			m_keeoData.AdvNextScoNo = (m_keeoData.AdvScoNo+1);
 			break;
 		case AdvDefine.CMD_TYPE.CMD_CHOICE_START:
 		// 選択肢開始
@@ -408,11 +451,18 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 			m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_IN_BLACK);
 			m_isEffectWait = true;
 			break;
+		case AdvDefine.CMD_TYPE.CMD_GAME_CLEAR:
+		//-*ゲームクリア
+			m_isEnding = true;
+			break;
 		case AdvDefine.CMD_TYPE.CMD_SCO_END:
 		// シナリオ終了
 			if( IsCmdFileEndHaveNextSco(scoLineText) ){
 			//-*次のシナリオへ
 				m_isNextSceneWait = true;
+			}else if(m_isEnding){
+			//-*ゲームクリア(不要？）
+				m_isEnding = true;
 			}else{
 			//-*指定がない
 				//-*他のコマンドで遷移してるはずだから来ない想定
@@ -421,11 +471,14 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 			break;
 		case AdvDefine.CMD_TYPE.NO_CMD_SENTENCE:
 		// シナリオ本文
-			DevLog("//-********m_pageLineNum("+m_pageLineNum+")→MAX："+m_textLine.Length);
-			if(m_pageLineNum < m_textLine.Length){
-				m_textLine[m_pageLineNum].text = m_textData[m_textLineNum];
-				DevLog("//-*("+m_pageLineNum+"):"+m_textLine[m_pageLineNum].text);
-				m_pageLineNum++;
+			DevLog("//-********m_pageLineNum("+m_pageLineCount+")→MAX："+m_textLine.Length);
+			if(m_pageLineCount < m_textLine.Length){
+				m_textLineData.Add(m_textData[m_scoLineNum]);
+#if false
+				m_textLine[m_pageLine].text = m_textData[m_textLineNum];		//-*直接
+#endif
+				DevLog("//-*("+m_pageLineCount+"):"+m_textLineData[m_pageLineCount]);
+				m_pageLineCount++;
 			}
 			break;
 		//-*********ココで読み込んだらエラーなコマンド
@@ -439,7 +492,7 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 			m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_WAIT);
 			break;
 		}
-		m_textLineNum++;
+		m_scoLineNum++;
 	} 
 #region PAGE
 	/// <summary>
@@ -448,10 +501,20 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 	private void PageInit()
 	{
 		//-*ページ文の消去
-		for(m_pageLineNum = 0;m_pageLineNum<m_textLine.Length;m_pageLineNum++){
-			m_textLine[m_pageLineNum].text = string.Empty;
+		// for(m_pageLine = 0;m_pageLine < m_pageLineCount;m_pageLine++){
+		for(m_pageLine = 0;m_pageLine < m_textLine.Length;m_pageLine++){
+			if(m_textLine[m_pageLine] != null)
+				m_textLine[m_pageLine].text = string.Empty;
 		}
-		m_pageLineNum = 0;
+		if(m_textLineData != null){
+			m_textLineData.Clear();
+			m_textLineData = null;
+		}
+		m_textLineData = new List<string>();
+
+		m_pageLine = 0;
+		m_pageLineCount = 0;
+		m_messageCount = 0;
 		m_isPageWait = false;
 	}
 	/// <summary>
@@ -482,6 +545,37 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 		PageInit();
 		// SceneManager.LoadScene ("SelectStage");
 	}
+
+
+		int novelListIndex = 0; //現在表示中の会話文の配列
+		float novelSpeed = 0.2f;//一文字一文字の表示する速さ
+    private IEnumerator Novel()
+    {
+		m_messageCount = 0;
+		// for(int lineNo = 0;lineNo<m_textLine.Length;lineNo++)
+		// {
+		// 	m_textLine[lineNo].text = ""; //テキストのリセット
+		// }
+			// DevLog(""+(m_textLineData[m_pageLine].Length > m_messageCount));
+			DevLog("//-*m_pageLine("+m_pageLine+") < m_textLineData.Count("+m_textLineData.Count+") :m_messageCount = "+m_messageCount);
+			DevLog("null?"+(m_textLineData[m_pageLine] == null));
+			if((m_textLineData[m_pageLine] == null))
+			DevLog("Length:"+m_textLineData[m_pageLine].Length);
+        while (m_textLineData[m_pageLine].Length > m_messageCount)//文字をすべて表示していない場合ループ
+        {
+            m_textLine[m_pageLine].text += m_textLineData[m_pageLine][m_messageCount];//一文字追加
+            m_messageCount++;//現在の文字数
+            yield return new WaitForSeconds(novelSpeed);//任意の時間待つ
+        }
+
+        m_pageLine++; //次の会話文配列
+		DevLog("//-*m_pageLine("+m_pageLine+") < m_textLineData.Count("+m_textLineData.Count+")");
+        if (m_pageLine < m_textLineData.Count)//全ての会話を表示したか
+        {
+            yield return StartCoroutine(Novel());
+        }
+		yield break;
+    }	
 #endregion //-*PAGE
 
 #region CHOICE
@@ -521,7 +615,7 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 	public void PushChoiceButton(string a)
 	{
 		DevLog("//-*PushChoiceButton:"+a);
-		m_gameData.AdvNextScoNo = int.Parse(a);
+		m_keeoData.AdvNextScoNo = int.Parse(a);
 		m_isChoiceWait = false;
 		// SceneManager.LoadScene ("SelectStage");
 	}
@@ -534,14 +628,6 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 	private void FadeInit()
 	{
 		m_isEffectWait = false;
-
-		// //-*ページ文の消去
-		// for(m_pageLineNum = 0;m_pageLineNum<m_textLine.Length;m_pageLineNum++){
-		// 	m_textLine[m_pageLineNum].text = string.Empty;
-		// }
-		// m_pageLineNum = 0;
-		// m_isPageWait = false;
-
 	}
 #endregion	//-*EFFECT
 	/// <summary>
@@ -579,20 +665,30 @@ m_gameData.AdvNextScoNo = (m_gameData.AdvScoNo+1);
 	/// <summary>
 	/// シナリオコマンド用処理：コマンド以降の番号取得
 	/// </summary>
-	private string GetScoCmdNo( string scoLineText, AdvDefine.CMD_TYPE scoCmdType)
+	private int GetScoCmdNoInteger( string scoLineText, AdvDefine.CMD_TYPE scoCmdType)
+	{
+		var noStr = GetScoCmdNoString(scoLineText,scoCmdType);
+		int no = -1;
+		//-*不正な番号
+		if(!int.TryParse(noStr, out no)) return -1;	//-*番号ではない
+
+		DevLog("//-*"+scoCmdType+" = "+noStr);
+		return no;
+	}
+	private string GetScoCmdNoString( string scoLineText, AdvDefine.CMD_TYPE scoCmdType)
 	{
 		//-*番号の抜き出し
-		var no = scoLineText.Replace(AdvDefine.CmdDir[scoCmdType],"");
+		var noStr = scoLineText.Replace(AdvDefine.CmdDir[scoCmdType],"");
 		int temp = -1;
 		//-*不正な番号
-		if(!int.TryParse(no, out temp)) return "err:NotNumber:"+no;	//-*番号ではない
+		if(!int.TryParse(noStr, out temp)) return "err:NotNumber:"+noStr;	//-*番号ではない
 		if(temp < 0) return "err:IllegalNumber:"+temp;	//-*番号が負数
 
 		//-*背景番号が10未満なら文字追加
-		if(temp < 10)　no = "0"+no;
+		if(temp < 10)　noStr = "0"+noStr;
 
-		DevLog("//-*"+scoCmdType+" = "+no);
-		return no;
+		DevLog("//-*"+scoCmdType+" = "+noStr);
+		return noStr;
 	}
 	/// <summary>
 	/// シナリオコマンド用処理：コマンド以降の文取得
@@ -619,7 +715,7 @@ DevLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 			DevLog("//-*,._.,"+a);
 			//-*次のシナリオ番号が有れば
 			if( int.TryParse(a, out scoNo) ){
-				m_gameData.AdvNextScoNo = scoNo;
+				m_keeoData.AdvNextScoNo = scoNo;
 				return true;
 			}
 		}
@@ -642,12 +738,12 @@ DevLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 		}
 		m_choiceButton = new List<GameObject>();         //空のListを作成する
 
-		m_textLineNum++;	//-*Start行なので1行進める
-		while( !CheckScoCmd( m_textData[m_textLineNum], AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE_END],true ) )
+		m_scoLineNum++;	//-*Start行なので1行進める
+		while( !CheckScoCmd( m_textData[m_scoLineNum], AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE_END],true ) )
 		{//-*選択肢終了コマンドが出るまで
 			//-*選択肢コマンド
-			if( CheckScoCmd( m_textData[m_textLineNum], AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE]) ) {
-				var sentence = m_textData[m_textLineNum].Replace(AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE],"");
+			if( CheckScoCmd( m_textData[m_scoLineNum], AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE]) ) {
+				var sentence = m_textData[m_scoLineNum].Replace(AdvDefine.CmdDir[AdvDefine.CMD_TYPE.CMD_CHOICE],"");
 				var choiceAndScoNo = sentence.Split(AdvDefine.SCO_CMD_SPLIT);
 				//-*選択肢ボタン生成
 		        var obj = (GameObject)Resources.Load("Prefabs/advChoice_button");
@@ -659,7 +755,7 @@ DevLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 				btnCtl.SetLabel(choiceNo, choiceAndScoNo[0], choiceAndScoNo[1]);
 				choiceNo++;
 			}
-			m_textLineNum++;
+			m_scoLineNum++;
 		}
 	}
 
@@ -668,21 +764,38 @@ DevLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 	/// </summary>
 	private void SetMahjongInGameData( string scoLineText, AdvDefine.CMD_TYPE scoCmdType)
 	{
-		DevLog("//-*SetMahjongInGameData("+scoLineText+","+scoCmdType+")..."+m_gameData);
-		if(m_gameData == null)return;
-		var stageAndRule = GetScoCmdNo(scoLineText, scoCmdType).Split(AdvDefine.SCO_CMD_SPLIT);
+		DevLog("//-*SetMahjongInGameData("+scoLineText+","+scoCmdType+")..."+m_keeoData);
+		if(m_keeoData == null)return;
+		var stageAndRule = GetScoCmdNoString(scoLineText, scoCmdType).Split(AdvDefine.SCO_CMD_SPLIT);
 		int stNo = -1;
 		int ruleNo = -1;
 		if(stageAndRule != null ){
 			if(!string.IsNullOrEmpty(stageAndRule[0]) && int.TryParse(stageAndRule[0], out stNo)){
-				m_gameData.BattleStage = stNo;
+				m_keeoData.BattleStage = stNo;
 			}
 			if(!string.IsNullOrEmpty(stageAndRule[1]) && int.TryParse(stageAndRule[0], out ruleNo)){
-				m_gameData.BattleRule = ruleNo;
+				m_keeoData.BattleRule = ruleNo;
 			}
 		}
 		DevLog("//-*(stNo:"+stNo+", ruleNo:"+ruleNo+")");
 		// Const.MahjongInGameData
 	}
 #endregion	//-*ExclusiveScenarioCommand
+
+#region DEBUG
+[Header("デバッグ用")]
+	[SerializeField]
+	private GameObject m_dev_ScoFinButton;	//-*シナリオ終了ボタン
+	/// <summary>
+	/// ページ送りボタン押下処理
+	/// </summary>
+	public void DevPushButton()
+	{
+		SceneChange("SelectStage");
+
+		// SceneManager.LoadScene ("SelectStage");
+	}
+
+#endregion	//-*DEBUG
+
 }

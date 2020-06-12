@@ -78,6 +78,11 @@ public class DontDestroyData : MonoBehaviour {
 	public SoundManagerCtrl SoundCtl {
 		get { return m_SoundCtl; }
 	}
+
+	public void test()
+	{
+		m_SoundCtl.StopBgm();
+	}
 #endregion	//-*MAHJONG
 
 }

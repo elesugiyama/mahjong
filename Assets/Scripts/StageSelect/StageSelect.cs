@@ -89,7 +89,7 @@ public class StageSelect : SceneBase {
 	public void ButtonSelectStageTest(int a)
 	{
 		DevLog("//-*ButtonTest:"+a);
-		m_gameData.AdvNextScoNo = a;
+		m_keeoData.AdvNextScoNo = a;
 		SceneChange("Adventure");
 	}
 }

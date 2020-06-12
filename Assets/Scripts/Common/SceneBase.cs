@@ -14,8 +14,7 @@ public class SceneBase : MonoBehaviour {
 	[SerializeField]
 	public ScreenEffect m_screenEffect;
 
-	public GameObject m_dontDestroyObj;
-	public DontDestroyData m_gameData;
+	public DontDestroyData m_keeoData;
 
 	private Const.Err.ERRTYPE m_errType;
 
@@ -25,28 +24,20 @@ public class SceneBase : MonoBehaviour {
 	protected virtual void Start () {}
 	protected virtual void Update () {}
 	protected virtual void Awake() {
-		Debug.Log("//-*Awake:SceneBase"+(m_gameData!=null));
-		//-*シーン遷移で消えないオブジェクト関連
-		// int numMusicPlayers = FindObjectsOfType<DontDestroyData>().Length;
-		// if (numMusicPlayers <= 0)
-		// {
-	    //     GameObject objBG = (GameObject)Resources.Load("Prefabs/DontDestroyObj");
-		// 	m_dontDestroyObj = (GameObject)Instantiate(objBG, Vector3.zero, Quaternion.identity);
-		// }
-		// m_gameData = m_dontDestroyObj.GetComponent<DontDestroyData>();
+		Debug.Log("//-*Awake:SceneBase"+(m_keeoData!=null));
 		
 		var ObjList = FindObjectsOfType<DontDestroyData>();
 		DontDestroyData gameData = null;
 		if(ObjList.Length <= 0){
 		//-*初回
-	        GameObject objBG = (GameObject)Resources.Load("Prefabs/DontDestroyObj");
-			m_dontDestroyObj = (GameObject)Instantiate(objBG, Vector3.zero, Quaternion.identity);
-			gameData = m_dontDestroyObj.GetComponent<DontDestroyData>();
+	        var objBG = (GameObject)Resources.Load("Prefabs/DontDestroyObj");
+			var tempObj = (GameObject)Instantiate(objBG, Vector3.zero, Quaternion.identity);
+			gameData = tempObj.GetComponent<DontDestroyData>();
 		}else{
 		//-*既にある
 			gameData = ObjList[0];
 		}
-		m_gameData = gameData;		
+		m_keeoData = gameData;		
 	}
 
 	/// <summary>
@@ -75,8 +66,48 @@ public class SceneBase : MonoBehaviour {
 	{
 		m_isSceneChange = false;
 		SceneManager.LoadScene (nextScene);
+		StopSound(SoundManagerCtrl.SOUNDTYPE.TYPE_ALL);
 	}
-	
+#region SOUND
+	public void PlaySound(string fileName, SoundManagerCtrl.SOUNDTYPE type)
+	{
+		switch(type)
+		{
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_BGM:
+				m_keeoData.SoundCtl.PlayBgm( fileName );
+				break;
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_SE:
+				m_keeoData.SoundCtl.PlaySe( fileName );
+				break;
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_VOICE:
+				// m_gameData.SoundCtl.PlayVoice( fileName );	//-*未実装
+				break;
+			default:
+				break;
+		}
+	}
+
+	public void StopSound(SoundManagerCtrl.SOUNDTYPE type)
+	{
+		switch(type)
+		{
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_BGM:
+				m_keeoData.SoundCtl.StopBgm();
+				break;
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_SE:
+				m_keeoData.SoundCtl.StopSe();
+				break;
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_VOICE:
+				// m_gameData.SoundCtl.PlayVoice( fileName );	//-*未実装
+				break;
+			case SoundManagerCtrl.SOUNDTYPE.TYPE_ALL:
+				m_keeoData.SoundCtl.StopAll();
+				break;
+			default:
+				break;
+		}
+	}
+#endregion	//-*SOUND
 	/// <summary>
 	/// エラーダイアログ：todo
 	/// </summary>
@@ -91,16 +122,16 @@ public class SceneBase : MonoBehaviour {
 	/// <summary>
 	/// デバッグログ
 	/// </summary>
-	public void DevLog(string l)
+	public void DevLog(string log)
 	{
 #if true
-		Debug.Log(l);
+		Debug.Log(log);
 #endif		
 	}
-	public void DevLogError(string l)
+	public void DevLogError(string log)
 	{
 #if true
-		Debug.LogError(l);
+		Debug.LogError(log);
 #endif		
 	}	
 }
