@@ -1,0 +1,40 @@
+/****************************************************************/
+/*		サイズ定義												*/
+/****************************************************************/
+	#define		UINT1			char		//unsigned char
+	#define		UINT1p			char		//unsigned char *
+	#define		SINT1			char		//signed char
+	#define		SINT1p			char		//signed char *
+	#define		UINT2			short		//unsigned short
+	#define		UINT2p			short		//unsigned short *
+	#define		SINT2			short		//signed short
+	#define		SINT2p			short		//signed short *
+	#define		UINT4			int			//unsigned int
+	#define		UINT4p			int			//unsigned int *
+	#define		SINT4			int			//signed int
+	#define		SINT4p			int			//signed int *
+	#define		UINT8			long		//unsigned long
+	#define		UINT8p			long		//unsigned long *
+	#define		SINT8			long		//signed long
+	#define		SINT8p			long		//signed long *
+
+/* 基本型定義 (*** 環境依存注意 ***) */
+	#define		int8_t			char		//typedef signed   char		int8_t;
+	#define		int16_t			short		//typedef signed   short	int16_t;
+	#define		int32_t			long		//typedef signed   long		int32_t;
+
+	#define		uint8_t			char		//typedef unsigned char		uint8_t;
+	#define		uint16_t		short		//typedef unsigned short	uint16_t;
+	#define		uint32_t		long		//typedef unsigned long		uint32_t;
+
+	#define		in_port_t		uint16_t	//typedef uint16_t			in_port_t;
+
+//#endif	/* !_WIN32 */
+
+/*****************************************************************************/
+
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中	
+nextflg_ = 1;
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB

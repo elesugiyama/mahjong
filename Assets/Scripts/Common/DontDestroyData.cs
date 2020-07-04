@@ -55,21 +55,85 @@ public class DontDestroyData : MonoBehaviour {
 	/// <summary>
 	/// 麻雀：ステージ番号
 	/// </summary>
-	private int m_BattleStage;
-	public int BattleStage {
-		get { return m_BattleStage; }
-		set { m_BattleStage = value; }
+	private int m_mjStage;
+	public int MjStage {
+		get { return m_mjStage; }
+		set { m_mjStage = value; }
+	}
+
+	/// <summary>
+	/// 麻雀：モード
+	/// </summary>
+	private int m_mjMode;
+	public int MjMode {
+		get { return m_mjMode; }
+		set { m_mjMode = value; }
 	}
 
 	/// <summary>
 	/// 麻雀：ルール
 	/// </summary>
-	private int m_BattleRule;
-	public int BattleRule {
-		get { return m_BattleRule; }
-		set { m_BattleRule = value; }
+	private int m_mjRule;
+	public int MjRule {
+		get { return m_mjRule; }
+		set { m_mjRule = value; }
 	}
 
+	/// <summary>
+	/// 麻雀：フラグ
+	/// </summary>
+	private int m_mjFlags;
+	public int MjFlags {
+		get {return m_mjFlags;}
+		set {m_mjFlags = value;}
+	}
+#endregion	//-*MAHJONG
+#region MYCANVAS
+	/// <summary>
+	/// 麻雀：麻雀制限ルール変数
+	/// </summary>
+	private int m_mah_limit_num = -1;	// 麻雀制限ルール変数
+	public int mah_limit_num{
+		get {return m_mah_limit_num;}
+		set {m_mah_limit_num = value;}
+	}
+
+	/// <summary>
+	/// 麻雀：バトル数
+	/// </summary>
+	private int m_num_battle = -1;	// バトル数
+	public int num_battle{
+		get {return m_num_battle;}
+		set {m_num_battle = value;}
+	}
+
+	/// <summary>
+	/// 麻雀：バトル数
+	/// </summary>
+	private int m_battle_bgm = 0;	// バトル数
+	public int battle_bgm{
+		get {return m_battle_bgm;}
+		set {m_battle_bgm = value;}
+	}
+
+	/// <summary>
+	/// 麻雀：0:勝利/1:敗北/デフォルト:-1
+	/// </summary>
+	private int m_flag_res_battle	= -1;	// 0:勝利/1:敗北/デフォルト:-1
+	public int flag_res_battle{
+		get {return m_flag_res_battle;}
+		set {m_flag_res_battle = value;}
+	}
+
+	/// <summary>
+	/// 麻雀：敵の強さ度
+	/// </summary>
+	private int m_level_cpu		=  0;	// 敵の強さ度
+	public int level_cpu{
+		get {return m_level_cpu;}
+		set {m_level_cpu = value;}
+	}
+#endregion //-*MYCANVAS
 	/// <summary>
 	/// サウンド
 	/// </summary>
@@ -83,6 +147,5 @@ public class DontDestroyData : MonoBehaviour {
 	{
 		m_SoundCtl.StopBgm();
 	}
-#endregion	//-*MAHJONG
 
 }
