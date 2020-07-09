@@ -104,10 +104,11 @@ public partial class MahjongBase : SceneBase {
 		// フレームカウンタインクリメント
 	//	m_frameCounter++;
 
-#if false //-*todo:通信不要
+#if true //-*todo:通信不要
 		// msec/フレーム
 		{
-			long uptimems_ = GETUPTIMEMS();
+			// long uptimems_ = GETUPTIMEMS();
+			long uptimems_ = DateTime.Now.Ticks;
 			uptimems_perfrm = (ulong)uptimems_ - pre_uptimems;
 			pre_uptimems = (ulong)uptimems_;
 		}

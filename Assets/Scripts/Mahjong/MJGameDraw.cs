@@ -105,6 +105,15 @@ public void MJ_GameDraw( /*MahJongRally * pMe*/ )
 	// 自家位置描画
 	House = ( game_player + 0) % (int)D_CYA.D_MENTSU_COUNT;
 	MJ_JicyaDraw( House );
+
+	// 王牌の描画。
+	MJ_GameWanpaiDisp();
+
+	// 対戦者の対話描画
+	// リーチ、ツモ、ポン等
+	MJ_TalkDraw();
+
+	
 #if false //-*todo:描画保留
 
 	int		House=0;	// 誰から表示をするか
@@ -1253,18 +1262,87 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 	int	reached_add	= 0;
 	int	reached_line= 0;
 
-
+#region UNITY_ORIGINAL
+	/*===========================================================================
+		捨て牌数の描画
+	===========================================================================*/
+	DrawDiscardedTiles(House);
 
 	/*===========================================================================
 								手牌の描画
 	===========================================================================*/
 	cnt		= gsPlayerWork[House].byThcnt;							// 手牌の数を取得。
-	DebLog("//-***************手牌************");
-	for(int a=0;a<cnt;a++){
-		var tehaiDrawTest = m_myHandTiles[a].GetComponent<MJTIle>();
-		DebLog("//-*手牌["+a+"]:"+gsPlayerWork[House].byTehai[a]+"("+(PAI)gsPlayerWork[House].byTehai[a]+")");
-		tehaiDrawTest.set(TILE_STATE.MY_HAND,(PAI)gsPlayerWork[House].byTehai[a]);
+	// DebLog("//-***************手牌************");
+	for(int a=0;a<m_myHandTiles.Count;a++){
+		var tehaiDraw = m_myHandTiles[a].GetComponent<MJTIle>();
+		if(a < cnt){
+		// DebLog("//-*手牌["+a+"]:"+gsPlayerWork[House].byTehai[a]+"("+(PAI)gsPlayerWork[House].byTehai[a]+")");
+			tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byTehai[a]);
+		}else{
+		//-*鳴き等で手牌から消えてる
+			tehaiDraw.set(TILE_STATE.NO_USE,PAI.URA);
+		}
 	}
+	/*===========================================================================
+								ツモ牌の描画
+	===========================================================================*/
+	tsumopai = gsPlayerWork[House].byHkhai;		// ツモってきた牌を取得。
+
+	//> 2006/03/08 バグNo.165
+	if( hide_hkhai == 0 ){
+		if((tsumopai>=0x01) && (tsumopai<=0x37)) {
+		#if false //-*todo:描画
+			short icontype_ = D_TRIANGLE_DOWN;
+		#endif //-*todo:描画
+
+			if(
+				( ( csr== cnt ) && ( hai_up== 0 ) )
+				|| (( hai_up & 0x2000 ) != 0)
+				|| Optstk[ menu_csr ] == (byte)OP.TSUMO
+				|| ( ( Optstk[ menu_csr ] == (byte)OP.KAN ) && (( 0x0001 << cnt ) & hai_up ) != 0 )
+				|| ( ( Optstk[ menu_csr ] == (byte)OP.RICHI ) && (( 0x0001 << cnt ) == hai_up ) )
+			) {
+				paiupY = 6;		// = 5;
+				if( gsPlayerWork[House].byTkhai != 0 ){
+				#if false //-*todo:描画
+					MJ_IconDraw( icontype_,(short)((cnt*15)+17),220+12- 1,0);	//MJ_IconDraw( icontype_,(int16_t)((cnt*15)+17),220,0);
+				#endif //-*todo:描画
+				}
+			} else {
+				paiupY = 0;
+			}
+#if	Rule_2P
+			//鳴きメニュー選択中は、牌を上に上げない
+			if( _menuFlg)
+				paiupY= 0;
+#endif
+
+			if( gsPlayerWork[House].byTkhai != 0 ){
+				// ツモ牌
+#if true //-*todo:描画
+				var tehaiDrawTest = m_myHandTiles[cnt].GetComponent<MJTIle>();
+					tehaiDrawTest.set(TILE_STATE.HAND,(PAI)tsumopai);
+#else //-*todo:描画
+	#if	Rule_2P
+				hMpsBrewLib_DrawSprite( spPaiJicya, tsumopai,
+					(D_JICYA_TEHAI_X+cnt*(D_PAI_TATE_LARGE_SIZE_W-1)+5+2),
+					D_JICYA_TEHAI0_Y-paiupY+ _y_of010);
+	#endif
+#endif //-*todo:描画
+			}
+		}
+	}
+	/*===========================================================================
+								フーロ牌の描画
+		注：ここの処理より下にコードを書く場合は
+			if( Fr == 0 ) return;の解除を行うこと
+	===========================================================================*/
+	#if	Rule_2P
+	MJ_FrJicyaDraw( House, 247 );	//D_JICYA_TEHAI_Y
+	#endif
+#endregion //-*UNITY_ORIGINAL
+
+//-******todo:以下ガラケー版
 #if false//-*todo:描画保留
 	int i		= 0;	// ループ
 	int j		= 0;	// チーループ用。
@@ -1945,7 +2023,157 @@ public const int D_SUTEPAI_REACH_OFF			= (-4);	//(-3)
 public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_ToicyaDraw( int "+House+" )");
-	
+#region UNITY_ORIGINAL
+	int i		= 0;	// ループ
+	int j		= 0;	// チーループ用。
+	int suteCnt = 0;	// 捨て牌数。
+	int pai		= 0;	// 描画する牌の番号
+	int csr		= 0;	// 牌カーソル位置
+	int Fr		= 0;	// フーロ牌チェック用
+	int FrPos	= 0;	// 左0・中心1・右2．
+	int Bbit	= 0;	// フーロ牌情報取得
+	int Hbit	= 0;	// 上位ビット
+	int SBit	= 0;	// 下位ビット
+	int offsetX = 0;	// 捨て牌のオフセット値
+	int offsetY = 0;	// 捨て牌のオフセット値
+	int suteFlag= 0;	// リーチ or リーチ？
+	int	flg		= 0;	// 牌オープン？
+	int	dx		= 0;	//
+	int	no		= 0;	//
+	int furoOffX = 0;	// フーロ牌用のOFFset
+	int furoOffBaseX = 0;	// フーロ牌用のOFFset
+	int	DrawCount=0;
+	int	reached_add= D_SUTEPAI_REACH_OFF;
+	int	reached_line= 10;
+	int cnt		= 0;	// 現在の手牌数
+
+	/*===========================================================================
+		捨て牌数の描画
+	===========================================================================*/
+	DrawDiscardedTiles(House);
+	/*===========================================================================
+								手牌の描画
+	===========================================================================*/
+	cnt		= gsPlayerWork[House].byThcnt+1;							// 手牌の数を取得。
+	DebLogError("//-*相手の牌数："+cnt+":::"+gsPlayerWork[House].byTkhai);
+	flg = (hai_open & 0x4) != 0 ? -1 :
+		(gsPlayerWork[House].bFrich != 0 ? 1 : 0);
+	if(flg != 0){
+		Debug.Log("入る？");
+	}
+	// DebLog("//-***************手牌************");
+	for(int a=0;a<m_yourHandTiles.Count;a++){
+		var tehaiDraw = m_yourHandTiles[a].GetComponent<MJTIle>();
+		if(a < cnt){
+			if(a == (cnt-1)){
+			//-*最後のはツモ牌
+				if( gsPlayerWork[House].byTkhai == 0){
+				//-*ツモ牌持ってない(表示消し)
+					tehaiDraw.set(TILE_STATE.NO_USE,PAI.URA);
+				 	continue;
+				}
+
+				no = (int)PAI.URA;	//gsPlayerWork[House].byHkhai;
+				if( flg < 0) {
+					flg = 0;
+					no = gsPlayerWork[House].byHkhai;	// 現時点での捨てられた牌（ツモ牌）
+				}
+			}else{
+				no = (flg < 0) ? gsPlayerWork[House].byTehai[a] : (byte)PAI.URA;
+			}
+
+			if( flg != 0 ){
+				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
+				// tehaiDraw.set(TILE_STATE.MY_HAND,(PAI)gsPlayerWork[House].byTehai[a]);
+			}else{
+#if !DEBUG
+				if( a < (cnt-1)){
+				//-*手牌
+					tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byTehai[a]);
+				}else{
+				//-*ツモ牌
+					tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byHkhai);
+				}
+#else
+				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
+#endif //-*DEBUG
+			}
+		}else{
+		//-*鳴き等で手牌から消えてる
+			tehaiDraw.set(TILE_STATE.NO_USE,PAI.URA);
+		}
+	}
+	/*===========================================================================
+								フーロ牌の描画
+		注：ここの処理より下にコードを書く場合は
+			if( Fr == 0 ) return;の解除を行うこと
+	===========================================================================*/
+	#if	Rule_2P
+	MJ_FrJicyaDraw( House, 247 );	//D_JICYA_TEHAI_Y
+	#endif
+
+#if flase //-*todo:作業中
+	/*===========================================================================
+								ツモ牌の描画
+	===========================================================================*/
+	tsumopai = gsPlayerWork[House].byHkhai;		// ツモってきた牌を取得。
+
+	//> 2006/03/08 バグNo.165
+	if( hide_hkhai == 0 ){
+		if((tsumopai>=0x01) && (tsumopai<=0x37)) {
+		#if false //-*todo:描画
+			short icontype_ = D_TRIANGLE_DOWN;
+		#endif //-*todo:描画
+
+			if(
+				( ( csr== cnt ) && ( hai_up== 0 ) )
+				|| (( hai_up & 0x2000 ) != 0)
+				|| Optstk[ menu_csr ] == (byte)OP.TSUMO
+				|| ( ( Optstk[ menu_csr ] == (byte)OP.KAN ) && (( 0x0001 << cnt ) & hai_up ) != 0 )
+				|| ( ( Optstk[ menu_csr ] == (byte)OP.RICHI ) && (( 0x0001 << cnt ) == hai_up ) )
+			) {
+				paiupY = 6;		// = 5;
+				if( gsPlayerWork[House].byTkhai != 0 ){
+				#if false //-*todo:描画
+					MJ_IconDraw( icontype_,(short)((cnt*15)+17),220+12- 1,0);	//MJ_IconDraw( icontype_,(int16_t)((cnt*15)+17),220,0);
+				#endif //-*todo:描画
+				}
+			} else {
+				paiupY = 0;
+			}
+#if	Rule_2P
+			//鳴きメニュー選択中は、牌を上に上げない
+			if( _menuFlg)
+				paiupY= 0;
+#endif
+
+			if( gsPlayerWork[House].byTkhai != 0 ){
+				// ツモ牌
+#if true //-*todo:描画
+				var tehaiDrawTest = m_myHandTiles[cnt].GetComponent<MJTIle>();
+					tehaiDrawTest.set(TILE_STATE.MY_HAND,(PAI)tsumopai);
+#else //-*todo:描画
+	#if	Rule_2P
+				hMpsBrewLib_DrawSprite( spPaiJicya, tsumopai,
+					(D_JICYA_TEHAI_X+cnt*(D_PAI_TATE_LARGE_SIZE_W-1)+5+2),
+					D_JICYA_TEHAI0_Y-paiupY+ _y_of010);
+	#endif
+#endif //-*todo:描画
+			}
+		}
+	}
+	/*===========================================================================
+								フーロ牌の描画
+		注：ここの処理より下にコードを書く場合は
+			if( Fr == 0 ) return;の解除を行うこと
+	===========================================================================*/
+	#if	Rule_2P
+	MJ_FrJicyaDraw( House, 247 );	//D_JICYA_TEHAI_Y
+	#endif
+#endif //-*todo:作業中
+
+#endregion //-*UNITY_ORIGINAL
+
 #if false//-*todo:描画保留
 	int i		= 0;	// ループ
 	int j		= 0;	// チーループ用。
@@ -2726,6 +2954,40 @@ public const int		D_WanBASE_Y			= 113;		//(120)
 public void MJ_GameWanpaiDisp( /*MahJongRally * pMe*/ )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_GameWanpaiDisp()");
+	if(m_WanTilesBase == null)return;
+	short i=0;
+	byte  no=0;
+	int doraNo = 0;
+	for( i= 8; i>= 0; i-=2) {
+		switch(WanPaiBuf[i]) {
+			case	(byte)WANTYPE.REV:	//裏向き
+				no = (byte)PAI.URA;		//no = Bipai[PAI_MAX + i];	//122x
+				break;
+			case	(byte)WANTYPE.FRONT:
+				if(( i&1 ) != 0 ){
+					no = (byte)PAI.URA;	//no = 0;			// ロンした時。
+				}else{
+					no = Bipai[(int)MJDefine.PAI_MAX + i];		//122x
+				}
+				if( Rultbl[(int)RL.KANUR] != 0 || ((Rultbl[(int)RL.URA] != 0 ) && i/2 == 4)) {
+					if((i&1) != 0 ){
+						// dy += 20;	//dy -= buf1;	// ロンした時に。
+					}else{
+						// dy += 0;					// 1枚目のドラ位置？(上段右から3個目)
+					}
+				}
+				break;
+			case	(byte)WANTYPE.NON:		// カンした時。
+				no = (byte)PAI.URA;
+				break;
+		}
+
+		if(no != 0xFF) {
+			m_WanTilesBase.GetComponent<SetWanpai>().Set(no,doraNo);
+		}
+		doraNo++;
+	}
+
 #if false //-*todo:描画保留
 	short i=0;
 	short	dx= D_WanBASE_X+ (13*2);
@@ -4277,6 +4539,121 @@ public const int D_AGARI_FR_DRAW_BASE_X	17
 public void MJ_FrJicyaDraw( /*MahJongRally * pMe,*/ int House, int D_JICYA_TEHAI_Y )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_FrJicyaDraw( int "+House+", int "+D_JICYA_TEHAI_Y+" )");
+	int Bbit		= 0;	// フーロ牌情報取得
+	int BbitBefor	= 0;	//-*todo:GameObject生成確認用
+	int Fr			= 0;	// フーロ牌チェック用
+	int FrPos		= 0;	// 左0・中心1・右2．
+	int furoOffBaseX= 0;	// フーロ牌用のOFFset
+	int furoOffX	= 0;	// フーロ牌用のOFFset
+	int Hbit		= 0;	// 上位ビット
+	int i			= 0;	// ループ
+	int j			= 0;	// チーループ用。
+	int SBit		= 0;	// 下位ビット
+
+	// フーロ牌があるかチェック
+	Fr = gsPlayerWork[House].byFhcnt;
+
+	if( Fr == 0 )	return;							// フーロ牌が無ければ。
+	if( Fr > 4 )	Fr = 4;
+	// フーロ牌の情報取得
+	for( i= 0; i< Fr; i++ ) {
+		Bbit = gsPlayerWork[House].byFrhai[i];		// フーロ牌情報取得。
+		BbitBefor = gsPlayerWork[House].byFrhaiBefore[i];		// フーロ牌情報取得。
+		//Frに4以上が入る不具合発生のため暫定的にここで処理を入れる 20051202
+		if(Bbit == 0)	return;
+		if(Bbit == BbitBefor)continue;
+		
+		gsPlayerWork[House].byFrhaiBefore[i]= gsPlayerWork[House].byFrhai[i];//-*todo:GameObject生成確認用の副露数更新
+
+#if	Rule_2P
+		FrPos= 2;		//対面から
+#endif
+
+		Hbit = Bbit & 0xC0;							// 上位ビットの取得。
+DebLogError("//-*"+Hbit+"(#-_-)gsPlayerWork["+House+"].byFrpos["+i+"] = "+gsPlayerWork[House].byFrpos[i]+":("+Bbit+" == "+BbitBefor+")");
+#region UNITY_ORIGINAL
+GameObject furoTilesBase = null;
+List<GameObject> furoTilesTiles = new List<GameObject>();
+if(House == 0){
+//-*自分
+	furoTilesBase = m_myFuroTilesBase;
+	furoTilesTiles = m_myFuroTilesTiles;
+}else{
+//-*相手
+	furoTilesBase = m_yourFuroTilesBase;
+	furoTilesTiles = m_yourFuroTilesTiles;
+}
+#endregion //-*UNITY_ORIGINAL
+
+		switch( Hbit ) {
+			// 明カン(自家)
+			case MJDefine.D_MINKAN:
+				SBit = Bbit & 0x3F;					// 下位ビットの取得
+				furoOffX = 0;
+				furoOffBaseX = 0;
+				{
+#region UNITY_ORIGINAL
+					GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetPonMinkan");
+					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+					instantObj.name = "FuroMinkan"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
+					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					furoTilesTiles.Add(instantObj);
+					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
+					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
+#endregion
+				}
+				break;
+			// 暗カン(両端を裏にして表示)
+			case MJDefine.D_ANKAN:
+				SBit = Bbit & 0x3F;					// 下位ビットの取得
+				{
+#region UNITY_ORIGINAL
+					GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetAnkan");
+					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+					instantObj.name = "FuroAnkan"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
+					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					furoTilesTiles.Add(instantObj);
+					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
+					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
+#endregion
+				}
+				break;
+
+			// ポン
+			case MJDefine.D_PON:
+				SBit = Bbit & 0x3F;					// 下位ビットの取得
+				furoOffX = 0;
+				{
+#region UNITY_ORIGINAL
+					GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetPonMinkan");
+					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+					instantObj.name = "FuroPon"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
+					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					furoTilesTiles.Add(instantObj);
+					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
+					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
+#endregion
+				}
+				break;
+			// チー
+			default:
+				FrPos= gsPlayerWork[House].byFrpos[i];		// 鳴き場所取得。
+				{
+#region UNITY_ORIGINAL
+					GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetChi");
+					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+					instantObj.name = "FuroChi"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
+					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					furoTilesTiles.Add(instantObj);
+					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
+					mjFuroSet.SetFuroImage(Hbit,Bbit,FrPos);
+#endregion
+				}
+				break;
+
+		} // switch( Hbit )
+	} // for
+
 #if false //-*todo:描画保留
 	int Bbit		= 0;	// フーロ牌情報取得
 	int Fr			= 0;	// フーロ牌チェック用
@@ -4807,4 +5184,145 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 #endif //-*todo:描画保留
 }
 //-*********************MJ_GameDraw.j
+#region UNITY_ORIGINAL
+	/// <summary>
+	/// 捨て牌数の描画
+	/// </summary>
+	public void DrawDiscardedTiles(int House)
+	{
+		int sutecnt = gsPlayerWork[House].byShcnt;					// 捨て牌数取得。
+		byte suteFlag	= 0;							// 捨て牌がリーチかどうかをGET。
+		TILE_STATE tState = TILE_STATE.NO_USE;
+		switch(House){
+		case 0:	//-*自分の捨て牌
+			if(m_myDiscardedTiles !=  null){
+				for( int i=0 ; i<sutecnt ; i++ ) {
+					if(m_myDiscardedTiles.Count <= i){
+						suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
+					//-*新規捨て牌なら生成して追加
+						GameObject obj = null;
+						switch(suteFlag){
+						case (byte)SUTEHAI.ON:
+							tState = TILE_STATE.MY_DISCARDED;
+							obj = (GameObject)Resources.Load("Prefabs/TileBaseDiscard");
+							break;
+						case (byte)SUTEHAI.REACH:
+							tState = TILE_STATE.RIICHI;
+							obj = (GameObject)Resources.Load("Prefabs/TileBaseHorizon");
+							Debug.LogWarning("//-*("+House+")REACH:No."+i+" : "+gsPlayerWork[House].bySthai[i]);
+							break;
+						default:
+							Debug.LogWarning("//-*("+House+")suteFlag("+suteFlag+"):No."+i+" : "+gsPlayerWork[House].bySthai[i]);
+							break;
+						}
+						GameObject instantObj = (GameObject)Instantiate(obj,
+									Vector3.zero,
+									Quaternion.identity);
+						if(instantObj == null){
+							DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
+							return;
+						}
+						instantObj.name = "Discarded"+String.Format("{0:00}", i);
+						instantObj.transform.SetParent(m_myDiscardedTilesBase.transform, false);
+						m_myDiscardedTiles.Add(instantObj);
+						// var mjTile = new MJTIle();
+
+						var mjTile = m_myDiscardedTiles[i].GetComponent<MJTIle>();
+						mjTile.set(tState,(PAI)gsPlayerWork[House].bySthai[i]);
+					}
+				}
+			}
+			break;
+		case 1:	//-*相手の捨て牌(対面)
+			if(m_yourDiscardedTiles !=  null){
+				for( int i=0 ; i<sutecnt ; i++ ) {
+					if(m_yourDiscardedTiles.Count <= i){
+						suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
+					//-*新規捨て牌なら生成して追加
+						GameObject obj = null;
+						switch(suteFlag){
+						case (byte)SUTEHAI.ON:
+							tState = TILE_STATE.YOUR_DISCARDED;
+							obj = (GameObject)Resources.Load("Prefabs/TileBaseDiscard");
+							break;
+						case (byte)SUTEHAI.REACH:
+							tState = TILE_STATE.RIICHI;
+							obj = (GameObject)Resources.Load("Prefabs/TileBaseHorizon");
+							Debug.LogWarning("//-*("+House+")REACH:No."+i+" : "+gsPlayerWork[House].bySthai[i]);
+							break;
+						default:
+							Debug.LogWarning("//-*("+House+")suteFlag("+suteFlag+"):No."+i+" : "+gsPlayerWork[House].bySthai[i]);
+							break;
+						}
+						GameObject instantObj = (GameObject)Instantiate(obj,
+									Vector3.zero,
+									Quaternion.identity);
+						if(instantObj == null){
+							DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
+							return;
+						}
+						instantObj.name = "Discarded"+String.Format("{0:00}", i);
+						instantObj.transform.SetParent(m_yourDiscardedTilesBase.transform, false);
+						m_yourDiscardedTiles.Add(instantObj);
+						// var mjTile = new MJTIle();
+
+						var mjTile = m_yourDiscardedTiles[i].GetComponent<MJTIle>();
+						mjTile.set(tState,(PAI)gsPlayerWork[House].bySthai[i]);
+					}
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+
+#if false//-*todo:実装中
+	for( i=0 ; i<sutecnt ; i++ ) {
+		if(sutecnt)
+		suteFlag	= Rec_sute_pos[House][i];						// 捨て牌がリーチかどうかをGET。
+		pai			= gsPlayerWork[House].bySthai[i];				// 河の捨て牌取得。
+		offsetX		= DrawCount%12;		//	%8						// 横の位置
+		offsetY		= DrawCount/12;		//	/8						// 段の位置
+		switch( suteFlag ) {
+			case SUTEHAI_ON:
+				// 捨て牌通常表示
+#if	Rule_2P
+				if(offsetY == reached_line)
+					// リーチ牌を表示したラインならば
+					hMpsBrewLib_DrawSprite( spSutePaiJicya, pai,
+						(D_JICYA_RIVER_X+(offsetX*13)+reached_add),
+						D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H) );
+				else
+					// ちがうのであれば
+					hMpsBrewLib_DrawSprite( spSutePaiJicya, pai,
+						D_JICYA_RIVER_X+(offsetX*13),
+						D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H) );
+#endif
+				DrawCount+=1;
+				break;
+//m			case SUTEHAI_OFF:
+//m				break;
+			case SUTEHAI_REACH:
+				reached_add=4;
+				reached_line = offsetY;
+
+				// 捨て牌リーチ表示。
+#if	Rule_2P
+				hMpsBrewLib_DrawSprite_line4( spSutePaiShimocya, pai,
+#endif
+					D_JICYA_RIVER_X+(offsetX*13),
+					(D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H))+4+1 );
+				DrawCount+=1;
+				break;
+//m			default:
+//m				break;
+		}
+	}
+#endif //-*todo:実装中		
+	}
+#endregion //-*UNITY_ORIGINAL
+
+
+
 }

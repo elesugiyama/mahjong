@@ -188,9 +188,7 @@ public short HaiSelPD( /*MahJongRally * pMe*/ )
 	short no, add=0;
 
 	play_wk.byThcnt = gsPlayerWork[game_player].byThcnt;
-#if SUGI_DEB //-*todo:注デバッグ中	
-gAutoFlag = 1;
-#endif //-*todo:注デバッグ中
+
 	no = hai_csr;
 	//if( pd_trg & GAME_OK_BTN) return( no);
 	#if true //-*todo:キー操作

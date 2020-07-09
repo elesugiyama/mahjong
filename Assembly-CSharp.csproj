@@ -109,6 +109,8 @@
      <Compile Include="Assets\Scripts\Mahjong\MJTIleImage.cs" />
      <Compile Include="Assets\Scripts\Mahjong\Mjycalc.cs" />
      <Compile Include="Assets\Scripts\Mahjong\PLAYERWORK.cs" />
+     <Compile Include="Assets\Scripts\Mahjong\SetFuro.cs" />
+     <Compile Include="Assets\Scripts\Mahjong\SetWanpai.cs" />
      <Compile Include="Assets\Scripts\Mahjong\Stage.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageButton.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageSelect.cs" />

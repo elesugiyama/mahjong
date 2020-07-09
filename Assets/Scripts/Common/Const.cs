@@ -101,8 +101,7 @@ namespace Const {
 		/// 麻雀で使用する画像の場所
 		/// </summary>
 		public static string MJ_DIRECTORY {
-			// get{ return "scenario/";}
-			get{ return String.Concat(RESOURCES_DIRECTORY, "InGame/");}
+			get{ return "InGame/";}
 		} 
 		/// <summary>
 		/// 麻雀で使用する牌画像の場所

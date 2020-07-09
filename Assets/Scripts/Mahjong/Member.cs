@@ -97,7 +97,7 @@ public class Member : MonoBehaviour {
 			m_myHandTileImage = null;
 		}
 		m_myHandTileImage = new List<GameObject>();
-		GameObject obj = (GameObject)Resources.Load("Prefabs/TileBase");
+		GameObject obj = (GameObject)Resources.Load("Prefabs/TileBaseHand");
 		for(int no=0; no<MJDefine.HAND_NUM_MAX; no++){
 			m_myHandTileImage.Add( (GameObject)Instantiate(obj,Vector3.zero,Quaternion.identity) );
 			m_myHandTileImage[no].GetComponent<MJTIleImage>().Init();

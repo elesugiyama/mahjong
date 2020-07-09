@@ -1,5 +1,5 @@
 /****************************************************************/
-/*		ƒTƒCƒY’è‹`												*/
+/*		ã‚µã‚¤ã‚ºå®šç¾©												*/
 /****************************************************************/
 	#define		UINT1			char		//unsigned char
 	#define		UINT1p			char		//unsigned char *
@@ -18,7 +18,7 @@
 	#define		SINT8			long		//signed long
 	#define		SINT8p			long		//signed long *
 
-/* Šî–{Œ^’è‹` (*** ŠÂ‹«ˆË‘¶’ˆÓ ***) */
+/* åŸºæœ¬å‹å®šç¾© (*** ç’°å¢ƒä¾å­˜æ³¨æ„ ***) */
 	#define		int8_t			char		//typedef signed   char		int8_t;
 	#define		int16_t			short		//typedef signed   short	int16_t;
 	#define		int32_t			long		//typedef signed   long		int32_t;
@@ -34,7 +34,7 @@
 /*****************************************************************************/
 
 //-*SUGI_DEB***************************
-#if SUGI_DEB //-*todo:’ƒfƒoƒbƒO’†	
+#if SUGI_DEB //-*todo:æ³¨ãƒ‡ãƒãƒƒã‚°ä¸­	
 nextflg_ = 1;
-#endif //-*todo:’ƒfƒoƒbƒO’†
+#endif //-*todo:æ³¨ãƒ‡ãƒãƒƒã‚°ä¸­
 //-****************************SUGI_DEB

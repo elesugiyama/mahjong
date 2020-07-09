@@ -11,7 +11,7 @@ using MJDialogHeader;
 
 
 public class Stage : MonoBehaviour {
-
+//-*todo:作ってみたけど不要かな
 	[Header("麻雀牌(プレイヤー)")]
 	//-手牌
 	[SerializeField]
@@ -50,6 +50,7 @@ public class Stage : MonoBehaviour {
 		
 	}
 	private void Init(){
+		#if false //-*todo:作ってみたけど不要かな
 		//-*牌リスト作成
 		if(m_mjTiles != null)
 		{
@@ -65,6 +66,7 @@ public class Stage : MonoBehaviour {
 				m_mjTiles.Add(temp);
 			}
 		}
+	#endif //-*todo:作ってみたけど不要かな
 	}
 
 }

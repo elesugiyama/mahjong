@@ -48,9 +48,7 @@ return true;	//-*todo:キー操作(保留
 ****************************************/
 public void	MjModeInit(/*MahJongRally * pMe*/)
 {
-	#if true	//-*todo:
 	DebLog(("Init for Mode Init"));
-	#endif	//-*todo:
 
 	switch (sGameData.byGameMode) {
 	  case MJDefine.GAMEMODE_SURVIVAL:			/*	サバイバル		*/
@@ -175,7 +173,7 @@ public void	MjKyokuInit(/*MahJongRally * pMe*/)
 {
 	byte i;
 
-DebLog(( "MjKyokuInit_bflag : flag="+MjKyokuInit_bflag ));
+DebLogError(( "MjKyokuInit_bflag : flag="+MjKyokuInit_bflag ));
 #if false //-*描画
 #if	Rule_2P
 	FaceNum= 0;			//キャラクター表情
@@ -811,11 +809,6 @@ public bool AgariDispMain(/*MahJongRally * pMe*/)
 
 
 #endif //-*todo:通信
-//-*SUGI_DEB***************************
-#if SUGI_DEB //-*todo:注デバッグ中	
-nextflg_ = 1;
-#endif //-*todo:注デバッグ中
-//-****************************SUGI_DEB
 				if( nextflg_ == 1 ) {
 					// ｽﾀﾝﾄﾞｱﾛｰﾝ時はｴﾝﾀｰｷｰで移行。
 					switch( Pinch ) {
@@ -864,7 +857,7 @@ faceChangeCnt = 0;	//*カウンター初期化
 #else
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中	
-gNextTimeOut = 0;
+// gNextTimeOut = 0;
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
 
@@ -915,7 +908,7 @@ gNextTimeOut = 0;
 			NetActTimeOutJdg();
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中	
-gNextTimeOut = 0;
+// gNextTimeOut = 0;
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
 			if( gNextTimeOut <= 0 ) {

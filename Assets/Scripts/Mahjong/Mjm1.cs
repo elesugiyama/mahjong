@@ -703,7 +703,7 @@ public void reentry_m1 ( /*MahJongRally * pMe*/ )
 	#endif
 	}
 #endif
-DebLog("//-*reentry_m1():Order("+Order+"):reentry_m1_bflag("+reentry_m1_bflag+")");
+// DebLog("//-*reentry_m1():Order("+Order+"):reentry_m1_bflag("+reentry_m1_bflag+")");
 		switch ( reentry_m1_bflag ) {
 			case ( 1 ):		 /*** 牌をツモる ***/
 			#if false //-*todo:サウンド
@@ -759,7 +759,11 @@ DebLogError((""+tehaiList));
 						mypinch_hitter_select_ok_flag = 1;
 					}
 				#endif //-*todo:通信
-
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+gpsPlayerWork.byPlflg = 0;
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 					//プレーヤー／COM判定
 					if ( gpsPlayerWork.byPlflg == 0 || is_reentry == true || daiuchi_ == 2 ) {	// いれ込み。
 						// COMか再接続の時の処理

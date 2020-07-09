@@ -38,11 +38,16 @@ public partial class MahjongBase : SceneBase {
 	private GameObject m_myHandTilesBase;
 	[SerializeField]
 	private List<GameObject> m_myHandTiles = new List<GameObject>();
-	//-*ツモ牌
+	//-*捨て牌
 	[SerializeField]
-	private GameObject m_myDrawTileBase;
+	private GameObject m_myDiscardedTilesBase;
 	[SerializeField]
-	private GameObject m_myDrawTile;
+	private List<GameObject> m_myDiscardedTiles = new List<GameObject>();
+	//-*副露牌
+	[SerializeField]
+	private GameObject m_myFuroTilesBase;
+	[SerializeField]
+	private List<GameObject> m_myFuroTilesTiles = new List<GameObject>();
 
 	[Header("麻雀牌(相手)")]
 	//-手牌
@@ -50,12 +55,21 @@ public partial class MahjongBase : SceneBase {
 	private GameObject m_yourHandTilesBase;
 	[SerializeField]
 	private List<GameObject> m_yourHandTiles = new List<GameObject>();
-	//-*ツモ牌
+	//-*捨て牌
 	[SerializeField]
-	private GameObject m_yourDrawTileBase;
+	private GameObject m_yourDiscardedTilesBase;
 	[SerializeField]
-	private GameObject m_yourDrawTile;
+	private List<GameObject> m_yourDiscardedTiles = new List<GameObject>();
+	//-*副露牌
+	[SerializeField]
+	private GameObject m_yourFuroTilesBase;
+	[SerializeField]
+	private List<GameObject> m_yourFuroTilesTiles = new List<GameObject>();
 
+	[Header("共通")]
+	//-*王牌
+	[SerializeField]
+	private GameObject m_WanTilesBase;
 #if false //-*todo:作ってみたけど...
 	//-*内部処理用
 	private List<MJTIle> m_mjTiles = new List<MJTIle>();
@@ -1126,14 +1140,6 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 
 
 
-	private void TilesShuffle()
-	{
-#if false //-*todo:作ってみたけど...
-		m_mjTiles = m_mjTiles.OrderBy( a => Guid.NewGuid() ).ToList();
-		// for(int a=0;a<m_mjTiles.Count;a++)
-		// 	Debug.Log("//-*m_mjTiles["+a+"] = "+m_mjTiles[a].ListNo);
-#endif //-*todo:作ってみたけど...
-	}
 	private IEnumerator UpdateMahjong(){
 		while(true){
 			switch(a_Mode){
@@ -1143,8 +1149,10 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 				break;
 			case MAHJONGMODE.mMODE_INIT:
 #region UNITY_ORIGINAL
-				ResetTiles();
+				ResetDiscardedTiles();
 				InitMakeHandTiles();
+				ResetFuroTiles();
+				ResetWanTiles();
 #endregion //-*UNITY_ORIGINAL
 				MahJongRally_InitAppData();
 				a_Mode = ModeSet(MAHJONGMODE.mMODE_GAME);
@@ -1167,7 +1175,7 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 					#if DEBUG
 					//	Runtime info= Runtime.getRuntime();
 					//	Debug.mem("mem");
-					Debug.Log("app_main error");
+					Debug.Log("app_main error:"+e);
 					#if	_APP_MAIN
 					Debug.Log( "app_main:" + e );
 					#endif
@@ -1217,14 +1225,7 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 	// #define	IsGameClear()			((sGameData.byFlags & GAMEFLAG_CLEAR) != 0)
 	public bool IsGameClear(){	return ((sGameData.byFlags & (byte)GAMEFLAG.CLEAR) != 0);}
 	public bool IsGameAutoPlay(){
-		// return	((sGameData.byFlags & (byte)GAMEFLAG.AUTO) != 0);
-//-*SUGI_DEB***************************
-#if SUGI_DEB //-*todo:注デバッグ中	
-		return	true;
-#else //-*todo:注デバッグ中
 		return	((sGameData.byFlags & (byte)GAMEFLAG.AUTO) != 0);
-#endif //-*todo:注デバッグ中
-//-****************************SUGI_DEB
 	}
 #if false //-*todo:必要になったら考える
 	// #define	SetGameClear()			(sGameData.byFlags |= GAMEFLAG_CLEAR)
@@ -1247,9 +1248,8 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 
 #region UNITY_ORIGINAL
 	private void InitMakeHandTiles(){
-		DebLog("//-*,._.,InitMakeHandTiles");
 
-		GameObject obj = (GameObject)Resources.Load("Prefabs/TileBase");
+		GameObject obj = (GameObject)Resources.Load("Prefabs/TileBaseHand");
 
 		// m_StageButton = new GameObject[STAGEMAXNUM_TEST];
         // プレハブを元にオブジェクトを生成する(偶数自分:奇数相手)
@@ -1263,7 +1263,7 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 				DebLogError("//-*Make TileBase Err:("+assort+")No."+handNo);
 				return;
 			}
-			instantObj.name = "TileBase"+String.Format("{0:D2}", handNo);
+			instantObj.name = "HandTile"+String.Format("{0:D2}", handNo);
 			var mjTile = new MJTIle();
 			
 			switch(assort){
@@ -1293,31 +1293,67 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
     	}
 
 	}
-	private void ResetTiles()
+	/// <summary>
+	/// 捨て牌の初期化
+	/// </summary>
+	private void ResetDiscardedTiles()
 	{
-#if false //-*todo:作ってみたけど...		
-		//-*牌リスト作成
-		if(m_mjTiles != null)
+		//-*自分
+		if(m_myDiscardedTiles != null)
 		{
-			m_mjTiles.Clear();
-			m_mjTiles = null;
-		}
-		m_mjTiles = new List<MJTIle>();
-		for(TILE_LIST no=TILE_LIST.CHARACTERS_1; no<TILE_LIST.TILES_MAX; no++){
-		// for(TILE_LIST no=TILE_LIST.CHARACTERS_1; no<TILE_LIST.TILES_MAX; no++){
-			for(int num=0; num<MJDefine.ONE_TILES_NUM_MAX; num++){
-			//-*4個作成
-				var temp = new MJTIle();
-				temp.Init_BOTU(no);
-				m_mjTiles.Add(temp);
+			foreach(var tile in m_myDiscardedTiles){
+				UnityEngine.Object.Destroy(tile);
 			}
+			m_myDiscardedTiles.Clear();
+			m_myDiscardedTiles = null;
 		}
-#endif //-*todo:作ってみたけど...		
-		TilesShuffle();
+		m_myDiscardedTiles = new List<GameObject>();
+		
+		//-*相手
+		if(m_yourDiscardedTiles != null)
+		{
+			foreach(var tile in m_yourDiscardedTiles){
+				UnityEngine.Object.Destroy(tile);
+			}
+			m_yourDiscardedTiles.Clear();
+			m_yourDiscardedTiles = null;
+		}
+		m_yourDiscardedTiles = new List<GameObject>();
+	}
+	/// <summary>
+	/// 副露牌の初期化
+	/// </summary>
+	private void ResetFuroTiles()
+	{
+		//-*自分
+		if(m_myFuroTilesTiles != null)
+		{
+			foreach(var furo in m_myFuroTilesTiles){
+				UnityEngine.Object.Destroy(furo);
+			}
+			m_myFuroTilesTiles.Clear();
+			m_myFuroTilesTiles = null;
+		}
+		m_myFuroTilesTiles = new List<GameObject>();
+
+		//-*相手
+		if(m_yourFuroTilesTiles != null)
+		{
+			foreach(var furo in m_yourFuroTilesTiles){
+				UnityEngine.Object.Destroy(furo);
+			}
+			m_yourFuroTilesTiles.Clear();
+			m_yourFuroTilesTiles = null;
+		}
+		m_yourFuroTilesTiles = new List<GameObject>();
 	}
 
-	public void test(){
-
+	/// <summary>
+	/// 王牌の初期化
+	/// </summary>
+	private void ResetWanTiles(){
+		if(m_WanTilesBase == null)return;
+		m_WanTilesBase.GetComponent<SetWanpai>().Init();
 	}
 #endregion //-*UNITY_ORIGINAL
 }

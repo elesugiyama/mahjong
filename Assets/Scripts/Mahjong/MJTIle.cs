@@ -43,37 +43,77 @@ public class MJTIle : MonoBehaviour {
 		set {m_tileState = value;}
 	}
 
+
+	/// <summary>
+	/// 牌画像と内部番号の連結
+	/// </summary>
+	public Dictionary<PAI, TILE_LIST> PAI_LIST = new Dictionary<PAI,TILE_LIST>()
+	{
+	//-*萬子
+		{ PAI.M1,TILE_LIST.CHARACTERS_1 },		//
+		{ PAI.M2,TILE_LIST.CHARACTERS_2 },		//
+		{ PAI.M3,TILE_LIST.CHARACTERS_3 },		//
+		{ PAI.M4,TILE_LIST.CHARACTERS_4 },		//
+		{ PAI.M5,TILE_LIST.CHARACTERS_5 },		//
+		{ PAI.M6,TILE_LIST.CHARACTERS_6 },		//
+		{ PAI.M7,TILE_LIST.CHARACTERS_7 },		//
+		{ PAI.M8,TILE_LIST.CHARACTERS_8 },		//
+		{ PAI.M9,TILE_LIST.CHARACTERS_9 },		//
+	//-*索子
+		{ PAI.S1,TILE_LIST.BAMBOOS_1 },		//
+		{ PAI.S2,TILE_LIST.BAMBOOS_2 },		//
+		{ PAI.S3,TILE_LIST.BAMBOOS_3 },		//
+		{ PAI.S4,TILE_LIST.BAMBOOS_4 },		//
+		{ PAI.S5,TILE_LIST.BAMBOOS_5 },		//
+		{ PAI.S6,TILE_LIST.BAMBOOS_6 },		//
+		{ PAI.S7,TILE_LIST.BAMBOOS_7 },		//
+		{ PAI.S8,TILE_LIST.BAMBOOS_8 },		//
+		{ PAI.S9,TILE_LIST.BAMBOOS_9 },		//
+	//-*筒子
+		{ PAI.P1,TILE_LIST.CIRCLES_1 },		//
+		{ PAI.P2,TILE_LIST.CIRCLES_2 },		//
+		{ PAI.P3,TILE_LIST.CIRCLES_3 },		//
+		{ PAI.P4,TILE_LIST.CIRCLES_4 },		//
+		{ PAI.P5,TILE_LIST.CIRCLES_5 },		//
+		{ PAI.P6,TILE_LIST.CIRCLES_6 },		//
+		{ PAI.P7,TILE_LIST.CIRCLES_7 },		//
+		{ PAI.P8,TILE_LIST.CIRCLES_8 },		//
+		{ PAI.P9,TILE_LIST.CIRCLES_9 },		//
+	//-*字牌
+		{ PAI.TON,  TILE_LIST.HONOURS_EAST  },	//
+		{ PAI.NAN,  TILE_LIST.HONOURS_SOUTH },	//
+		{ PAI.SYA,  TILE_LIST.HONOURS_WEST  },	//
+		{ PAI.PEI,  TILE_LIST.HONOURS_NORTH },	//
+		{ PAI.HAKU, TILE_LIST.HONOURS_WHITE },	//
+		{ PAI.HATSU,TILE_LIST.HONOURS_GREEN },	//
+		{ PAI.CHUN, TILE_LIST.HONOURS_RED   },	//
+	//-*裏向き
+		{ PAI.URA,TILE_LIST.BACK },			//
+	};
+
+
 	public void Init()
 	{
-		set(TILE_STATE.THE_WALL,PAI.M1);
+		set(TILE_STATE.NO_USE,PAI.M1);
 		m_tileImage.Init();
 	}
 	public void set(TILE_STATE state,PAI no)
 	{
-		m_tileState = state;
-		m_listNo = no;
-		m_tileType = (TILE_TYPE)( (int)m_listNo / MJDefine.TYPE_TILES_NO_MAX );
-		m_no = (int)m_listNo % MJDefine.TYPE_TILES_NO_MAX;
-		m_tileImage.SetState(m_tileState,m_tileType,m_no);
+		//-******
+		if( PAI_LIST.ContainsKey(no) )	{
+			TILE_LIST tNo = TILE_LIST.BACK;
+			m_tileState = state;
+			PAI_LIST.TryGetValue(no,out tNo);
+			m_no = (int)tNo;
+			m_tileImage.SetState(m_tileState,m_tileType,m_no);
+		}
+		//-******
 	}
 
 
 
 
-	public void Init_BOTU(TILE_LIST listNo)
-	{
-		Debug.LogError("(-_-)");
-		// m_listNo = listNo;
-		m_tileType = (TILE_TYPE)( (int)listNo / MJDefine.TYPE_TILES_NO_MAX );
-		m_no = (int)listNo % MJDefine.TYPE_TILES_NO_MAX;
-		m_tileState = TILE_STATE.THE_WALL;
-		m_tileImage.Init();
-	}
-	public void SetState_BOTU(TILE_STATE state)
-	{
-		m_tileState = state;
-		// m_tileImage.SetState(m_tileState,m_myHandTiles[no].ListNo);
-	}
+
 
 	// Use this for initialization
 	void Start () {}

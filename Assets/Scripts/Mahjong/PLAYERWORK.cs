@@ -15,7 +15,7 @@ using MJDialogHeader;
 /// <summary>
 /// 各プレイヤーの状態
 /// </summary>
-public class PLAYERWORK : MonoBehaviour {
+public class PLAYERWORK  {
 	// public class PLAYERWORK {
 	public byte[]	byTehai = new byte [14];	/* 手牌(０～１２のＭＡＸ１３牌)             */
 										/* １３ = ツモ牌（あやしい）                */
@@ -41,6 +41,7 @@ public class PLAYERWORK : MonoBehaviour {
 	public byte	byTkhai;					//:// 手牌表示フラグ（00:byThcntの数だけ表示 FF:byThcntの数表示+byHkhai（ツモ牌）を表示）
 	public byte	byPlflg;					/* プレイヤーフラグ(プレイヤーでＯＮ)       */
 	public byte[]	byFrhai = new byte [4];	/* フーロ牌（ＭＡＸで４個分）               */
+	public byte[]	byFrhaiBefore = new byte [4];	//-*todo:前回のフーロ牌の数(GameObject生成するか確認用)
 	public byte[]	byFrpos = new byte [4];	/* フーロ牌のポジション                     */
 										/* ポンカンの場合：フーロ者から見て(0:上家)(1:対面)(2:下家) */
 										/* チーの場合：順子の(0-2)番目の牌を一番左に持ってきて横にする */
@@ -77,7 +78,10 @@ public class PLAYERWORK : MonoBehaviour {
 		byKflg= ob.byKflg;
 		byTkhai= ob.byTkhai;
 		byPlflg= ob.byPlflg;
+
+
 		for(i = 0; i < 4; i++)	byFrhai[i]= ob.byFrhai[i];
+		for(i = 0; i < 4; i++)	byFrhaiBefore[i]= ob.byFrhaiBefore[i];//-*todo:前回のフーロ牌の数(GameObject生成するか確認用)
 		for(i = 0; i < 4; i++)	byFrpos[i]= ob.byFrpos[i];
 
 		for(i = 0; i < 13; i++)	byMchai[i]= ob.byMchai[i];
@@ -117,6 +121,7 @@ public class PLAYERWORK : MonoBehaviour {
 		ret.byTkhai= this.byTkhai;
 		ret.byPlflg= this.byPlflg;
 		for(i = 0; i < 4; i++)	ret.byFrhai[i]= this.byFrhai[i];
+		for(i = 0; i < 4; i++)	ret.byFrhaiBefore[i]= this.byFrhaiBefore[i];//-*todo:前回のフーロ牌の数(GameObject生成するか確認用)
 		for(i = 0; i < 4; i++)	ret.byFrpos[i]= this.byFrpos[i];
 
 		for(i = 0; i < 13; i++)	ret.byMchai[i]= this.byMchai[i];

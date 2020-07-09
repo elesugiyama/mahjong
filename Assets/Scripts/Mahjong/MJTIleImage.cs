@@ -53,32 +53,34 @@ public class MJTIleImage : MonoBehaviour {
 		m_tileImageBase.SetActive(false);
 	}
 
-	public void SetImage(TILE_TYPE type, int no)
+	public void SetState(TILE_STATE state, TILE_TYPE type, int no)
+	{
+		switch(state)
+		{
+		case TILE_STATE.NO_USE:
+		//-*山に有る間は表示なし
+			m_tileImageBase.SetActive(false);
+			break;
+		default:
+			SetImage(state,no);
+			break;
+		}
+	}
+	public void SetImage(TILE_STATE state, int no)
 	{
 		if(m_tileImage == null)return;
-		String tileName = String.Concat( (int)type, String.Format("{0:D2}", no) );
+		String tileName = String.Concat( (int)state, String.Format("{0:D2}", no) );
 		String imageName = String.Concat(Dir.MJ_TILE_DIRECTORY, Dir.IMAGE_TILE_BASE_NAME,tileName);
-		Debug.Log("//-*TileImageSet:"+imageName+" type:"+type+"("+(int)type+") no:"+no+"("+String.Format("{0:D2}", no)+")");
 		var spriteImage = Resources.Load<Sprite>(imageName);
-		if(spriteImage == null) return;
+		if(spriteImage == null){
+			Debug.LogError("//-*TileImageSet:NullErr:"+imageName+" type:"+state+"("+(int)state+") no:"+no+"("+String.Format("{0:D2}", no)+")");
+			return;
+		}
 		m_tileImageBase.SetActive(true);
 		m_tileImage.sprite = spriteImage;
 	}
 
 
-	public void SetState(TILE_STATE state, TILE_TYPE type, int no)
-	{
-		switch(state)
-		{
-		case TILE_STATE.THE_WALL:
-		//-*山に有る間は表示なし
-			m_tileImageBase.SetActive(false);
-			break;
-		default:
-			SetImage(type,no);
-			break;
-		}
-	}
 
 	// Use this for initialization
 	void Start () {}

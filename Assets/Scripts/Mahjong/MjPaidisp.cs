@@ -172,6 +172,13 @@ public void init_sutehai_rec( /*MahJongRally * pMe*/ )
 	Rec_chankan_man = MJDefine.NONE;
 	Rec_chankan_hai = MJDefine.NONE;
 	Rec_chankan_no = MJDefine.NONE;
+
+#region UNITY_ORIGINAL
+	ResetDiscardedTiles();
+	ResetFuroTiles();
+	ResetWanTiles();
+#endregion //-*UNITY_ORIGINAL
+
 }
 
 /*****************************
