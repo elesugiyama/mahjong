@@ -66,10 +66,67 @@ public partial class MahjongBase : SceneBase {
 	[SerializeField]
 	private List<GameObject> m_yourFuroTilesTiles = new List<GameObject>();
 
-	[Header("共通")]
+	[Header("その他")]
+	//-*ヘッダーフッター
+	[SerializeField]
+	private MJHeaderFooter m_HeaderFooterBase;
 	//-*王牌
 	[SerializeField]
 	private GameObject m_WanTilesBase;
+	//-*鳴き系メニュー
+	[SerializeField]
+	private GameObject m_callMenuBase;
+	[SerializeField]
+	private List<GameObject> m_callMenus = new List<GameObject>();
+	//-*鳴き宣言描画用
+	[SerializeField]
+	private List<MJCallDraw> m_callObjs = new List<MJCallDraw>();	//-*0:自分　1:相手
+
+	//-*流局表示用
+	[SerializeField]
+	private MJCallDraw m_callObjRyukyoku;	//-*todo:検討中
+
+
+	//-*リーチ棒(0：自分、1:相手)
+	[SerializeField]
+	private List<GameObject> m_ribos = new List<GameObject>();
+
+	[Header("リザルト画面")]
+	//-*リザルト画面
+	[SerializeField]
+	private GameObject m_resultBox;
+	//-*ポイント変動画面
+	[SerializeField]
+	private GameObject m_resultPointBox;
+	[SerializeField]
+	private GameObject m_nextButton;	//-*ページ送りボタン
+
+
+	//-*牌選択用(元キー操作)
+	private short m_haiCsrNo = -1;
+	private bool m_haiSelF = false;
+	//-*鳴き系メニュー選択用(元キー操作)
+	private short m_callMenuCsrNo = -1;
+	private bool m_callMenuSelF = false;
+	//-*「次へ」ボタン
+	private bool m_nextBtnF = false;
+	public bool nextBtnF{
+		get{return m_nextBtnF;}
+		set{m_nextBtnF = value;}
+	}
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+
+	[Header("デバッグ")]
+	//-*デバッグ
+	[SerializeField]
+	private DebBoxInGame m_DebBox;
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
+	private int tsumikomiNum = -1;
+
+//-*****ここまでUnity用
+
 #if false //-*todo:作ってみたけど...
 	//-*内部処理用
 	private List<MJTIle> m_mjTiles = new List<MJTIle>();
@@ -315,6 +372,9 @@ public partial class MahjongBase : SceneBase {
 	private short			hai_open;		//自分 下家 対家 上家
 
 	private short			chi_csr;							// チー選択カーソル 2006/02/06 BugNo 30
+#region UNITY_ORIGINAL
+	private short			chi_hai_csr;	//-*チー用選択中の手牌番号
+#endregion	//-*UNITY_ORIGINAL
 	private short			chi_min;
 	private short			chi_max;
 
@@ -507,6 +567,8 @@ public partial class MahjongBase : SceneBase {
 	private bool			tsumo_agari;				// ツモ和了フラグ 真:ツモ 偽:ロン	2006/02/24 要望No.113
 
 	/**********		ここから麻雀用宣言　おわり		**********/
+	[Header("元ソース")]
+
 //0430mt
 //0518mt	MjWeb			stWeb; 		//*stWeb; 					// Webから画像をダウンロードするための構造体
 	public byte[]		 stWeb_pszRecv = new byte [2048];
@@ -1149,10 +1211,19 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 				break;
 			case MAHJONGMODE.mMODE_INIT:
 #region UNITY_ORIGINAL
-				ResetDiscardedTiles();
+				//-*開始時一度だけの処理
 				InitMakeHandTiles();
+				InitNextPageBtn();
+				//-*局ごとのリセット
+				ResetDiscardedTiles();
 				ResetFuroTiles();
 				ResetWanTiles();
+				ResetCallMenu();
+				RestRebo();
+				RestCallDraw();
+				RestCallRyukyokuDraw();
+				RestResultBoxDraw();
+				RestResultPointDraw();
 #endregion //-*UNITY_ORIGINAL
 				MahJongRally_InitAppData();
 				a_Mode = ModeSet(MAHJONGMODE.mMODE_GAME);
@@ -1272,12 +1343,23 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 				instantObj.transform.SetParent(m_myHandTilesBase.transform, false);
 				m_myHandTiles.Add(instantObj);
 				mjTile = m_myHandTiles[handNo].GetComponent<MJTIle>();
+				if(mjTile == null){
+					DebLogError("//-*MJTIle noto found :AllNo."+i+", assort:"+assort+", HandNo:"+handNo);
+					break;
+				}
+				mjTile.InitTileHand(assort,handNo,true);
+				mjTile.SetOnPointerClickCallback(ButtonSelectTile);
 				break;
 			case 1:
 				//-*相手
 				instantObj.transform.SetParent(m_yourHandTilesBase.transform, false);
 				m_yourHandTiles.Add(instantObj);
 				mjTile = m_yourHandTiles[handNo].GetComponent<MJTIle>();
+				if(mjTile == null){
+					DebLogError("//-*MJTIle noto found :AllNo."+i+", assort:"+assort+", HandNo:"+handNo);
+					break;
+				}
+				mjTile.InitTileHand(assort,handNo);
 				break;
 			default:
 				DebLogError("//-*人数("+MJDefine.MEMBER_NUM_MAX+")に合わせてcase式増設の必要("+assort+"):No."+handNo);
@@ -1285,14 +1367,27 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 			}
 		
 
-			if(mjTile == null){
-				DebLogError("//-*MJTIle noto found :AllNo."+i+", assort:"+assort+", HandNo:"+handNo);
-				break;
-			}
-			mjTile.Init();
     	}
 
 	}
+	/// <summary>
+	/// ヘッダーフッターの初期化
+	/// </summary>
+	private void InitHeaderFotter()
+	{
+		m_HeaderFooterBase.InitHF();
+	}
+
+	/// <summary>
+	/// 次へボタンの初期化
+	/// </summary>
+	private void InitNextPageBtn()
+	{
+		//-*ページ送りボタン
+		m_nextButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(ButtonGoToNext);
+		SetNextBtnActive(false);
+	}
+
 	/// <summary>
 	/// 捨て牌の初期化
 	/// </summary>
@@ -1355,5 +1450,132 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 		if(m_WanTilesBase == null)return;
 		m_WanTilesBase.GetComponent<SetWanpai>().Init();
 	}
+
+	/// <summary>
+	/// リー棒表示初期化
+	/// </summary>
+	private void RestRebo()
+	{
+		for(int a=0;a<m_ribos.Count;a++){
+		//-*リー棒表示消し
+			DrawRibo(a,false);
+		}
+	}
+	/// <summary>
+	/// 鳴き系メニューの初期化
+	/// </summary>
+	private void ResetCallMenu(){
+		if(m_callMenus != null)
+		{
+			foreach(var call in m_callMenus){
+				UnityEngine.Object.Destroy(call);
+			}
+			m_callMenus.Clear();
+			m_callMenus = null;
+		}
+		m_callMenus = new List<GameObject>();
+	}
+	/// <summary>
+	/// 鳴き宣言の描画消し
+	/// </summary>
+	private void RestCallDraw()
+	{
+		for(int a=0;a<m_callObjs.Count;a++){
+			m_callObjs[a].InitCallDraw();
+		}
+	}
+	/// <summary>
+	/// 鳴き宣言の描画消し
+	/// </summary>
+	private void RestCallRyukyokuDraw()
+	{
+		m_callObjRyukyoku.InitCallDraw();
+	}
+	/// <summary>
+	/// リザルトの描画消し
+	/// </summary>
+	private void RestResultBoxDraw()
+	{
+		var resultBox = m_resultBox.GetComponent<MJResultBox>();
+		if(resultBox == null)return;
+		resultBox.InitResult();
+		// resultBox.SetOnPointerClickCallback(ButtonGoToNext);
+		m_resultBox.SetActive(false);
+	}
+	/// <summary>
+	/// リザルト精算画面の描画消し
+	/// </summary>
+	private void RestResultPointDraw()
+	{
+		var resultPontBox = m_resultPointBox.GetComponent<MJResultPointBox>();
+		if(resultPontBox == null)return;
+		int[] nowPoint = new int[]{gsTableData[0].sMemData[0].nOldPoint,gsTableData[0].sMemData[1].nOldPoint};
+		resultPontBox.InitResultPoint(nowPoint);
+		// resultBox.SetOnPointerClickCallback(ButtonGoToNext);
+		m_resultPointBox.SetActive(false);
+	}
+	/// <summary>
+	/// ヘッダーフッターの更新
+	/// </summary>
+	private void UpdateHeaderFotter()
+	{
+		int		Kyoku 	= ((gpsTableData.byKyoku/ 4) & 0x01);						// 局(東南西北)。
+		int		KyokuCnt= ((gpsTableData.byKyoku) & 0x01);						// 局数。
+		int		Renchan = (byte)(gpsTableData.byDrawRenchan % 100);	// 何本場か
+		int		House 	= (( gpsTableData.byOya+ 4- game_player) % 4) & 0x01;
+		int		Ribo	= (byte)(	gpsTableData.sMemData[0].byRibo_stack+
+									gpsTableData.sMemData[1].byRibo_stack);		//場にあるリー棒
+		int[]	Point = new int[MJDefine.MAX_TABLE_MEMBER2];		// 現在の点数
+
+		for( int i = 0; i < MJDefine.MAX_TABLE_MEMBER2; i++ ) {
+			int Seki = ( game_player+ i) % 4;
+			Point[i]		= gsTableData[0].sMemData[Seki].nOldPoint;		// 現在の点数
+		}
+		m_HeaderFooterBase.UpdateHF(House,Kyoku,KyokuCnt,Renchan,Point,m_keepData.mah_limit_num,Ribo);
+	}
+	/// <summary>
+	/// 次へボタンの点灯消灯
+	/// </summary>
+	private void SetNextBtnActive(bool active)
+	{
+		//-*ページ送りボタン
+		m_nextButton.SetActive(active);
+	}
+
+	//-*****キー操作関連
+	/// <summary>
+	/// 捨て牌選択
+	/// </summary>
+	public void ButtonSelectTile(int a)
+	{
+		DebLog("//-*ButtonSelectTile:"+a);
+		m_haiCsrNo = (short)a;
+		m_haiSelF = true;
+	}
+
+	/// <summary>
+	/// 鳴き系メニュー選択
+	/// </summary>
+	public void ButtonSelectCall(int a)
+	{
+		DebLog("//-*ButtonSelectCall:"+a);
+		m_callMenuCsrNo = (short)a;
+		m_callMenuSelF = true;
+	}
+
+	/// <summary>
+	/// 次へボタン
+	/// </summary>
+	public void ButtonGoToNext()
+	{
+		DebLog("//-*ButtonGoToNext()");
+		nextBtnF = true;
+	}
+
+
+//-*******************デバッグ機能
+	//-*デバッグ機能
+
+
 #endregion //-*UNITY_ORIGINAL
 }

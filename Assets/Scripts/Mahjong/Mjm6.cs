@@ -45,6 +45,9 @@ public bool	chkchi_m6 ( /*MahJongRally * pMe*/ )/*1995.9.6*/
 	int		iThcnt = 0;	//w4
 
 	Chiflg = 0;
+#region UNITY_ORIGINAL
+	iThcnt = gpsPlayerWork.byThcnt;
+#endregion //-*UNITY_ORIGINAL	
 	if (gpsPlayerWork.bFrich != 0 ) {
 		return (false);
 	} else if ( Thcnt < 4 ) {
@@ -147,6 +150,9 @@ public bool	chkpon_m6 ( /*MahJongRally * pMe*/ )
 	}
 
 	iThcnt	= Thcnt;		//手牌数
+#region UNITY_ORIGINAL
+	iThcnt = gpsPlayerWork.byThcnt;
+#endregion //-*UNITY_ORIGINAL
 	if (Thcnt < 4 ) {
 		return (false);
 	}
@@ -576,7 +582,7 @@ public int naki_Sm6 (/*MahJongRally * pMe,*/ int iPon, int iChi )
 	#endif //-*todo:
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中	
-gMyTable_NakiNashi = (byte)D_OPTION_NAKINASHI.ON;
+// gMyTable_NakiNashi = (byte)D_OPTION_NAKINASHI.ON;	//-*鳴き無し
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
 		//------------------------------

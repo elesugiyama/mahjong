@@ -32,6 +32,11 @@ public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 	{
 		m_OnPointerClickCallbackString = a_OnPointerClickCallback;
 	}
+	public Action<int,bool> m_OnPointerClickCallbackIntBool = null;
+	public void SetOnPointerClickCallback(Action<int,bool> a_OnPointerClickCallback)
+	{
+		m_OnPointerClickCallbackIntBool = a_OnPointerClickCallback;
+	}
 	//---------------------------------------------------------
 	/// <summary>
 	/// クリック
@@ -60,6 +65,5 @@ public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 	public virtual void SetPos(Vector3 pos)
 	{
 		this.transform.localPosition = pos;
-		Debug.Log("//-****"+this.transform.localPosition+"(-_-)"+pos);
 	}
 }

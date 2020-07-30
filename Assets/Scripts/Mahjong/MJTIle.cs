@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Const;
@@ -15,25 +16,31 @@ using MJDialogHeader;
 /// <summary>
 /// 麻雀牌
 /// </summary>
-public class MJTIle : MonoBehaviour {
+public class MJTIle : ButtonCtl {
+	
 	[Header("Image")]
 	[SerializeField]
 	private MJTIleImage m_tileImage;
+	[Header("Button")]
+	[SerializeField]
+	private Button m_button;
+	[Header("鳴き時などの画像位置")]
+	[SerializeField]
+	private Transform m_callPos;
 
 	//-*リスト内番号
-	private PAI m_listNo;
-	public PAI ListNo{
-		get {return m_listNo;}
-	}
+	private int m_no;
+	//-*所属(偶数自分:奇数相手)
+	private int m_assort;
 	//-*牌種類
 	private TILE_TYPE m_tileType;
 	public TILE_TYPE TileType{
 		get {return m_tileType;}
 	}
 	//-*牌数字
-	private int m_no;
+	private int m_tileNo;
 	public int No{
-		get {return m_no;}
+		get {return m_tileNo;}
 	}
 
 	//-*牌状態
@@ -92,10 +99,27 @@ public class MJTIle : MonoBehaviour {
 	};
 
 
-	public void Init()
+	/// <summary>
+	/// 手牌用初期化
+  	/// <param name="assort">ボタン管理番号</param>
+  	/// <param name="handNo">何番目</param>
+  	/// <param name="selectF">ボタン機能フラグ</param>
+	/// </summary>
+	public void InitTileHand(int assort, int handNo, bool selectF = false)
 	{
+		m_assort = assort;
+		if(m_button != null){
+			if(m_assort == 0 && selectF){
+				m_button.enabled = true;
+			}else{
+				m_button.enabled = false;
+			}
+		}
+		m_no = handNo;
 		set(TILE_STATE.NO_USE,PAI.M1);
+		m_callPos.localPosition = new Vector3(0.0f,0.0f,0.0f);
 		m_tileImage.Init();
+
 	}
 	public void set(TILE_STATE state,PAI no)
 	{
@@ -104,15 +128,24 @@ public class MJTIle : MonoBehaviour {
 			TILE_LIST tNo = TILE_LIST.BACK;
 			m_tileState = state;
 			PAI_LIST.TryGetValue(no,out tNo);
-			m_no = (int)tNo;
-			m_tileImage.SetState(m_tileState,m_tileType,m_no);
+			m_tileNo = (int)tNo;
+			m_tileImage.SetState(m_tileState,m_tileType,m_tileNo);
 		}
 		//-******
 	}
 
 
-
-
+	/// <summary>
+	/// 鳴き時等の牌選択用位置調整
+	/// todo:本体はlayoutgroupに入ってるのでとりあえず画像の方で位置調整
+	/// </summary>
+	public void SetCallTileePos(bool callTileF){
+		if(callTileF){
+			m_callPos.localPosition = new Vector3(0.0f,25.0f,0.0f);
+		}else{
+			m_callPos.localPosition = new Vector3(0.0f,0.0f,0.0f);
+		}
+	}
 
 
 	// Use this for initialization
@@ -120,5 +153,23 @@ public class MJTIle : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {}
 
-
+	//---------------------------------------------------------
+	/// <summary>
+	/// クリック
+	/// </summary>
+	//---------------------------------------------------------
+	public override void OnPointerClick(PointerEventData eventData)
+    {
+		if(m_assort != 0)return;	//-*自分所属(偶数)の牌のみ反応
+		if(target == null){
+			Debug.Log("//-*Button:target is null");
+			return;
+		}
+        target.OnPointerClick(eventData);
+		// コールバック
+		if (m_OnPointerClickCallbackInt != null)
+		{
+			m_OnPointerClickCallbackInt(m_no);
+		}
+    }
 }

@@ -39,7 +39,16 @@ public bool NextButton(/*MahJongRally * pMe*/){
 	} else
 		return(FALSE);
 #else
-return true;	//-*todo:キー操作(保留
+	if(nextBtnF){
+	//-*次へボタンが押された
+		nextBtnF = false;	//-*フラグOFF
+		SetNextBtnActive(false);
+		return true;	//-*todo:キー操作(保留
+	}else{
+		SetNextBtnActive(true);
+		DebLog("//-*from.................");
+	}
+	return false;
 #endif
 }
 
@@ -198,9 +207,13 @@ DebLogError(( "MjKyokuInit_bflag : flag="+MjKyokuInit_bflag ));
 			if( (sGameData.byGameMode != MJDefine.GAMEMODE_NET_FREE) &&
 				(sGameData.byGameMode != MJDefine.GAMEMODE_NET_RESERVE) ) {
 				shipai_m2();					/* 牌のかき混ぜ						*/
-#if __LOGIC_CHECK
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+// #if __LOGIC_CHECK
 				tsumikomi();
-#endif
+// #endif
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB	
 			}
 
 			init_sutehai_rec();					/* 捨て牌表示管理バッファの初期化	*/
@@ -855,11 +868,7 @@ faceChangeCnt = 0;	//*カウンター初期化
 #endif
 			}
 #else
-//-*SUGI_DEB***************************
-#if SUGI_DEB //-*todo:注デバッグ中	
-// gNextTimeOut = 0;
-#endif //-*todo:注デバッグ中
-//-****************************SUGI_DEB
+
 
 	#if	Rule_2P
 			if( gNextTimeOut <= 0	/*OptionWaitTime[D_TENPAI_TIME] <0*/ ){
@@ -906,11 +915,7 @@ faceChangeCnt = 0;	//*カウンター初期化
 			}
 #if	Rule_2P
 			NetActTimeOutJdg();
-//-*SUGI_DEB***************************
-#if SUGI_DEB //-*todo:注デバッグ中	
-// gNextTimeOut = 0;
-#endif //-*todo:注デバッグ中
-//-****************************SUGI_DEB
+
 			if( gNextTimeOut <= 0 ) {
 				gNextTimeOut = MJDefine.D_NEXT_WAIT_TIMEOUTS;
 				gAutoFlag = 0x00;
@@ -1563,6 +1568,15 @@ DebLog("mj_sts "+mj_sts);		//aaaa
 					mj_sts = 3;
 				break;
 			case	3:						//局処理
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+				if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.INITGAME,true)){
+				//-*新規局へ
+					mj_sts = 2;
+					break;
+				}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 				MjKyokuMain();
 				if(reentry_m1_bflag== 0xFF) {
 					mj_sts = 8;
@@ -1703,8 +1717,10 @@ public short CommandCatch(/*MahJongRally * pMe,*/ byte iOrder)
 
 	//プレイヤーの入力(ツモった後)
 	#if true //-todo:
-	// if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;	paintF= true;		}
-	// if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;			paintF= true;		}
+	//-*元
+	if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;	paintF= true;		}
+	if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;			paintF= true;		}
+	#else
 	if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;	}
 	if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;			}
 	#endif //-*todo:
@@ -1721,10 +1737,12 @@ public short NakiCommandCatch(/*MahJongRally * pMe,*/ byte iOrder)
 #endif
 	short	ret = (NakiSel());		//0422
 
-	#if true //-todo:
 	//プレイヤーの入力(鳴いた後)
-	// if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;	paintF= true;		}
-	// if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;			paintF= true;		}
+	#if true //-todo:
+	//-*元
+	if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;	paintF= true;		}
+	if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;			paintF= true;		}
+	#else
 	if( menu_mode_kep!= menu_mode) {	menu_mode_kep= menu_mode;		}
 	if( hai_up_kep!= hai_up) {			hai_up_kep= hai_up;				}
 	#endif //-*todo:

@@ -165,6 +165,11 @@ namespace MJDefsHeader {
 		CHANKAN = ( 8 ),	// 加槓(CHAKAN)なのに槍槓(CHANKAN)としているので、注意
 		TAPAI = ( 9 ),
 		THREE_CHAHO = ( 10 ),// 三家和の追加(例外的処理)
+#region UNITY_ORIGINAL
+		//-***鳴きメニュー用追加
+		SUTE_HAI = (100),	//-*捨牌
+#endregion //-*UNITY_ORIGINAL
+
 	};
 
 	/// <summary>

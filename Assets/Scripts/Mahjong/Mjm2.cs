@@ -187,6 +187,13 @@ public void	shipai_m2 ( /*MahJongRally * pMe*/ )
 
 	Dicnum[0]	=	(byte)mj_getrand(6);
 	Dicnum[1]	=	(byte)mj_getrand(6);
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	if(m_DebBox != null && !m_DebBox.IsSameTumikomi()){
+		m_DebBox.SetTumikomiSameKyoku(Bipai);
+	}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 
 }
 
@@ -229,36 +236,64 @@ public void	svdora_m2 ( /*MahJongRally * pMe*/ )
 		Dora[i] = svdoranext ( Hyouji_dora[i] );
 	}
 }
-#if __LOGIC_CHECK
+
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中	
+// #if __LOGIC_CHECK
 /**
  * @brief 積み込み
  */
 public void tsumikomi( /*MahJongRally * pMe*/ )
 {
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	var tumiData = MJDefine.tumiData;
+	if(m_DebBox != null && m_DebBox.GetTumikomiNo() >= 0){
+		tsumikomiNum = m_DebBox.GetTumikomiNo();
+		if(m_DebBox.IsSameTumikomi()){
+		//-*TUMIKOMI_PLUS.SAME_KYOKU
+			byte[] sameLine = m_DebBox.GetTumikomiSameKyoku();
+			for( int i= 0; i< MJDefine.HAI_MAX_NUM; i++){
+				Bipai[i]= sameLine[i];
+			}
+		}else if(tsumikomiNum < tumiData.Length){
+			for( int i= 0; i< MJDefine.HAI_MAX_NUM; i++){
+				Bipai[i]= tumiData[tsumikomiNum][i];
+			}
+		}
+		Dicnum[0]= Dicnum[1]= 0;
+	}
+#else //-*todo:注デバッグ中
 	#if true//-*todo:要るかな？
 // 	char tumiData[][] = {
 // #include "../../YamaData.j"
 // 	};
 	var tumiData = MJDefine.tumiData;
-	#endif //-*todo:
 
-	if( tumiData.length<= tsumikomiNum) {
-		Debug.out("積み込みデータエラー:", tumiData.length);
+	if( tumiData.Length<= tsumikomiNum) {
+		Debug.Log("積み込みデータエラー:"+tumiData.Length);
 		return;
 	}
-	if( tumiData[tsumikomiNum].length!= HAI_MAX_NUM) {
-		Debug.out("積み込みデータエラー 136:", tumiData[tsumikomiNum].length);
+	if( tumiData[tsumikomiNum].Length!= MJDefine.HAI_MAX_NUM) {
+		Debug.Log("積み込みデータエラー 136:"+tumiData[tsumikomiNum].Length);
 		return;
 	}
 	if( gpsTableData.byKyoku!= 0)			return;		//局数
 	if( gpsTableData.byDrawRenchan!= 0)		return;		//何本場か
+	#endif //-*todo:
 
-	for( int i= 0; i< HAI_MAX_NUM; i++)
+	for( int i= 0; i< MJDefine.HAI_MAX_NUM; i++){
 		Bipai[i]= tumiData[tsumikomiNum][i];
+	}
 
 	Dicnum[0]= Dicnum[1]= 0;
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 }
-#endif
+// #endif
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
+
 /*****************************
 	配牌
 *****************************/
@@ -398,7 +433,7 @@ public void	intwrk_m2e()
 	#if true //-*todo 
 	// if( myCanvas.mah_limit_num== MAH_LIM03)
 	if( m_keepData.mah_limit_num == (int)MAH.LIM03)
-		pRyansh = false;
+		pRyansh = true;
 	#endif
 #endif
 }

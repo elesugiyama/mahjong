@@ -109,10 +109,81 @@ public void MJ_GameDraw( /*MahJongRally * pMe*/ )
 	// 王牌の描画。
 	MJ_GameWanpaiDisp();
 
+//-********ここからtodo
+	// 何局目・サイコロ・残り牌数・点棒
+	MJ_GameSozaiDisp( );
+//-********ここまでtodo
+#if	Rule_2P
+	// リーチ棒
+	for(int a=0;a<SubMj.RiboDispFlg.Length;a++){
+		DrawRibo(a, ( SubMj.RiboDispFlg[0]!= 0) );
+	}
+#endif
+	// > 2006/02/21 No.124
+	// 流局を描画
+	if ( agari_sts == (byte)SEQ.AG_RYUKYOKU ){
+		MJ_RyukyokuDraw();
+	}
+	// < 2006/02/21 No.124
+//-********ここまでtodo
+	
+
 	// 対戦者の対話描画
 	// リーチ、ツモ、ポン等
 	MJ_TalkDraw();
+	//0511mt if( paintF) {
+//-********ここからtodo
+	// ゲーム中の得点描画。
+	MJ_GamePointDraw( );
+//-********ここまでtodo
+	// ゲーム中のメニュー描画。
+	MJ_GameMenuDraw();
 
+//-********ここからtodo
+	// 結果の表示
+	switch(agari_sts) {
+		case (byte)SEQ.AG_END2 : {
+#if false
+//			String szText;		//AECHAR
+
+			MJ_DrawMenu( 8,100,12,5,NORMAL_MENU );
+
+//			STREXPAND((const byte*)"対局を続けますか？",20,szText,sizeof(szText));
+			MJ_Msg_CenterLine(	"対局を続けますか？", 0, 109, SYS_FONT_WHITE );
+
+			// はい・いいえの描画。
+			MJ_YesNo_Draw( 75,140,20 );
+#endif
+		}
+		break;
+//		// < 2006/02/21 No.124
+		case (byte)SEQ.AG_TENPAI: {
+			// 流局後のテンパイ or ノーテン 描画。
+			// テンパイ描画。
+			MJ_TenpaiDraw( );
+			return;
+		}
+		case (byte)SEQ.AG_YAKU:
+		case (byte)SEQ.AG_NEXT_RESULT: {
+#if true
+			// 上がり役描画
+			MJ_PointDraw();
+#endif
+			return;
+		}
+		case (byte)SEQ.AG_SCORE0:
+		case (byte)SEQ.AG_SCORE1:
+		case (byte)SEQ.AG_SCORE2: {
+#if true
+			// 清算描画
+			MJ_ResultDraw();
+#endif
+			return;
+		}
+		default:
+			break;
+	}
+//-********ここまでtodo
 	
 #if false //-*todo:描画保留
 
@@ -499,7 +570,29 @@ public void MJ_GamePointDraw( /*MahJongRally * pMe*/ )
 public void MJ_ResultDraw( /*MahJongRally * pMe*/ )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_ResultDraw()");
-#if false//-*todo:描画保留
+#if true//-*todo:描画保留
+	bool isFirstTime = false;
+	
+	int		House = (( gpsTableData.byOya+ 4- game_player) % 4) & 0x01;
+	int[]		Point = new int[MJDefine.MAX_TABLE_MEMBER2];		// 現在の点数
+	int[]		MovePoint = new int[MJDefine.MAX_TABLE_MEMBER2];	// 移動点数
+	for( int i = 0; i < MJDefine.MAX_TABLE_MEMBER2; i++ ) {
+		int Seki = ( game_player+ i) % 4;
+		Point[i]		= gsTableData[0].sMemData[Seki].nOldPoint;		// 現在の点数
+		MovePoint[i]	= gsTableData[0].sMemData[Seki].nMovePoint;		// 移動点数
+	}
+	if(!m_resultPointBox.activeSelf){
+		isFirstTime = true;
+	}
+	m_resultPointBox.SetActive(true);
+	var pointBox = m_resultPointBox.GetComponent<MJResultPointBox>();
+	if(pointBox == null) return;
+	if(isFirstTime){
+		pointBox.SetResultPointBox(House,Point,MovePoint);
+	}else{
+		pointBox.UpdateResultPointBox(Point);
+	}
+#else//-*todo:描画保留
 
 #if	Rule_2P
 	int		House = (( gpsTableData.byOya+ 4- game_player) % 4) & 0x01;
@@ -734,7 +827,333 @@ public byte	DAgariNumDisp( /*MahJongRally * pMe,*/
 public void MJ_PointDraw( /*MahJongRally * pMe*/ )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_PointDraw()");
-#if false//-*todo:描画保留
+#if true //-*todo:描画保留
+
+
+
+	int		i			= 0;		// ループ用&OFFSET用。
+	int		yakuCount	= 0;		// 和了した手が何翻か？
+	int		yakuNumber	= 0;		// 役の番号。
+	int		yakuFactor	= 0;		// 役の翻数。
+	int		FU			= 0;		// 符。
+	int		HAN			= 0;		// 翻。
+	int		RENCYAN		= 0;		// 何本場？
+	int		TotalPoint	= 0;		// 和了した点数は？
+	int		iOrder		= Order;	// 現在のオーナーを取得。
+	int		offSetX		= 0;		//
+	int		offSetY		= 0;		//
+	int		DoraY		= 0;
+	int		cnt			= 0;
+	int		pai			= 0;
+	int 	posX	= 0;		//
+	int 	posY	= 0;		//
+	short 	SetY	= 0;
+	short	Rich	= (short)gpsPlayerWork.bFrich;	// リーチした場合。
+	string		name;			//char name[D_NICK_NAME_MAX+1]	= {0};
+	//< 2006/03/23 流し満貫、十三不塔対策	//0422
+	bool	 isSpecialYaku = false;
+	bool	 isNagashi	   = false;
+	//< 2006/03/23 流し満貫、十三不塔対策
+	MJK_RESULT result_ = gMJKResult;
+
+
+#region UNITY_ORIGINAL
+var resultBox = m_resultBox.GetComponent<MJResultBox>();
+if(resultBox == null)return;
+m_resultBox.SetActive(true);
+#if	Rule_2P
+	yaku_number_sort();			//役番号のソート
+#endif
+//> 2006/03/23 流し満貫、十三不塔対策		//0422
+for (i = 0; i < yakuCount ; i++){
+	switch( result_.sYaku[i].name ) {
+		case (byte)YK.YAOCH : isSpecialYaku = isNagashi = true;	break;
+		case (byte)YK.SHISA : isSpecialYaku = true;				break;
+	}
+}
+resultBox.SetResultBox(gMJKResult,Rich,Dora,Ura,byDoraCnt,isSpecialYaku);
+
+// (テスト)和了した後はメニューを初期化させる。
+Optcnt = 0;
+gGamePointFlag = true;
+#endregion //-*UNITY_ORIGINAL
+//-*todo:MJResultBoxに移植　これ以下不要予定
+
+
+#if false //-*todo 通信
+	if( SubMj.result_disp_no < Roncnt && Rultbl[ (int)RL.TWO_CHAHO ] != 0) {
+		// 二家和ありなら、個別に成績を表示
+		iOrder	= result_order[ SubMj.result_disp_no ];
+		result_ = gMJKResultSub[ SubMj.result_disp_no ];
+	}
+
+	// 役満の場合は、翻と符を表示させない。
+	// yakumanFlagがFALSEの時が役満なので注意
+
+	// チャットの文字描画は行なわない。
+	ChatFlag = 0;
+#endif //-*todo 通信
+	yakuCount = result_.byYakuCnt;
+
+	FU			= (int)result_.byFu;		// 符。
+	HAN			= (int)result_.byHan;		// 翻。
+	RENCYAN		= (int)result_.byRenchan;	// 何本場？
+	TotalPoint	= (int)result_.nTotalPoint;	// 和了した得点。
+
+	// (テスト)和了した後はメニューを初期化させる。
+	Optcnt = 0;
+	gGamePointFlag = true;
+
+
+	//> 2006/03/23 流し満貫、十三不塔対策		//0422
+	for (i = 0; i < yakuCount ; i++){
+		switch( result_.sYaku[i].name ) {
+			case (byte)YK.YAOCH : isSpecialYaku = isNagashi = true;	break;
+			case (byte)YK.SHISA : isSpecialYaku = true;				break;
+		}
+	}
+	//< 2006/03/23 流し満貫、十三不塔対策
+#if	Rule_2P
+//zeniya
+#if false //-*todo:1枚絵使用で不要
+	MpsBrewLib_DrawSprite( spGame[D_GAME_JYANTAKU], 0, 0 );
+
+
+
+	MpsBrewLib_DrawSprite( spGame[D_END00_00], 4, 9 );			//役とドラの表示ウィンドウ
+
+	mMpsBrewLib_DrawSprite( spGame[D_END01_04], 46, 29 );		//局 - 場表示（東一局東家）
+	mMpsBrewLib_DrawSprite( spGame[D_END01_05], 72, 29 );		//家 - 場表示（東一局東家）
+	mMpsBrewLib_DrawSprite( spGame[D_END01_06], 18, 49 );		//1000点棒
+	mMpsBrewLib_DrawSprite( spGame[D_END01_17], 53, 49 );		//100点棒
+
+	mMpsBrewLib_DrawSprite( spGame[D_END01_32], 86, 192 );		//得点表示の枠
+#endif //-*todo:1枚絵使用で不要
+#endif
+
+	/****************************************************************/
+	/*						和了した牌の描画						*/
+	/****************************************************************/
+	{
+#if false //-*todo:お互いに手牌は見えてるから保留
+
+		//> 2006/03/24 流し満貫対策		//0422
+		if( isNagashi == false ) {
+		//< 2006/03/24 流し満貫対策
+			cnt		= gsPlayerWork[iOrder].byThcnt;	// 手牌の数を取得。
+			for( i=0 ; i<cnt ; i++ ) {
+				pai = gsPlayerWork[iOrder].byTehai[i];
+#if	Rule_2P
+				hMpsBrewLib_DrawSprite( spPaiJicya, pai,
+					D_JICYA_TEHAI_X+(i*(D_PAI_TATE_LARGE_SIZE_W-1)), 226 );		//10
+#endif
+			}
+#if	Rule_2P
+			hMpsBrewLib_DrawSprite( spPaiJicya, Sthai,
+				D_JICYA_TEHAI_X-3+((1+cnt)*(D_PAI_TATE_LARGE_SIZE_W-1)), 226 );		//10
+#endif
+			MJ_FrJicyaDraw( iOrder, 265 );		//D_AGARI_FR_DRAW_BASE_X
+		}
+#endif //-*todo:お互いに手牌は見えてるから保留
+	}
+
+	/****************************************************************/
+	/*					和了したキャラクターの描画					*/
+	/****************************************************************/
+#if	Rule_2P
+#endif
+
+	/****************************************************************/
+	/*						ドラの描画								*/
+	/****************************************************************/
+	if( result_.byYakuman == 0 ) {	//&& isSpecialYaku == FALSE ) //> 2006/03/23 流し満貫・十三不塔対策	//0422
+#if true //-*todo:実装中
+Dora[0] = 0;
+#else //-*todo:実装中
+
+#if	Rule_2P
+		for( i=0 ; i< byDoraCnt ; i++ )
+			hMpsBrewLib_DrawSprite( spSutePaiJicya, Dora[i], 139+ i* 15, 17 );
+#endif
+		/****************************************************************/
+		/*						ウラドラの描画							*/
+		/****************************************************************/
+		// リーチがされていなければ表示しない。
+#if	Rule_2P
+		if( Rich != 0 ) {
+			for( i=0 ; i<byUraDoraCnt ; i++ )
+				hMpsBrewLib_DrawSprite( spSutePaiJicya, Ura[i], 144+ i* 15, 48 );
+			DoraY = 0;
+		}
+#endif
+
+#endif //-*todo:実装中
+	}
+
+	/****************************************************************/
+	/*		満貫以上ならの描画										*/
+	/****************************************************************/
+#if false //-*todo:実装中
+
+#if	Rule_2P
+	i= -1;
+	if( result_.byYakuman!= 0)		// 役満
+		i= ( gpsTableData.byOya == iOrder ) ? D_END02_05+ (TotalPoint / 48000)- 1 : D_END02_05+ (TotalPoint / 32000)- 1;
+	else if( result_.byHan>= 13)	i= D_END02_04;		// 数え役満
+	else if( result_.byHan>= 11)	i= D_END02_03;		// ３倍満
+	else if( result_.byHan>= 8)		i= D_END02_02;		// 倍満
+	else if( result_.byHan>= 6)		i= D_END02_01;		// 跳満
+	else if((result_.byHan >=	5)						// 満貫
+		|| (result_.byHan == 4 && result_.byFu >=  40)
+		|| (result_.byHan == 3 && result_.byFu >=  70)
+		|| (result_.byHan == 2 && result_.byFu >= 130))
+									i= D_END02_00;
+
+	if( i!= -1) {
+		int j= D_END01_31;
+
+		if( i>= D_END02_04)
+			j= D_END01_30;
+		mMpsBrewLib_DrawSprite( spGame[j],  4, 193 );	//ワク
+		mMpsBrewLib_DrawSprite( spGame[i], 13, 198 );	//文字
+	}
+
+#endif
+
+#endif //-*todo:実装中
+
+	/****************************************************************/
+	/*						和了した役の描画						*/
+	/****************************************************************/
+#if	Rule_2P
+	yaku_number_sort();			//役番号のソート
+#endif
+#if false //-*todo:実装中
+
+	/*	役名を作成	*/
+	for (i = 0; i < yakuCount ; i++) {
+		yakuNumber = result_.sYaku[i].name;								// 役の名前取得。
+
+		offSetX = i % 2;
+		offSetY = i / 2;
+
+		posX = offSetX != 0 ? D_YAKU_DISP_BASE_X+(offSetX*D_YAKU_DISP_OFFSET_X) : D_YAKU_DISP_BASE_X;
+		posY = D_YAKU_DISP_BASE_Y+offSetY*D_YAKU_DISP_OFFSET_Y;
+
+		// 和了した役の描画。
+		if( result_.byYakuman == 0 && isSpecialYaku == false )		//0422
+			MpsBrewLib_DrawSprite( spYakuBG[yakuNumber],posX,posY-(DoraY) );
+		else
+			MpsBrewLib_DrawSprite( spYakuBG[yakuNumber],posX,posY );
+
+		// 役数・飜
+		if( result_.byYakuman == 0 && isSpecialYaku == false ) {		//0422
+			yakuFactor = result_.sYaku[i].factor;
+			if( yakuFactor>= 10)
+			mMpsBrewLib_DrawSprite( spGame[D_END01_18+ (yakuFactor / 10)], posX+ 59+ 20- 7, (posY)-(DoraY));
+			mMpsBrewLib_DrawSprite( spGame[D_END01_18+ (yakuFactor % 10)], posX+ 59+ 20, (posY)-(DoraY));
+			mMpsBrewLib_DrawSprite( spGame[D_END01_34], posX+ 59+ 27, (posY)-(DoraY));	//得点表示の"飜"（単位）
+		}
+	}
+#endif //-*todo:実装中
+
+		/****************************************************************/
+		/*		符の描画												*/
+		/****************************************************************/
+	// 役満の場合は符と翻の描画を行わない。
+	if(result_.byYakuman == 0 && isSpecialYaku == false ) {	//> 2006/03/23 流し満貫、十三不塔対策	//0422
+#if false //-*todo:実装中
+		{		//0422
+			{
+				// 通常。
+				i= AgariNumDisp( FU, 97- 7, 198, 3, 3, FALSE )+ 1;
+				mMpsBrewLib_DrawSprite( spGame[ D_END01_33], 97- 7+ (i* 7), 198 );
+			}
+
+			/****************************************************************/
+			/*		翻の描画												*/
+			/****************************************************************/
+			i= AgariNumDisp( HAN, 132, 198, 2, 2, FALSE )+ 2;
+			mMpsBrewLib_DrawSprite( spGame[ D_END01_34], 132- 7+ (i* 7), 198 );
+		}
+#endif //-*todo:実装中
+	}
+
+	/****************************************************************/
+	/*		親か子か描画											*/
+	/****************************************************************/
+#if	Rule_2P
+#endif
+
+	/****************************************************************/
+	/*		本場の描画												*/
+	/****************************************************************/
+	// 何本場？
+#if false //-*todo:実装中
+		AgariNumDisp( RENCYAN, 70- 7* 2, 48- 1, 3, 3, false, D_END01_07- D_END01_18);
+#endif //-*todo:実装中
+
+	//***************************************************************
+	//		リー棒数の描画											*
+	//***************************************************************
+#if	Rule_2P
+#if false //-*todo:実装中
+	AgariNumDisp( gpsTableData.sMemData[0].byRibopublicck+ gpsTableData.sMemData[1].byRibopublicck,
+		35- 7* 2, 48- 1, 3, 3, false, D_END01_07- D_END01_18);
+#endif //-*todo:実装中
+#endif
+
+	/****************************************************************/
+	/*		合計の描画												*/
+	/****************************************************************/
+#if false //-*todo:実装中
+	if( result_.byYakuman != 0 ) {	//&& isSpecialYaku == FALSE )	//0422
+		// --- 通常。
+		i= AgariNumDisp( TotalPoint, 167- 7* 3, 198, 7, 8, false )+ 5;
+	} else {
+		// --- 役満・特殊役なら。
+		i= AgariNumDisp( TotalPoint, 167- 7* 3, 198, 7, 8, false )+ 5;
+	}
+	mMpsBrewLib_DrawSprite( spGame[ D_END01_35], 167- 7* 6+ (i* 7), 198 );	//"点"
+#endif //-*todo:実装中
+
+
+	/****************************************************************/
+	/*		？局？家												*/
+	/****************************************************************/
+	{
+#if false //-*todo:実装中
+
+	int		Oya			= gpsTableData.byOya;		// 現在の親。
+#if	Rule_2P
+	int		House		= ( gpsTableData.byOya == iOrder ) ? D_END01_00 : D_END01_36;
+#endif
+	int		Kyoku		= gpsTableData.byKyoku;		// 局数。
+
+	mMpsBrewLib_DrawSprite( spGame[D_END01_00+ ((Kyoku/ 4) & 0x01)],	124- 105,	3+ 26 );	//2
+	mMpsBrewLib_DrawSprite( spGame[D_END01_02+ (Kyoku & 0x01)],			137- 105,	3+ 26 );
+	mMpsBrewLib_DrawSprite( spGame[House],								84- 25,		244- 215 );
+#endif //-*todo:実装中
+	}
+
+#if false //-*todo:実装中
+#if	Rule_2P
+	/* ドラ枠の影 */
+	mMpsBrewLib_DrawSprite( spGame[D_END01_28], 101, 13 );		//ドラの表示枠(牌の影消し用も兼ねているので牌より上に描画してください)
+	mMpsBrewLib_DrawSprite( spGame[D_END01_29], 106, 44 );		//裏ドラの表示枠(牌の影消し用も兼ねているので牌より上に描画してください)
+#endif
+
+#endif //-*todo:実装中
+
+
+
+
+
+
+
+
+
+#else //-*todo:描画保留
 	int		i			= 0;		// ループ用&OFFSET用。
 	int		yakuCount	= 0;		// 和了した手が何翻か？
 	int		yakuNumber	= 0;		// 役の番号。
@@ -1147,7 +1566,6 @@ public void MJ_PointDraw( /*MahJongRally * pMe*/ )
 	mMpsBrewLib_DrawSprite( spGame[D_END01_29], 106, 44 );		//裏ドラの表示枠(牌の影消し用も兼ねているので牌より上に描画してください)
 #endif
 #endif //-*todo:描画保留
-
 }
 
 /****************************************
@@ -1263,6 +1681,8 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 	int	reached_line= 0;
 
 #region UNITY_ORIGINAL
+	// 現在の牌カーソル値の取得
+	csr = hai_csr;
 	/*===========================================================================
 		捨て牌数の描画
 	===========================================================================*/
@@ -1273,11 +1693,46 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 	===========================================================================*/
 	cnt		= gsPlayerWork[House].byThcnt;							// 手牌の数を取得。
 	// DebLog("//-***************手牌************");
+
 	for(int a=0;a<m_myHandTiles.Count;a++){
+
+			//> 2006/02/05 No19. メニューの値ではなくオプションスタックを見るように変更
+			x = 0x00;
+			if( hai_up == 0 ) {
+				// 持ち上げ牌フラグが０の場合（アクションが無し）
+				if( a == hai_csr ) {
+					// パス、打牌時のみカーソルを採用
+					switch( Optstk[ menu_csr ] ) {
+						case (byte)OP.PASS:
+						case (byte)OP.TAPAI:
+							x = 0x01;
+							break;
+					}
+				}
+			} else {
+				// 立直、哭きはこちらにくる、こない場合は牌選択ルーチンがおかしい可能性あり
+				//> 要望No.112 捨牌でツモ牌以外を選択後にツモを選択すると、カーソルが２個表示される
+				if( Optstk[menu_csr] != (byte)OP.TSUMO ) {
+					//< 要望No.112
+					x = hai_up >> a;
+					x = x & 0x1;
+				}
+			}
+
 		var tehaiDraw = m_myHandTiles[a].GetComponent<MJTIle>();
 		if(a < cnt){
 		// DebLog("//-*手牌["+a+"]:"+gsPlayerWork[House].byTehai[a]+"("+(PAI)gsPlayerWork[House].byTehai[a]+")");
 			tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byTehai[a]);
+			tehaiDraw.SetCallTileePos(false);
+			if(House == 0 && x!=0){
+				//-*自分用
+				// for(int b=0;b<Chips1.Length;b++){
+				// 	if(Chiflg != 0 && (Chips1[b] == a || Chips1[b] == a)){
+				 		tehaiDraw.SetCallTileePos(true);
+				// 		break;
+				// 	}
+				// }
+			}
 		}else{
 		//-*鳴き等で手牌から消えてる
 			tehaiDraw.set(TILE_STATE.NO_USE,PAI.URA);
@@ -1320,8 +1775,15 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 			if( gsPlayerWork[House].byTkhai != 0 ){
 				// ツモ牌
 #if true //-*todo:描画
-				var tehaiDrawTest = m_myHandTiles[cnt].GetComponent<MJTIle>();
-					tehaiDrawTest.set(TILE_STATE.HAND,(PAI)tsumopai);
+				var tumoDraw = m_myHandTiles[cnt].GetComponent<MJTIle>();
+					tumoDraw.set(TILE_STATE.HAND,(PAI)tsumopai);
+
+
+				tumoDraw.SetCallTileePos(false);
+				if(paiupY != 0){
+				//-*選択牌なら上げる
+				 		tumoDraw.SetCallTileePos(true);
+				}
 #else //-*todo:描画
 	#if	Rule_2P
 				hMpsBrewLib_DrawSprite( spPaiJicya, tsumopai,
@@ -2055,12 +2517,8 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 								手牌の描画
 	===========================================================================*/
 	cnt		= gsPlayerWork[House].byThcnt+1;							// 手牌の数を取得。
-	DebLogError("//-*相手の牌数："+cnt+":::"+gsPlayerWork[House].byTkhai);
 	flg = (hai_open & 0x4) != 0 ? -1 :
 		(gsPlayerWork[House].bFrich != 0 ? 1 : 0);
-	if(flg != 0){
-		Debug.Log("入る？");
-	}
 	// DebLog("//-***************手牌************");
 	for(int a=0;a<m_yourHandTiles.Count;a++){
 		var tehaiDraw = m_yourHandTiles[a].GetComponent<MJTIle>();
@@ -2079,7 +2537,15 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 					no = gsPlayerWork[House].byHkhai;	// 現時点での捨てられた牌（ツモ牌）
 				}
 			}else{
+				// flg = -1;
 				no = (flg < 0) ? gsPlayerWork[House].byTehai[a] : (byte)PAI.URA;
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+				if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.OPEN_PAI)){
+					no = gsPlayerWork[House].byTehai[a];
+				}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 			}
 
 			if( flg != 0 ){
@@ -2828,6 +3294,108 @@ public void MJ_KamicyaDraw( /*MahJongRally * pMe,*/ int House )
 public void MJ_GameMenuDraw( /*MahJongRally * pMe*/ )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_GameMenuDraw()");
+//-********************ここから
+
+	int		i			= 0;		// ループ
+	byte	MenuNumber	= 0;		// メニュー番号がIn
+	//> バグ No.67 要望 No.50 メニューの変更
+	ushort	strNo		= 0;
+	byte	offsetY_	= 0;
+	String	charBuff= "";			//AECHAR	charBuff[10]={0};	// 読込んだ文字列.
+	//< バグ No.67 要望 No.50 メニューの変更
+	byte show_ = 0;
+
+#if	Rule_2P
+	_menuFlg= false;
+#endif
+
+	//> バグ No.67 要望 No.50 メニューの変更
+//xxxx	SpriteInfo opt_spinfo_[]= new SpriteInfo [D_OPT_STK_MAX];
+//xxxx	for( i = 0; i < D_OPT_STK_MAX; ++i )
+//xxxx	{
+//xxxx		opt_spinfo_[i] = NULL;
+//xxxx	}
+	//< バグ No.67 要望 No.50 メニューの変更
+
+	// プレイヤーの入力待ち状態になるまでメニューを表示しない
+	switch( reentry_m1_bflag ) {
+		case 3 :	if( chakan_m6_bflag == 3 )		show_ = 1;
+					if( ankan_m6_bflag == 1 &&
+					( Status | (byte)ST.CHANK ) != 0 )	show_ = 1;		break;
+		case 6 :	if( is_ronchk_menu_open == 0 )	show_ = 1;		break;
+		case 7 :	if( ronho_m5_bflag == 4 )		show_ = 1;		break;
+		case 8 :	show_ = 1;										break;
+	}
+
+
+
+	if(Optcnt == 0 || gTalkFlag != 0 || menu_mode_sub!= 0 || show_ == 0){
+		ResetCallMenu();	//-*メニューボタンの削除
+		return;
+	}
+	// if( Optcnt == 0 )		return;		// メニューが零であれば。
+	// if( gTalkFlag != 0)		return;		// 対話があれば表示しない
+	// if( menu_mode_sub!= 0)	return;
+	// if( show_ == 0 )return;
+
+	gGamePointFlag = true;		//メニューが出た時に(ポン、チー)、得点表示を消す
+
+
+
+
+
+
+	if(m_callMenus.Count == 0 && Optcnt > 0){
+	//-*todo:中身が無ければ作成(元は毎回描画だから今回は1回だけ)
+		for( i=0 ; i< Optcnt ; i++ ) {
+			int	j;
+#if	Rule_2P
+			MenuNumber = Optstk[i];
+			if( reentry_m1_bflag == 8 && MenuNumber == (byte)OP.TAPAI ){
+				// j= D_WIN_18;	//捨牌
+				MenuNumber = 10;	//-*捨牌 todo:処理先での専用番号(マジックナンバーなのどうにかしたい)
+			}else {
+				MenuNumber = Optstk[i];
+				// int[] menu_dat = new int[]{
+				// 	D_WIN_10,	D_WIN_13,	D_WIN_12,	D_WIN_14,		//"ツモ", "ロン", "リーチ", "チー",
+				// 	D_WIN_15,	D_WIN_16,	D_WIN_11,	D_WIN_16,		//"ポン", "カン", "たおす", "ﾁｬﾝｶﾝ",
+				// 	D_WIN_17,											//"パス",
+				// };
+				// j= menu_dat[gMenuStr_res[MenuNumber]];
+			}
+			// mMpsBrewLib_DrawSprite( spGame[ j],
+			// 	D_MENU_BASE_X, D_MENU_BASE_Y- (Optcnt* 16)+ (i * 16));
+#endif
+#region UNITY_ORIGINAL
+			GameObject obj = (GameObject)Resources.Load("Prefabs/CallMenu_button");
+			GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+			instantObj.name = "CallMenuBtn"+i;	//-*メニューボタン名
+			instantObj.transform.SetParent(m_callMenuBase.transform, false);
+			m_callMenus.Add(instantObj);
+			var mjCallBtn = m_callMenus[i].GetComponent<CallMenuButton>();
+			mjCallBtn.SetLabel(i,MenuNumber);
+			mjCallBtn.SetOnPointerClickCallback(ButtonSelectCall);
+
+#endregion
+		}
+	}else if(Optcnt == 0){
+		ResetCallMenu();	//-*メニューボタンの削除
+	}
+#if false	//-*todo:作業中
+
+	//カーソル
+#if	Rule_2P
+	mMpsBrewLib_DrawSprite( spGame[ D_WCURSOR], D_MENU_BASE_X+ 4, (D_MENU_BASE_Y- (Optcnt* 16))+ (menu_csr * 16)+ 3);
+
+#endif
+	//> バグ No.67 要望 No.50 メニューの変更
+#endif	//-*todo:作業中
+
+#if	Rule_2P
+	_menuFlg= true;
+#endif
+//-********************ここまで
+
 #if false//-*todo:描画保留
 //	enum {
 //		D_MENU_BASE_X		=	80, //160
@@ -3410,6 +3978,7 @@ Debug.mem("mem");
 public void MJ_GameSozaiDisp( /*MahJongRally * pMe*/ )
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_GameSozaiDisp()");
+	UpdateHeaderFotter();
 #if false //-*todo:描画保留
 	
 	// 2006/03/31 謎処理につき修正		//0422
@@ -3517,10 +4086,7 @@ public void MJ_GameSozaiDisp( /*MahJongRally * pMe*/ )
 /********************************************************/
 public int	getKakarenaihai( /*MahJongRally * pMe,*/ int House )
 {
-#if true //-*todo:描画保留
 	DebLog("//-*MJ:GameDraw.cs:getKakarenaihai( int "+House+")");
-	return 0;
-#else //-*todo:描画保留
 	int			i		= 0;
 	short	suteCnt = 0;
 	short	suteFlag= 0;
@@ -3540,7 +4106,6 @@ public int	getKakarenaihai( /*MahJongRally * pMe,*/ int House )
 	}
 
 	return	ret;
-#endif //-*todo:描画保留
 }
 
 /********************************************************/
@@ -4570,7 +5135,6 @@ public void MJ_FrJicyaDraw( /*MahJongRally * pMe,*/ int House, int D_JICYA_TEHAI
 #endif
 
 		Hbit = Bbit & 0xC0;							// 上位ビットの取得。
-DebLogError("//-*"+Hbit+"(#-_-)gsPlayerWork["+House+"].byFrpos["+i+"] = "+gsPlayerWork[House].byFrpos[i]+":("+Bbit+" == "+BbitBefor+")");
 #region UNITY_ORIGINAL
 GameObject furoTilesBase = null;
 List<GameObject> furoTilesTiles = new List<GameObject>();
@@ -4584,7 +5148,6 @@ if(House == 0){
 	furoTilesTiles = m_yourFuroTilesTiles;
 }
 #endregion //-*UNITY_ORIGINAL
-
 		switch( Hbit ) {
 			// 明カン(自家)
 			case MJDefine.D_MINKAN:
@@ -4593,15 +5156,26 @@ if(House == 0){
 				furoOffBaseX = 0;
 				{
 #region UNITY_ORIGINAL
-					GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetPonMinkan");
-					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
-					instantObj.name = "FuroMinkan"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
-					instantObj.transform.SetParent(furoTilesBase.transform, false);
-					furoTilesTiles.Add(instantObj);
+					if(BbitBefor == 0)
+					{//-*新規副露牌(ポン→カンの場合は追加しないで更新のみ)
+						GameObject obj = (GameObject)Resources.Load("Prefabs/FuroSetPonMinkan");
+						GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
+						instantObj.name = "FuroMinkan"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
+						instantObj.transform.SetParent(furoTilesBase.transform, false);
+						//-*副露牌の置き場所(Hierarchy順)の調整
+						if(House == 0){
+						//-*自分(最奥)
+							instantObj.transform.SetAsFirstSibling();
+						}else{
+						//-*相手(最前面)
+							instantObj.transform.SetAsLastSibling();
+						}
+						furoTilesTiles.Add(instantObj);
+					}
 					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
 					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
-#endregion
 				}
+#endregion
 				break;
 			// 暗カン(両端を裏にして表示)
 			case MJDefine.D_ANKAN:
@@ -4612,6 +5186,14 @@ if(House == 0){
 					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
 					instantObj.name = "FuroAnkan"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
 					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					//-*副露牌の置き場所(Hierarchy順)の調整
+					if(House == 0){
+					//-*自分(最奥)
+						instantObj.transform.SetAsFirstSibling();
+					}else{
+					//-*相手(最前面)
+						instantObj.transform.SetAsLastSibling();
+					}
 					furoTilesTiles.Add(instantObj);
 					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
 					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
@@ -4629,6 +5211,14 @@ if(House == 0){
 					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
 					instantObj.name = "FuroPon"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
 					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					//-*副露牌の置き場所(Hierarchy順)の調整
+					if(House == 0){
+					//-*自分(最奥)
+						instantObj.transform.SetAsFirstSibling();
+					}else{
+					//-*相手(最前面)
+						instantObj.transform.SetAsLastSibling();
+					}
 					furoTilesTiles.Add(instantObj);
 					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
 					mjFuroSet.SetFuroImage(Hbit,SBit,FrPos);
@@ -4644,6 +5234,14 @@ if(House == 0){
 					GameObject instantObj = (GameObject)Instantiate(obj, Vector3.zero, Quaternion.identity);
 					instantObj.name = "FuroChi"+Fr+"_"+j;	//-*副露Fr回目_a個目牌
 					instantObj.transform.SetParent(furoTilesBase.transform, false);
+					//-*副露牌の置き場所(Hierarchy順)の調整
+					if(House == 0){
+					//-*自分(最奥)
+						instantObj.transform.SetAsFirstSibling();
+					}else{
+					//-*相手(最前面)
+						instantObj.transform.SetAsLastSibling();
+					}
 					furoTilesTiles.Add(instantObj);
 					var mjFuroSet = furoTilesTiles[i].GetComponent<SetFuro>();
 					mjFuroSet.SetFuroImage(Hbit,Bbit,FrPos);
@@ -4934,7 +5532,50 @@ if(House == 0){
 public void MJ_TenpaiDraw(/*MahJongRally* pMe*/)
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_TenpaiDraw( )");
-#if false //-*todo:描画保留
+#if true //-*todo:描画保留
+#region  UNITY_ORIGINAL
+	short				Seki, i;
+	byte				is_yaoch_ = 0x00;		//0422
+	//	  2
+	// 3	 1
+	//	  0
+	//	(自分)
+	for( i = 0; i < MJDefine.MAX_TABLE_MEMBER2; ++i ){	//0422	//MAX_TABLE_MEMBER
+		if( is_yaoch[i] == 0x01 ) {				//0422
+			is_yaoch_ = 0x01;					//0422
+			break;
+		}
+	}
+
+	if( is_yaoch_ == 0x01 ) {
+		for ( i = 0 ; i < MJDefine.MAX_TABLE_MEMBER2 ; i++ ) {	//MAX_TABLE_MEMBER (4)
+
+			// 描画の場所を取得。
+			Seki = (short)((game_player+i) % 4);
+
+			if( is_yaoch[Seki] == 0x01 ) {
+#if	Rule_2P
+				// mMpsBrewLib_DrawSprite( spGame[D_NAKI02_03], 40,  177- i* 125 );	//流し満貫
+				m_callObjs[Seki].setCall((int)CALLDRAW.NAGASHI);
+#endif
+			}
+		}
+	} else {
+#if	Rule_2P
+		for ( i = 0 ; i < MJDefine.MAX_TABLE_MEMBER2; i++ ){
+			if ( gsPlayerWork[i].byTenpai!= 0 ){
+				m_callObjs[i].setCall((int)CALLDRAW.TENPAI);
+			}else{
+				m_callObjs[i].setCall((int)CALLDRAW.NOTEN);
+			}
+		}
+#endif
+	}
+#endregion  //-*UNITY_ORIGINAL
+
+
+
+#else //-*todo:描画保留
 	short[]	MenuPosX	 = {  50,	75,  50,  20};
 	short[]	MenuPosY	 = { 190, 135,	20,  78};
 	short[]	FacePosX	  = {  55,	80,  55,  25};
@@ -5089,7 +5730,12 @@ public AEERect		MJ_RyukyokuDraw_rect_= new AEERect();	//0508mt
 public void MJ_RyukyokuDraw(/*MahJongRally* pMe*/)
 {
 	DebLog("//-*MJ:GameDraw.cs:MJ_RyukyokuDraw( )");
-#if false //-*todo:描画保留
+#if true //-*todo:描画保留
+	if( Pinch != (byte)SP.YAOCHU){
+		m_callObjRyukyoku.setCall((int)CALLDRAW.RYUKYOKU);
+	}
+#else //-*todo:描画保留
+
 #if	Rule_2P
 	if( Pinch!= SP_YAOCHU)
 		mMpsBrewLib_DrawSprite( spGame[D_NAKI02_00], 40, 90 );		//流局
@@ -5191,13 +5837,20 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 	public void DrawDiscardedTiles(int House)
 	{
 		int sutecnt = gsPlayerWork[House].byShcnt;					// 捨て牌数取得。
+		int drawCount	 = sutecnt-getKakarenaihai( House );		// 鳴かれた牌数を取得。
 		byte suteFlag	= 0;							// 捨て牌がリーチかどうかをGET。
 		TILE_STATE tState = TILE_STATE.NO_USE;
 		switch(House){
 		case 0:	//-*自分の捨て牌
 			if(m_myDiscardedTiles !=  null){
 				for( int i=0 ; i<sutecnt ; i++ ) {
+					suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
+					if(suteFlag == (byte)SUTEHAI.OFF && m_myDiscardedTiles[i].activeSelf){
+					//-*鳴きなどで表示させない
+						m_myDiscardedTiles[i].SetActive(false);
+					}
 					if(m_myDiscardedTiles.Count <= i){
+
 						suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
 					//-*新規捨て牌なら生成して追加
 						GameObject obj = null;
@@ -5236,8 +5889,12 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 		case 1:	//-*相手の捨て牌(対面)
 			if(m_yourDiscardedTiles !=  null){
 				for( int i=0 ; i<sutecnt ; i++ ) {
+					suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
+					if(suteFlag == (byte)SUTEHAI.OFF && m_yourDiscardedTiles[i].activeSelf){
+					//-*鳴きなどで表示させない
+						m_yourDiscardedTiles[i].SetActive(false);
+					}
 					if(m_yourDiscardedTiles.Count <= i){
-						suteFlag	= Rec_sute_pos[House,i];						// 捨て牌がリーチかどうかをGET。
 					//-*新規捨て牌なら生成して追加
 						GameObject obj = null;
 						switch(suteFlag){
@@ -5252,7 +5909,7 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 							break;
 						default:
 							Debug.LogWarning("//-*("+House+")suteFlag("+suteFlag+"):No."+i+" : "+gsPlayerWork[House].bySthai[i]);
-							break;
+							continue;
 						}
 						GameObject instantObj = (GameObject)Instantiate(obj,
 									Vector3.zero,
@@ -5276,51 +5933,16 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 		default:
 			break;
 		}
-
-#if false//-*todo:実装中
-	for( i=0 ; i<sutecnt ; i++ ) {
-		if(sutecnt)
-		suteFlag	= Rec_sute_pos[House][i];						// 捨て牌がリーチかどうかをGET。
-		pai			= gsPlayerWork[House].bySthai[i];				// 河の捨て牌取得。
-		offsetX		= DrawCount%12;		//	%8						// 横の位置
-		offsetY		= DrawCount/12;		//	/8						// 段の位置
-		switch( suteFlag ) {
-			case SUTEHAI_ON:
-				// 捨て牌通常表示
-#if	Rule_2P
-				if(offsetY == reached_line)
-					// リーチ牌を表示したラインならば
-					hMpsBrewLib_DrawSprite( spSutePaiJicya, pai,
-						(D_JICYA_RIVER_X+(offsetX*13)+reached_add),
-						D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H) );
-				else
-					// ちがうのであれば
-					hMpsBrewLib_DrawSprite( spSutePaiJicya, pai,
-						D_JICYA_RIVER_X+(offsetX*13),
-						D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H) );
-#endif
-				DrawCount+=1;
-				break;
-//m			case SUTEHAI_OFF:
-//m				break;
-			case SUTEHAI_REACH:
-				reached_add=4;
-				reached_line = offsetY;
-
-				// 捨て牌リーチ表示。
-#if	Rule_2P
-				hMpsBrewLib_DrawSprite_line4( spSutePaiShimocya, pai,
-#endif
-					D_JICYA_RIVER_X+(offsetX*13),
-					(D_JICYA_RIVER_Y+(offsetY*D_SUTEPAI_OFFSET_H))+4+1 );
-				DrawCount+=1;
-				break;
-//m			default:
-//m				break;
-		}
 	}
-#endif //-*todo:実装中		
+	/// <summary>
+	/// リーチ棒の描画
+	/// </summary>
+	public void DrawRibo(int House, bool flag)
+	{
+		if(House >= m_ribos.Count || m_ribos[House].activeSelf == flag)return;
+		m_ribos[House].SetActive(flag);
 	}
+	
 #endregion //-*UNITY_ORIGINAL
 
 

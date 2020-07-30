@@ -50,10 +50,16 @@ namespace Const {
 	//-*****麻雀関連
 	
 		/// <summary>
-		/// 麻雀牌の基本名
+		/// 麻雀牌画像の基本名
 		/// 使用例:IMAGE_TILE_BASE_NAME+00(牌番号)
 		/// </summary>
 		public const string IMAGE_TILE_BASE_NAME = "p";
+		/// <summary>
+		/// 役画像の基本名
+		/// 使用例:IMAGE_TILE_BASE_NAME+00(牌番号)
+		/// </summary>
+		public const string IMAGE_YAKU_BASE_NAME = "Y";
+
 	#endregion //-*INGAME_FILE
 
 	#region SOUND_FILE
@@ -110,6 +116,28 @@ namespace Const {
 			// get{ return "scenario/";}
 			// get{ return String.Concat(RESOURCES_DIRECTORY, MJ_DIRECTORY, "pai/");}
 			get{ return String.Concat(MJ_DIRECTORY, "pai/");}
+		} 
+		/// <summary>
+		/// 麻雀で使用する鳴き系ボタン画像の場所
+		/// </summary>
+		public static string MJ_CALL_DIRECTORY {
+			get{ return String.Concat(MJ_DIRECTORY, "button/");}
+		}
+		/// <summary>
+		/// 麻雀で使用する役画像の場所
+		/// </summary>
+		public static string MJ_YAKU_DIRECTORY {
+			// get{ return "scenario/";}
+			// get{ return String.Concat(RESOURCES_DIRECTORY, MJ_DIRECTORY, "pai/");}
+			get{ return String.Concat(MJ_DIRECTORY, "yaku/");}
+		} 
+		/// <summary>
+		/// 麻雀で使用する汎用画像の場所
+		/// </summary>
+		public static string MJ_COMMON_DIRECTORY {
+			// get{ return "scenario/";}
+			// get{ return String.Concat(RESOURCES_DIRECTORY, MJ_DIRECTORY, "pai/");}
+			get{ return String.Concat(MJ_DIRECTORY, "common/");}
 		} 
 	#endregion //-*INGAME_DIR
 

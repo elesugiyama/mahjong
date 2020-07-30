@@ -690,6 +690,10 @@ public void reentry_m1 ( /*MahJongRally * pMe*/ )
 //	BYTE	tmp;
 
 #if DEBUG
+if(selFlg){
+	int a=0;
+	Debug.Log("//-*"+selFlg);
+}
 	if( reentry_m1_bflag_dbg != reentry_m1_bflag ) {	// && !is_reentry )
 		// 状態遷移があったらデバッグ出力
 //		DebLog(( "reentry_m1(): reentry_m1_bflag=%d,ply1=%d,ply2=%d,com=%d,order=%d,me=%d,status=%04x", reentry_m1_bflag, before_richi_m4_bflag, after_richi_m4_bflag, comput_m1_bflag, Order, game_player, Status ));
@@ -717,9 +721,10 @@ public void reentry_m1 ( /*MahJongRally * pMe*/ )
 				reentry_m1_bflag = 2;
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中	
-string tehaiList = "PLAYER("+Order+"):";
+string tehaiList = "PLAYER("+Order+"){"+Thcnt+":"+gpsPlayerWork.byThcnt+"}:";
 for(int a=0;a<gpsPlayerWork.byTehai.Length;a++)
 {
+	// if(gpsPlayerWork.byThcnt-1 < a)gpsPlayerWork.byTehai[a] = 0x40;
 	tehaiList += "["+gpsPlayerWork.byTehai[a]+"] ";
 }
 DebLogError((""+tehaiList));
@@ -761,7 +766,7 @@ DebLogError((""+tehaiList));
 				#endif //-*todo:通信
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中
-gpsPlayerWork.byPlflg = 0;
+// gpsPlayerWork.byPlflg = 0;	//-*オートプレイ
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
 					//プレーヤー／COM判定
@@ -1080,7 +1085,7 @@ gpsPlayerWork.byPlflg = 0;
 					clropt_opt();
 					is_ronchk_menu_open = 0;
 				}
-			#if false //-*todo保留
+			#if true
 				if( gMyTable_NakiNashi == 1 && Optcnt == 0 ) {
 					//メニュークリア
 					clropt_opt();

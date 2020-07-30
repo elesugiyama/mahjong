@@ -42,6 +42,13 @@ public short get_mjpoint( /*MahJongRally * pMe,*/ ushort pos )
 *****************************/
 public void set_mjpoint( /*MahJongRally * pMe,*/ ushort pos, short score )
 {
+	//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.GET_SCORE)){
+		score = gpsTableData.sMemData[pos].nPoint;
+	}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 	gpsTableData.sMemData[pos].nPoint	=	score;
 }
 

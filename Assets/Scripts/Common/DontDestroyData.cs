@@ -8,7 +8,11 @@ public class DontDestroyData : MonoBehaviour {
 	void Start () {}
 	
 	// Update is called once per frame
-	void Update () {}
+	void Update () {
+		// if (Input.GetKey (KeyCode.LeftArrow)) {
+		// 	Debug.Log("//-*********");
+		// }
+	}
 	void Awake() {
 		// シーンまたぎに登録
 		int numMusicPlayers = FindObjectsOfType<DontDestroyData>().Length;
@@ -70,14 +74,6 @@ public class DontDestroyData : MonoBehaviour {
 		set { m_mjMode = value; }
 	}
 
-	/// <summary>
-	/// 麻雀：ルール
-	/// </summary>
-	private int m_mjRule;
-	public int MjRule {
-		get { return m_mjRule; }
-		set { m_mjRule = value; }
-	}
 
 	/// <summary>
 	/// 麻雀：フラグ

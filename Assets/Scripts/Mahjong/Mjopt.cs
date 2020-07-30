@@ -39,6 +39,9 @@ public void clropt_opt ( /*MahJongRally * pMe*/ )
 	// motohashi
 	// メニューカーソルの初期化。
 	menu_csr = 0;
+#region UNITY_ORIGINAL
+	ResetCallMenu();
+#endregion //-*UNITY_ORIGINAL
 }
 
 /*****************************

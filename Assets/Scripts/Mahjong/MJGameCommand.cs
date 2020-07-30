@@ -70,9 +70,24 @@ public short TsumoMenuSel( /*MahJongRally * pMe*/ )
 	no = menu_csr;								//現状選択しているオプション番号設定
 
 	//オプションがない場合は処理なしで返す
-	if( Optcnt == 0 )
+	if( Optcnt == 0 ){
 		return (-1);
-
+	}
+#region UNITY_ORIGINAL
+		if(m_callMenuSelF || gAutoFlag != 0) {
+			DebLog(("menu_csr(TsumoMenuSel) = "+menu_csr));
+			no = m_callMenuCsrNo;
+			m_callMenuSelF = false;
+			menu_csr = no;
+			selFlg = true;
+			// > 2006/02/26 要望No.107
+			if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) ){
+				hai_csr = (short)gpsPlayerWork.byThcnt;	// 牌カーソルを初期値に戻す
+			}
+			// ResetCallMenu();	//-*メニューボタンの削除
+			return (short)(Optstk[no]);
+		}
+#endregion //-*UNITY_ORIGINAL
 	do{
 		#if false //-*todo:キー操作
 		if( D_ONEPUSH_INPUT_DOWN ) {
@@ -96,12 +111,12 @@ public short TsumoMenuSel( /*MahJongRally * pMe*/ )
 			}
 //		}while( 0 );
 
+#if false //-*todo:不要
 		menu_csr = no;
-
 		// > 2006/02/26 要望No.107
 		if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) )
 			hai_csr = (short)gpsPlayerWork.byThcnt;	// 牌カーソルを初期値に戻す
-
+#endif //-*todo:不要
 #if false //-*tod:サウンド
 		// < 2006/02/26 要望No.107
 		SeOnPlay( SE_ATACK, SEQ_SE);
@@ -134,6 +149,22 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 	if( ( D_ONEPUSH_INPUT_SELECT ) || gAutoFlag != 0){
 		return (short)(Optstk[no]);
 	}
+	#else //-*todo:キー操作
+#region UNITY_ORIGINAL
+		if(m_callMenuSelF || gAutoFlag != 0) {
+			DebLog(("menu_csr(MenuSel) = "+hai_csr));
+			no = m_callMenuCsrNo;
+			m_callMenuSelF = false;
+			menu_csr = no;
+			ResetCallMenu();	//-*メニューボタンの削除
+			// selFlg = true;
+			selFlg = true;
+			if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) ){	// 2006/02/26 要望No.107
+				hai_csr = (short)gpsPlayerWork.byThcnt;	//	牌カーソルを初期値に戻す。
+			}
+			return (short)(Optstk[no]);
+		}
+#endregion //-*UNITY_ORIGINAL
 	#endif //-*todo:キー操作
 	do{
 		#if false//-*todo:キー操作
@@ -161,8 +192,10 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 
 		menu_csr = no;
 //		if(menu_csr == 0)
+#if false //-*todo:不要
 		if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) )	// 2006/02/26 要望No.107
 			hai_csr = (short)gpsPlayerWork.byThcnt;	//	牌カーソルを初期値に戻す。
+#endif //-*todo:不要
 
 #if false //-*todo:サウンド
 		SeOnPlay( SE_ATACK, SEQ_SE);
@@ -170,7 +203,7 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 		DebLog(("menu_csr = "+menu_csr));
 	}while(false);	//0
 
-	if(Optstk[no]!= (byte)OP.TAPAI)
+	if(Optstk[no]!= (byte)OP.TAPAI/* && selFlg*/)
 		return (short)(Optstk[no]);
 
 	return( -1);			//決定で移動
@@ -183,10 +216,9 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 /*	IN)		nothing												*/
 /*	OUT)	手牌番号(未決定:-1)									*/
 /****************************************************************/
-public short HaiSelPD( /*MahJongRally * pMe*/ )
+public short HaiSelPD( /*MahJongRally * pMe*/)
 {
 	short no, add=0;
-
 	play_wk.byThcnt = gsPlayerWork[game_player].byThcnt;
 
 	no = hai_csr;
@@ -194,10 +226,36 @@ public short HaiSelPD( /*MahJongRally * pMe*/ )
 	#if true //-*todo:キー操作
 		// スタンドアローン。
 		// if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0) {
-		if(/* (D_ONEPUSH_INPUT_SELECT) || */gAutoFlag != 0) {
+#region UNITY_ORIGINAL
+#if true
+		if(m_haiSelF || gAutoFlag != 0) {
 			DebLog(("hai_csr = "+hai_csr));
-			return (no);
+			no = m_haiCsrNo;
+			selFlg = true;
+			m_haiSelF = false;
+			// if(test)return (no);
+			if(( (hai_on & (1 << no)) == 0)){
+				if(hai_csr != no && hai_csr != 14){
+					hai_csr = no;
+				}else{
+					return (no);
+				}
+			}
 		}
+
+#else
+		if(m_haiSelF || gAutoFlag != 0) {
+			DebLog(("hai_csr = "+hai_csr));
+			no = m_haiCsrNo;
+			selFlg = true;
+			if(( (hai_on & (1 << no)) == 0)){
+				m_haiSelF = false;
+				hai_csr = no;
+				return (no);
+			}
+		}
+#endif
+#endregion //-*UNITY_ORIGINAL
 	#else //-*todo:通信キー操作
 
 	// ツモった牌を捨てる時の決定キー。
@@ -217,7 +275,6 @@ public short HaiSelPD( /*MahJongRally * pMe*/ )
 		}
 	}
 	#endif //-*todo:保留通信キー操作
-
 	do{
 	#if false //-*todo:キー操作
 		if( D_ONEPUSH_INPUT_RIGHT ){
@@ -229,8 +286,9 @@ public short HaiSelPD( /*MahJongRally * pMe*/ )
 				break;
 			}
 		}
-	#endif //-*todo:キー操作
+
 		do{
+
 			no += add;
 			if( no < 0){
 				no = (short)play_wk.byThcnt;
@@ -240,13 +298,52 @@ public short HaiSelPD( /*MahJongRally * pMe*/ )
 				}
 			}
 		} while( (hai_on & (1 << no)) != 0);
+	#endif //-*todo:キー操作
 
 	#if false //-*todo:サウンド
 		SeOnPlay( SE_ATACK, SEQ_SE);
 	#endif //-*todo:サウンド
 		hai_csr = no;
 	}while(false);	//0
+//-****************************
+	// if( IS_NETWORK_MODE ) {
+	// 	// 通信対戦時はチャットメニューとの兼ね合いを避けるためにフラグ管理。
+	// 	if( ((D_ONEPUSH_INPUT_SELECT) && ChatFlag==OFF) || gAutoFlag != 0) {
+	// 		DTRACE(("hai_csr = %d\n",hai_csr));
+	// 		ResetCountDown();
+	// 		return (no);
+	// 	}
+	// } else{
+	// 	// スタンドアローン。
+	// 	if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0) {
+	// 		DTRACE(("hai_csr = %d\n",hai_csr));
+	// 		return (no);
+	// 	}
+	// }
+	// do{
+	// 	if( D_ONEPUSH_INPUT_RIGHT ){
+	// 		add = 1;
+	// 	}else{
+	// 		if( D_ONEPUSH_INPUT_LEFT ){
+	// 			add = -1;
+	// 		}else{
+	// 			break;
+	// 		}
+	// 	}
+	// 	do{
+	// 		no += add;
+	// 		if( no < 0){
+	// 			no = (SINT2)play_wk.byThcnt;
+	// 		}else{
+	// 			if( no > play_wk.byThcnt){
+	// 				no = 0;
+	// 			}
+	// 		}
+	// 	} while( (hai_on & (1 << no)) != 0);
 
+	// 	hai_csr = no;
+	// }while(false);	//0
+//-****************************
 	return( -1);
 }
 
@@ -508,17 +605,48 @@ Debug.Log("menu_mode_sub: "+ menu_mode_sub);
 #endif
 }
 #endif
+#if true //-*移植中
+	// no = HaiSelPD(true);
+	no = HaiSelPD();
 
+	if( no < 0) {
+		do {
+			old = menu_csr;
+			int	ret= MenuSel();
+menu_ret = (short)ret;
+			if(selFlg) {
+				//ツモ ロン 九種九牌 次の決定をスキップする
+				if((ret== (int)OP.TSUMO) || (ret== (int)OP.RON) || (ret== (int)OP.PON) || (ret== (int)OP.TAOPAI))
+					return hai_csr;
+				//明カン 次の決定をスキップする
+				if((ret== (int)OP.KAN) && (menu_type== 1))
+					return hai_csr;
+			}
+			if( old == menu_csr)
+				break;
+
+			menu_mode = menu;
+		}while(false);	//0
+	}
+	if( menu_mode_sub== 0) {
+		//上下だけ
+		if( (selFlg) || gAutoFlag != 0){
+			menu_mode_sub= 1;
+		}
+	}
+#else //-*
 #if	Rule_2P
 	#if false //-*todo:保留キー操作
 	if( menu_mode_sub== 0) {
 		//上下だけ
-		if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0)
+		if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0){
 			menu_mode_sub= 1;
+		}
 		KeyInfo.trigger&= ~(KEY_SELECT2 | KEY_RIGHT2 | KEY_LEFT2);
-	} else
+	} else {
 		//左右決定だけ
 		KeyInfo.trigger&= ~(KEY_UP2 | KEY_DOWN2);
+	}
 	#endif //-*todo:保留キー操作
 #endif
 
@@ -558,6 +686,7 @@ Debug.Log("menu_mode_sub: "+ menu_mode_sub);
 		}while(false);	//0
 	}
 #endif
+#endif //-*
 
 	return( no);
 }
@@ -595,6 +724,8 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 #endif
 
 #if	Rule_2P
+
+	selFlg = false;
 	#if false //-*todo:保留キー操作
 	selFlg= D_ONEPUSH_INPUT_SELECT;
 	if( Optcnt != 0 ) {
@@ -605,6 +736,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 		} else
 			KeyInfo.trigger&= ~(KEY_UP2 | KEY_DOWN2);
 	}
+	#else
 	#endif //-*todo:保留キー操作
 #endif
 
@@ -702,7 +834,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 				// < 2006.05.12 No.1055
 
 #if		false
-				if(( Optcnt != 0 ) && ( menu_mode_sub== 0)) {
+				if(( Optcnt != 0 ) && ( == 0)) {
 					if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0)
 						menu_mode_sub= 1;
 
@@ -866,7 +998,15 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 	}while(false);	//0
 
 //	if( ( game_wait == 0) && (menu_mode != 9)){}
-
+#region  UNITY_ORIGINAL
+	if( Optcnt != 0 ) {
+		if( menu_mode_sub== 0) {
+			if( selFlg || gAutoFlag != 0){
+				menu_mode_sub= 1;
+			}
+		}
+	}
+#endregion //-*UNITY_ORIGINAL
 	return( -1);
 }
 
@@ -882,9 +1022,11 @@ public short NakiSel( /*MahJongRally * pMe*/ )
 //	int i, sel1, sel2;
 	short no, index;
 
-#if false	//-*todo:サウンド
+#if true	//-*todo:キー操作
+	// selFlg = false;
+#else //-*todo:キー操作
 	selFlg= D_ONEPUSH_INPUT_SELECT;
-#endif 	//-*todo:サウンド
+#endif 	//-*todo:キー操作
 
 	do{
 #if DEBUG
@@ -931,6 +1073,9 @@ Debug.Log("menu_mode 2: "+ menu_mode);
 				goto case 1;
 			case 1:	//再準備
 				menu_mode = 2;
+#region UNITY_ORIGINAL
+menu_mode_sub = 0;
+#endregion //-*UNITY_ORIGINAL
 				menu_ret = -1;
 				hai_up = 0;
 				break;
@@ -983,7 +1128,9 @@ Debug.Log("menu_mode 2: "+ menu_mode);
 				no = HaiSelM( (short)1);	//menu_mode
 
 				// 2006/02/06 BugNo 30
+#if true	//-*todo:キー操作
 				hai_csr = 14;
+#endif 	//-*todo:キー操作
 
 				for( index = 0; index <= 2; ++index )
 					if( Chipsf[index] == 255 ) {
@@ -999,7 +1146,25 @@ Debug.Log("menu_mode 2: "+ menu_mode);
 					}
 
 				index = chi_csr;
-#if false	//-*todo:キー操作
+#if true	//-*todo:キー操作
+				if(no != -1){
+					if(chi_hai_csr < m_haiCsrNo){
+						if( chi_min <= chi_csr && chi_csr < chi_max  ){
+							++chi_csr;
+						}else{
+							// chi_csr = chi_min;	//-*カーソルループは無し
+						}
+					}else if(chi_hai_csr > m_haiCsrNo){
+						if( chi_min < chi_csr && chi_csr <= chi_max  ){
+							--chi_csr;
+						}else{
+							// chi_csr = chi_max;	//-*カーソルループは無し
+						}
+					}
+					// chi_hai_csr = m_haiCsrNo;
+					chi_hai_csr = m_haiCsrNo;
+				}
+#else	//-*todo:キー操作
 				if( D_ONEPUSH_INPUT_RIGHT ) {
 					if( chi_min <= chi_csr && chi_csr < chi_max  )
 						++chi_csr;
@@ -1023,9 +1188,16 @@ Debug.Log("menu_mode 2: "+ menu_mode);
 					chi_csr = index;
 					NakiSelNo = (byte)chi_csr;
 				}
+#region UNITY_ORIGINAL
 
+	#if true//-*todo:キー操作
+				if( chi_hai_csr == m_haiCsrNo) DispInfo();	//9
+	#else
 				// 2006/02/06 BugNo 30
 				if( no >= 0) DispInfo();	//9
+	#endif //-*todo:キー操作
+
+#endregion //-*UNITY_ORIGINAL
 				break;
 
 //==========================================================

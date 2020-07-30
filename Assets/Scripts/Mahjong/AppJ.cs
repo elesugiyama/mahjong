@@ -104,15 +104,19 @@ public partial class MahjongBase : SceneBase {
 		// フレームカウンタインクリメント
 	//	m_frameCounter++;
 
-#if true //-*todo:通信不要
+
 		// msec/フレーム
 		{
-			// long uptimems_ = GETUPTIMEMS();
-			long uptimems_ = DateTime.Now.Ticks;
+#if false //-*todo:旧方式
+			long uptimems_ = GETUPTIMEMS();
 			uptimems_perfrm = (ulong)uptimems_ - pre_uptimems;
 			pre_uptimems = (ulong)uptimems_;
+#else //-*todo:旧方式
+#region UNITY_ORIGINAL
+			uptimems_perfrm = (ulong)(1/Time.deltaTime);	//-*Unity
+#endregion //-*UNITY_ORIGINAL
+#endif //-*todo:旧方式
 		}
-#endif //-*todo:通信不要
 		//メインループ
 		switch(m_Mode) {
 //-**********todo:ここから必要物移植

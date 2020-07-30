@@ -69,7 +69,6 @@ public class ScreenEffect : MonoBehaviour {
 			FadeInStart(true);
 			break;
 		case EFFECTTYPE.FADE_OUT_BLACK:
-		Debug.Log("//-***********(ﾟ∀ﾟ)"+effect);
 			FadeOutStart(false);
 			break;
 		case EFFECTTYPE.FADE_OUT_WHITE:

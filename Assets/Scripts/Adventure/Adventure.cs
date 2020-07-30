@@ -744,7 +744,6 @@ m_isSceneChange = true;
 DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Length+")");
 		int scoNo = 0;
 		foreach( var a in nextScoNo ){
-			DebLog("//-*,._.,"+a);
 			//-*次のシナリオ番号が有れば
 			if( int.TryParse(a, out scoNo) ){
 				m_keepData.AdvNextScoNo = scoNo;
@@ -798,15 +797,17 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 	{
 		DebLog("//-*SetMahjongInGameData("+scoLineText+","+scoCmdType+")..."+m_keepData);
 		if(m_keepData == null)return;
-		var stageAndRule = GetScoCmdNoString(scoLineText, scoCmdType).Split(AdvDefine.SCO_CMD_SPLIT);
+		// var stageAndRule = GetScoCmdNoString(scoLineText, scoCmdType).Split(AdvDefine.SCO_CMD_SPLIT);
+		var stageAndRule = GetScoCmdChoiceSentence(scoLineText, scoCmdType).Split(AdvDefine.SCO_CMD_SPLIT);
+		
 		int stNo = -1;
 		int ruleNo = -1;
 		if(stageAndRule != null ){
 			if(!string.IsNullOrEmpty(stageAndRule[0]) && int.TryParse(stageAndRule[0], out stNo)){
 				m_keepData.MjStage = stNo;
 			}
-			if(!string.IsNullOrEmpty(stageAndRule[1]) && int.TryParse(stageAndRule[0], out ruleNo)){
-				m_keepData.MjRule = ruleNo;
+			if(!string.IsNullOrEmpty(stageAndRule[1]) && int.TryParse(stageAndRule[1], out ruleNo)){
+				m_keepData.mah_limit_num = ruleNo;
 			}
 		}
 		DebLog("//-*(stNo:"+stNo+", ruleNo:"+ruleNo+")");
@@ -814,6 +815,7 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 	}
 #endregion	//-*ExclusiveScenarioCommand
 
+#if DEBUG
 #region DEBUG
 [Header("デバッグ用")]
 	[SerializeField]
@@ -829,5 +831,5 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 	}
 
 #endregion	//-*DEBUG
-
+#endif
 }

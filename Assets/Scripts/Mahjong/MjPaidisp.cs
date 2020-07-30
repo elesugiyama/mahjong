@@ -157,9 +157,9 @@ public void init_sutehai_rec( /*MahJongRally * pMe*/ )
 	short i, j;
 
 	for (i = 0; i < MJDefine.MAX_TABLE_MEMBER; i++) {	//4
-		for (j = 0; j < MJDefine.SUTEHAIMAX; j++)
+		for (j = 0; j < MJDefine.SUTEHAIMAX; j++){
 			Rec_sute_pos[i,j] = 0;
-
+		}
 //		Rec_sute_pri[i] = (USHORT)WORDMAX;
 		Rec_sute_reach[i] = false;
 		/* 1996.6.5.Chankan */
@@ -167,6 +167,13 @@ public void init_sutehai_rec( /*MahJongRally * pMe*/ )
 		// Rec_minkan_pri[i]		=	(USHORT)WORDMAX;
 		Rec_minkan_pri[i]		=	MJDefine.WORDMAX;
 		#endif //-*todo:short -> ushort に変更
+#region UNITY_ORIGINAL
+//-*副露牌情報初期化
+		for(int a=0;a<gsPlayerWork[i].byFrhai.Length;a++){
+			gsPlayerWork[i].byFrhaiBefore[a] = gsPlayerWork[i].byFrhai[a] = 0;
+		}
+#endregion //-*UNITY_ORIGINAL
+
 	}
 	Sute_flush_f = false;
 	Rec_chankan_man = MJDefine.NONE;
@@ -177,6 +184,12 @@ public void init_sutehai_rec( /*MahJongRally * pMe*/ )
 	ResetDiscardedTiles();
 	ResetFuroTiles();
 	ResetWanTiles();
+	ResetCallMenu();
+	RestRebo();
+	RestCallDraw();
+	RestCallRyukyokuDraw();
+	RestResultBoxDraw();
+	RestResultPointDraw();
 #endregion //-*UNITY_ORIGINAL
 
 }
