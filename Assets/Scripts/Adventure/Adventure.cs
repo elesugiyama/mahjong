@@ -139,7 +139,7 @@ public class Adventure : SceneBase {
 	// Use this for initialization
 	protected override void Start () {
 		DebLog("//-*ADV_start");
-#if true
+#if SUGI_DEB
 //-*デバッグ
 // m_gameData.AdvNextScoNo = "13";
 m_isSceneChange = true;
@@ -191,7 +191,7 @@ m_isSceneChange = true;
 
 		m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
 
-#if true
+#if SUGI_DEB
 //-*デバッグ
 		m_dev_ScoFinButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(DevPushButton);
 #endif
@@ -320,9 +320,11 @@ m_isSceneChange = true;
 		//-*シナリオファイル名
 		String scenarioName = String.Concat(Dir.ADV_SCENARIO_DIRECTORY, Dir.SCENARIO_BASE_NAME, scenarioNo, Dir.SCENARIO_EXTENSION);
 		DebLog("//-*scenarioName:"+scenarioName);
-
+#if SUGI_DEB
+		DevSetScoFileName(scenarioName);
+#endif //-*SUGI_DEB
 		//-*ファイル読み込み
-		System.IO.StreamReader file = new System.IO.StreamReader(scenarioName);  
+		System.IO.StreamReader file = new System.IO.StreamReader(scenarioName,System.Text.Encoding.UTF8);  
 
 		//-*ファイルを1行ごとに格納
 		int counter = 0;  
@@ -815,7 +817,7 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 	}
 #endregion	//-*ExclusiveScenarioCommand
 
-#if DEBUG
+#if SUGI_DEB
 #region DEBUG
 [Header("デバッグ用")]
 	[SerializeField]
@@ -830,6 +832,14 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 		// SceneManager.LoadScene ("SelectStage");
 	}
 
-#endregion	//-*DEBUG
+	[SerializeField]
+	private Text m_dev_ScoFileName;	//-*シナリオファイル名
+	public void DevSetScoFileName(string name)
+	{
+
+		m_dev_ScoFileName.text = name;
+	}
+
+#endregion	//-*SUGI_DEB
 #endif
 }
