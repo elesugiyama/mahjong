@@ -80,7 +80,26 @@ namespace Const {
 		/// リソースの場所
 		/// </summary>
 		public static string RESOURCES_DIRECTORY {
-			get{ return String.Concat(Application.dataPath, "/Resources/");}
+			get{ 
+				String path = ""; 
+#if UNITY_EDITOR
+				path = String.Concat(Application.dataPath, "/Resources/");
+#elif UNITY_ANDROID
+				path = "jar:file://" + Application.dataPath + "!/assets" + "/";
+#endif				
+				return path;
+// #if UNITY_EDITOR
+// 		path = Application.streamingAssetsPath + "\\" + textFileName;
+// 		FileStream file = new FileStream(path,FileMode.Open,FileAccess.Read);
+// 		txtReader = new StreamReader(file);
+// 		yield return new WaitForSeconds(0f);
+// #elif UNITY_ANDROID
+// 		path = "jar:file://" + Application.dataPath + "!/assets" + "/" + textFileName;
+// 		WWW www = new WWW(path);
+// 		yield return www;
+// 		txtReader = new StringReader(www.text);
+// #endif				
+				}
 		} 
 	#endregion //-*BASE
 		
