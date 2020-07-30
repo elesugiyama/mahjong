@@ -36,6 +36,8 @@ public class Title : SceneBase {
 
 	[SerializeField]
 	private ButtonCtl m_TitleButton = null;
+	[SerializeField]
+	private ButtonCtl m_TitleButton2 = null;
 
 	private TITLEMODE m_Mode = TITLEMODE.tMODE_MAX;	//-*モード
 
@@ -45,7 +47,8 @@ public class Title : SceneBase {
 	{
 		base.Awake();
 		m_Mode = TITLEMODE.tMODE_INIT;
-		m_TitleButton.SetOnPointerClickCallback(ButtonTest);
+		m_TitleButton.SetOnPointerClickCallback(ButtonSelectStage);
+		m_TitleButton2.SetOnPointerClickCallback(ButtonInGame);
 			DebLog("//-*awake");
 
 	}
@@ -66,9 +69,14 @@ public class Title : SceneBase {
 		}
 	}
 
-	public void ButtonTest()
+	public void ButtonSelectStage()
 	{
 		DebLog("//-*ButtonTest2:");
 		SceneChange("SelectStage");
+	}
+	public void ButtonInGame()
+	{
+		DebLog("//-*ButtonTest2:");
+		SceneChange("InGame");
 	}
 }
