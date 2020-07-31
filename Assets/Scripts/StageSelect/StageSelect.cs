@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class StageSelect : SceneBase {
 //-*仮データ用
-	private const int STAGEMAXNUM_TEST = 100;
+	private const int STAGEMAXNUM_TEST = 21;
 
 //-----------------------------------------------
 // ステージセレクトメニューの定義
