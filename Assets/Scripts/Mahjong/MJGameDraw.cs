@@ -2552,7 +2552,7 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
 				// tehaiDraw.set(TILE_STATE.MY_HAND,(PAI)gsPlayerWork[House].byTehai[a]);
 			}else{
-#if !DEBUG
+#if DEBUG
 				if( a < (cnt-1)){
 				//-*手牌
 					tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byTehai[a]);
