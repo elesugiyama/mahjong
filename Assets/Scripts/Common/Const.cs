@@ -77,7 +77,7 @@ namespace Const {
 
 	#region BASE
 		/// <summary>
-		/// リソースの場所
+		/// リソースの場所(todo:Resources.Loadを使うなら不要)
 		/// </summary>
 		public static string RESOURCES_DIRECTORY {
 			get{ 
@@ -85,20 +85,9 @@ namespace Const {
 #if UNITY_EDITOR
 				path = String.Concat(Application.dataPath, "/Resources/");
 #elif UNITY_ANDROID
-				path = "jar:file://" + Application.dataPath + "!/assets" + "/";
+				path = Application.dataPath+"/";
 #endif				
 				return path;
-// #if UNITY_EDITOR
-// 		path = Application.streamingAssetsPath + "\\" + textFileName;
-// 		FileStream file = new FileStream(path,FileMode.Open,FileAccess.Read);
-// 		txtReader = new StreamReader(file);
-// 		yield return new WaitForSeconds(0f);
-// #elif UNITY_ANDROID
-// 		path = "jar:file://" + Application.dataPath + "!/assets" + "/" + textFileName;
-// 		WWW www = new WWW(path);
-// 		yield return www;
-// 		txtReader = new StringReader(www.text);
-// #endif				
 				}
 		} 
 	#endregion //-*BASE
@@ -116,8 +105,8 @@ namespace Const {
 		/// シナリオの場所
 		/// </summary>
 		public static string ADV_SCENARIO_DIRECTORY {
-			// get{ return "scenario/";}
-			get{ return String.Concat(RESOURCES_DIRECTORY, "scenario/");}
+			get{ return "scenario/";}
+			// get{ return String.Concat(RESOURCES_DIRECTORY, "scenario/");}
 		} 
 	#endregion //-*ADVENTURE_DIR
 

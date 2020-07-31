@@ -173,7 +173,7 @@ m_isSceneChange = true;
 			m_charaObjBase.SetActive(false);
 		}
 
-		LoadScenarioFile();
+		yield return LoadScenarioFile();
 
 		//-*ページ送りボタン
 		m_nextButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(PushNextPageButton);
@@ -306,7 +306,7 @@ m_isSceneChange = true;
 	/// <summary>
 	/// シナリオファイルの読み込みと中身格納
 	/// </summary>
-	private bool LoadScenarioFile() {
+	private IEnumerator LoadScenarioFile() {
 		m_keepData.AdvScoNo = m_keepData.AdvNextScoNo;
 		if(m_keepData.AdvScoNo <= 0)
 		// if(string.IsNullOrEmpty(m_gameData.AdvScoNo))
@@ -315,30 +315,36 @@ m_isSceneChange = true;
 		}
 		// int scenarioNo = m_gameData.AdvScoNo;
 		var scenarioNo = (m_keepData.AdvScoNo).ToString();
-		if( String.IsNullOrEmpty(scenarioNo) )return false;
+		if( String.IsNullOrEmpty(scenarioNo) )yield break;
 //-*************ファイル読み込み
 		//-*シナリオファイル名
-		String scenarioName = String.Concat(Dir.ADV_SCENARIO_DIRECTORY, Dir.SCENARIO_BASE_NAME, scenarioNo, Dir.SCENARIO_EXTENSION);
+		String scenarioName = String.Concat(Dir.ADV_SCENARIO_DIRECTORY, Dir.SCENARIO_BASE_NAME, scenarioNo/*, Dir.SCENARIO_EXTENSION*/);
 		DebLog("//-*scenarioName:"+scenarioName);
 #if SUGI_DEB
 		DevSetScoFileName(scenarioName);
 #endif //-*SUGI_DEB
-		//-*ファイル読み込み
-		System.IO.StreamReader file = new System.IO.StreamReader(scenarioName,System.Text.Encoding.UTF8);  
+		//-*ファイル読み込み(todo:アセット化するなら別方法)
+		System.IO.TextReader file;
+		String jsonString = Resources.Load<TextAsset>(scenarioName).ToString(); 
+		file = new System.IO.StringReader(jsonString);
+	
+	 //-******
 
-		//-*ファイルを1行ごとに格納
-		int counter = 0;  
-		string line;
-		if(m_textData != null){
-			m_textData.Clear();
-			m_textData = null;
-		}
-		m_textData = new List<string>();         //空のListを作成する
-		while((line = file.ReadLine()) != null)  
-		{  
-			m_textData.Add(line);  
-			counter++;  
-		} 
+	//-*ファイルを1行ごとに格納
+	int counter = 0;  
+	string line;
+	if(m_textData != null){
+		m_textData.Clear();
+		m_textData = null;
+	}
+	m_textData = new List<string>();         //空のListを作成する
+	while((line = file.ReadLine()) != null)  
+	{  
+		m_textData.Add(line);  
+		counter++;  
+	} 
+
+
 //-*************
 		m_isPageWait = false;
 		m_isPageDraw = false;
@@ -358,7 +364,7 @@ m_isSceneChange = true;
 		DebLog(devSco);
 
 
-		return true;
+		yield break;
 	}
 	
 	/// <summary>
