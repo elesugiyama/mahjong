@@ -765,13 +765,13 @@ public partial class MahjongBase : SceneBase {
 			#endif
 		}
 
-#if false //-*todo:要るかな？
+#if false //-*todo:キー操作
 		KeyInfo= new KEYINFO();
 
 		appSystem= new APPSYSTEM();
-#endif //-*todo:
+#endif //-*todo:キー操作
 
-#if false //-*todo:描画回りだから要らない？
+#if false //-*todo:描画
 #if	Rule_2P
 		spPaiJicya= new SpriteInfo();			//m_spPaiJicya
 		spSutePaiJicya= new SpriteInfo();		//m_spSutePaiJicya
@@ -812,7 +812,7 @@ public partial class MahjongBase : SceneBase {
 			m_spMode[i]= new SpriteInfo();
 		for( i= 0; i< D_MAX_MARK_COUNT; i++)
 			m_spMark[i]= new SpriteInfo();
-#endif //-*todo:描画回りだから要らない？
+#endif //-*todo:描画
 
 		for( i = 0; i < 136*3; i++)
 			stReEntry_mycommand[i]= new CmdHistory_();
@@ -892,7 +892,7 @@ Debug.mem("mem");
 			return false;
 		}
 
-		#if false	//-*todoいるかも
+		#if false	//-*todo:
 		modeChange(D_LOGO_MODE);
 		#endif
 		//データ初期化

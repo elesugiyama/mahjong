@@ -70,6 +70,7 @@
      <Compile Include="Assets\Scripts\Common\spriteUINumS.cs" />
      <Compile Include="Assets\Scripts\Debug\DebBoxInGame.cs" />
      <Compile Include="Assets\Scripts\Debug\DebButtonBase.cs" />
+     <Compile Include="Assets\Scripts\Debug\DebScoSelect.cs" />
      <Compile Include="Assets\Scripts\Mahjong\AppJ.cs" />
      <Compile Include="Assets\Scripts\Mahjong\CallMenuButton.cs" />
      <Compile Include="Assets\Scripts\Mahjong\MahjongBase.cs" />

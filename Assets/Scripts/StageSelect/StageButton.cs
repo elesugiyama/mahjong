@@ -14,6 +14,8 @@ public class StageButton : ButtonCtl {
 #endif
 	[SerializeField]
 	private Text m_labelText;
+	[SerializeField]
+	private Text m_ruleText;
 	private int m_buttonNo;
 
 	// Use this for initialization
@@ -36,6 +38,10 @@ public class StageButton : ButtonCtl {
 		m_labelText.text = ""+(a+1);
 		// this.transform.localPosition = aaaa;
 		// SetPos(pos);
+	}
+	public void SetRuleLabel(string a)
+	{
+		m_ruleText.text = ""+(a);
 	}
 	//---------------------------------------------------------
 	/// <summary>

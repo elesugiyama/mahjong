@@ -11,6 +11,14 @@ using System;
 public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 {
 	public Button target;
+	private bool isPush = false;
+	public bool ISPUSH {
+		get{
+			bool isTemp = isPush;
+			isPush = false;
+			return isTemp;
+		}
+	}
 	//---------------------------------------------------------
 	/// <summary>
 	/// クリックコールバックのセット
@@ -49,6 +57,7 @@ public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 			return;
 		}
         target.OnPointerClick(eventData);
+		isPush = true;
 		// コールバック
 		if (m_OnPointerClickCallback != null)
 		{
@@ -65,5 +74,9 @@ public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 	public virtual void SetPos(Vector3 pos)
 	{
 		this.transform.localPosition = pos;
+	}
+	public virtual void SetInteractable(bool isInteractable)
+	{
+		target.interactable = isInteractable;
 	}
 }

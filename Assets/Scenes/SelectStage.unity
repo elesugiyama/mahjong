@@ -570,9 +570,10 @@ MonoBehaviour:
   m_screenEffect: {fileID: 0}
   m_keepData: {fileID: 0}
   m_isSceneChange: 0
+  m_nextScenes: 6
+  m_nextSceneName: 
   m_StageButton: []
   m_ScrollViewBase: {fileID: 2027870090}
-  test: {fileID: 0}
   UICanvas: {fileID: 174196913}
 --- !u!4 &688583724
 Transform:
@@ -598,7 +599,7 @@ GameObject:
   - component: {fileID: 1594227756}
   - component: {fileID: 1594227755}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -654,7 +655,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30B7\u30CA\u30EA\u30AA\u9078\u629E"
+  m_Text: "\u30C1\u30E3\u30EC\u30F3\u30B8\u30E2\u30FC\u30C9"
 --- !u!222 &1594227756
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -758,7 +759,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 650}
-  m_SizeDelta: {x: 800, y: 100}
+  m_SizeDelta: {x: 800, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1811090205
 MonoBehaviour:

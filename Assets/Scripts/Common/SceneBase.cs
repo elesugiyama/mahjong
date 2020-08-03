@@ -11,6 +11,33 @@ using Const;
 /// 継承して使用
 /// </summary>
 public class SceneBase : MonoBehaviour {
+	
+	/// <summary>
+	/// シーン名
+	/// </summary>
+	public enum SCENE_NAME{
+		TITLE,
+		ADVENTURE,
+		INGAME,
+		CHALLENGE,
+		DEB_TITLE,
+		DEB_SCOSEL,
+		MAX,
+	}
+	/// <summary>
+	/// シーン変更用
+	/// </summary>
+	public static Dictionary<SCENE_NAME,string> SceneNameDic = new Dictionary<SCENE_NAME,string>()
+	{
+		{ SCENE_NAME.TITLE,		"Title" },
+		{ SCENE_NAME.ADVENTURE,	"Adventure" },
+		{ SCENE_NAME.INGAME,	"InGame" },
+		{ SCENE_NAME.CHALLENGE,	"SelectStage" },
+		{ SCENE_NAME.DEB_TITLE,	"DEB_Title" },
+		{ SCENE_NAME.DEB_SCOSEL,"DEB_SelectStage" },
+		{ SCENE_NAME.MAX,		"" },
+	};
+
 	[Header("暗転などの演出")]
 	[SerializeField]
 	public ScreenEffect m_screenEffect;
@@ -21,12 +48,15 @@ public class SceneBase : MonoBehaviour {
 
 	//-*シーン変更
 	public bool m_isSceneChange = false;
+	public SCENE_NAME m_nextScenes = SCENE_NAME.MAX;
+	public string m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];
 
 	protected virtual void Start () {}
 	protected virtual void Update () {}
 	protected virtual void Awake() {
 		Debug.Log("//-*Awake:SceneBase"+(m_keepData!=null));
-		
+		m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];
+
 		var ObjList = FindObjectsOfType<DontDestroyData>();
 		DontDestroyData gameData = null;
 		if(ObjList.Length <= 0){
@@ -69,8 +99,24 @@ public class SceneBase : MonoBehaviour {
 	{
 		m_isSceneChange = false;
 		SceneManager.LoadScene (nextScene);
+		m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];	//-*シーン名は初期化しとく
 		StopSound(SoundManagerCtrl.SOUNDTYPE.TYPE_ALL);
 	}
+	/// <summary>
+	/// シーンチェンジ
+	/// </summary>
+	public virtual void SceneChange()
+	{
+		m_isSceneChange = false;
+		Debug.Log("//-*m_nextSceneName:"+m_nextSceneName);
+
+		if( !String.IsNullOrEmpty(m_nextSceneName) ){
+			SceneManager.LoadScene (m_nextSceneName);
+		}
+		m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];	//-*シーン名は初期化しとく
+		StopSound(SoundManagerCtrl.SOUNDTYPE.TYPE_ALL);
+	}
+
 #region SOUND
 	public void PlaySound(string fileName, SoundManagerCtrl.SOUNDTYPE type)
 	{
