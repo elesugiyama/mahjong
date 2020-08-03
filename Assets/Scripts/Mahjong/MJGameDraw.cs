@@ -2552,6 +2552,7 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
 				// tehaiDraw.set(TILE_STATE.MY_HAND,(PAI)gsPlayerWork[House].byTehai[a]);
 			}else{
+#if false //-*todo:デバッグ
 #if DEBUG
 				if( a < (cnt-1)){
 				//-*手牌
@@ -2563,6 +2564,9 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 #else
 				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
 #endif //-*DEBUG
+#endif //-*todo:デバッグ
+
+				tehaiDraw.set(TILE_STATE.HAND,(PAI)no);
 			}
 		}else{
 		//-*鳴き等で手牌から消えてる
