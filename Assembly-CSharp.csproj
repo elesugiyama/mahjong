@@ -71,6 +71,9 @@
      <Compile Include="Assets\Scripts\Debug\DebBoxInGame.cs" />
      <Compile Include="Assets\Scripts\Debug\DebButtonBase.cs" />
      <Compile Include="Assets\Scripts\Debug\DebScoSelect.cs" />
+     <Compile Include="Assets\Scripts\Gallery\Gallery.cs" />
+     <Compile Include="Assets\Scripts\Gallery\GalleryButton.cs" />
+     <Compile Include="Assets\Scripts\Gallery\GalleryDeffine.cs" />
      <Compile Include="Assets\Scripts\Mahjong\AppJ.cs" />
      <Compile Include="Assets\Scripts\Mahjong\CallMenuButton.cs" />
      <Compile Include="Assets\Scripts\Mahjong\MahjongBase.cs" />

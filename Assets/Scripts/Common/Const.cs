@@ -92,6 +92,16 @@ namespace Const {
 		} 
 	#endregion //-*BASE
 		
+	#region GALLERY_DIR
+		/// <summary>
+		/// ギャラリーで使用する画像の格納場所
+		/// </summary>
+		public static string GAL_IMAGE_DIRECTORY {
+			get{ return "gallery/";}
+			// get{ return String.Concat(RESOURCES_DIRECTORY, "gallery/");}
+		}
+	#endregion //-*GALLERY_DIR
+
 	#region ADVENTURE_DIR
 		/// <summary>
 		/// シナリオで使用する画像の格納場所

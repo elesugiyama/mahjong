@@ -19,7 +19,7 @@ public class AdventureChara : MonoBehaviour {
 	[SerializeField]
 	private Image m_face;
 
-	private Sprite[] m_faces; // 分割したh表情画像を格納する配列
+	private Sprite[] m_faces; // 分割した表情画像を格納する配列
 
 	/// <summary>
 	/// キャラ画像設定
