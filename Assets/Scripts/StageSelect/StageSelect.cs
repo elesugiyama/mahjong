@@ -66,6 +66,8 @@ public class StageSelect : SceneBase {
 
 	[SerializeField]
 	private GameObject m_ScrollViewBase;
+	[SerializeField]
+	private ButtonCtl m_BtnTitleBack = null;
 
 	private STAGESELECTMODE m_Mode = STAGESELECTMODE.mMODE_MAX;	//-*モード
 	private bool m_isStageSelect = false;
@@ -96,6 +98,7 @@ public class StageSelect : SceneBase {
 				
 			}
     	}
+		if(m_BtnTitleBack != null) m_BtnTitleBack.SetOnPointerClickCallback(ButtonTitleBack);
 	}
 	
 	// Update is called once per frame
@@ -145,5 +148,10 @@ public class StageSelect : SceneBase {
 		m_nextSceneName = SceneNameDic[SCENE_NAME.INGAME];
 		m_isStageSelect = true;
 		// SceneChange("InGame");
+	}
+	public void ButtonTitleBack()
+	{
+		m_nextSceneName = SceneNameDic[SCENE_NAME.TITLE];
+		m_isStageSelect = true;
 	}
 }
