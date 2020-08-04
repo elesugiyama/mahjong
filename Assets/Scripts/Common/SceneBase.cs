@@ -20,6 +20,7 @@ public class SceneBase : MonoBehaviour {
 		ADVENTURE,
 		INGAME,
 		CHALLENGE,
+		GALLERY,
 		DEB_TITLE,
 		DEB_SCOSEL,
 		MAX,
@@ -33,6 +34,7 @@ public class SceneBase : MonoBehaviour {
 		{ SCENE_NAME.ADVENTURE,	"Adventure" },
 		{ SCENE_NAME.INGAME,	"InGame" },
 		{ SCENE_NAME.CHALLENGE,	"SelectStage" },
+		{ SCENE_NAME.GALLERY,	"Gallery" },
 		{ SCENE_NAME.DEB_TITLE,	"DEB_Title" },
 		{ SCENE_NAME.DEB_SCOSEL,"DEB_SelectStage" },
 		{ SCENE_NAME.MAX,		"" },
@@ -50,9 +52,15 @@ public class SceneBase : MonoBehaviour {
 	public bool m_isSceneChange = false;
 	public SCENE_NAME m_nextScenes = SCENE_NAME.MAX;
 	public string m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];
+	//-*オプション画面
+	public bool m_isOpenOption = false;
 
 	protected virtual void Start () {}
-	protected virtual void Update () {}
+	protected virtual void Update () {
+		if(m_isOpenOption){
+			
+		}
+	}
 	protected virtual void Awake() {
 		Debug.Log("//-*Awake:SceneBase"+(m_keepData!=null));
 		m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];
@@ -213,4 +221,13 @@ public class SceneBase : MonoBehaviour {
 #endif		
 	}
 #endregion	//-*COMMON_FUNCTION
+
+#region OPTION
+	public void OpenOption(){
+		m_isOpenOption = true;
+	}
+	public void CloseOption(){
+		m_isOpenOption = false;
+	}
+#endregion //-*OPTION
 }

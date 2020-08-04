@@ -44,6 +44,10 @@ public class Title : SceneBase {
 	private ButtonCtl m_BtnSelSco = null;
 	[SerializeField]
 	private ButtonCtl m_BtnSelChallenge = null;
+	[SerializeField]
+	private ButtonCtl m_BtnSelGallery = null;
+	[SerializeField]
+	private ButtonCtl m_BtnSelOption = null;
 
 	[SerializeField]
 	private GameObject m_TitleBtnScoModeSelect = null;
@@ -118,6 +122,14 @@ public class Title : SceneBase {
 		if(m_BtnSelChallenge.ISPUSH){
 			m_nextSceneName = SceneNameDic[SCENE_NAME.CHALLENGE];
 			return TITLEMODE.tMODE_NEXT_SCENE;
+		}
+		if(m_BtnSelGallery.ISPUSH){
+			m_nextSceneName = SceneNameDic[SCENE_NAME.GALLERY];
+			return TITLEMODE.tMODE_NEXT_SCENE;
+		}
+		if(m_BtnSelOption.ISPUSH){
+			// m_nextSceneName = SceneNameDic[SCENE_NAME.OPTION];
+			// return TITLEMODE.tMODE_NEXT_SCENE;
 		}
 		return TITLEMODE.tMODE_MAIN;
 	}

@@ -600,7 +600,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 627760023}
   m_OnClick:
     m_PersistentCalls:
@@ -654,6 +654,8 @@ MonoBehaviour:
   m_TitleBtnModeSelect: {fileID: 704067765}
   m_BtnSelSco: {fileID: 1528103808}
   m_BtnSelChallenge: {fileID: 1810599384}
+  m_BtnSelGallery: {fileID: 627760022}
+  m_BtnSelOption: {fileID: 1701764596}
   m_TitleBtnScoModeSelect: {fileID: 268127122}
   m_BtnScoSelNew: {fileID: 1006837841}
   m_BtnScoSelContinue: {fileID: 1549460665}

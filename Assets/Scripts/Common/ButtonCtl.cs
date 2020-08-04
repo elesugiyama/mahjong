@@ -52,8 +52,10 @@ public class ButtonCtl : MonoBehaviour, IPointerClickHandler
 	//---------------------------------------------------------
 	public virtual void OnPointerClick(PointerEventData eventData)
     {
-		if(target == null){
-			Debug.Log("//-*Button:target is null");
+		if(target == null || !target.interactable){
+#if Debug
+			Debug.Log("//-*Button:target is null or interactable false");
+#endif 
 			return;
 		}
         target.OnPointerClick(eventData);
