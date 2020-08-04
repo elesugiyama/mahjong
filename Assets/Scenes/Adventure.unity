@@ -595,7 +595,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &567812322
 RectTransform:
   m_ObjectHideFlags: 0
@@ -754,6 +754,8 @@ MonoBehaviour:
   m_screenEffect: {fileID: 1937134883}
   m_keepData: {fileID: 0}
   m_isSceneChange: 0
+  m_nextScenes: 6
+  m_nextSceneName: 
   m_choiceObjBase: {fileID: 844371482}
   m_nextButton: {fileID: 1810599378}
   m_pageWaitIcon: {fileID: 513448571}
@@ -1075,7 +1077,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1571831823
 RectTransform:
   m_ObjectHideFlags: 0
