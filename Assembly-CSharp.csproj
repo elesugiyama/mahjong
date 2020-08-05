@@ -127,6 +127,9 @@
      <Compile Include="Assets\Scripts\Mahjong\SetResultDora.cs" />
      <Compile Include="Assets\Scripts\Mahjong\SetWanpai.cs" />
      <Compile Include="Assets\Scripts\Mahjong\Stage.cs" />
+     <Compile Include="Assets\Scripts\Option\Option.cs" />
+     <Compile Include="Assets\Scripts\Option\OptionButton.cs" />
+     <Compile Include="Assets\Scripts\Option\OptionDeffine.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageButton.cs" />
      <Compile Include="Assets\Scripts\StageSelect\StageSelect.cs" />
      <Compile Include="Assets\Scripts\Title\Title.cs" />

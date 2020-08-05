@@ -457,7 +457,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1079
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -646,10 +646,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_screenEffect: {fileID: 0}
+  m_raycaster: {fileID: 174196911}
   m_keepData: {fileID: 0}
   m_isSceneChange: 0
   m_nextScenes: 5
   m_nextSceneName: 
+  m_isOpenOption: 0
   m_TitleLogo: {fileID: 1291743497}
   m_TitleBtnModeSelect: {fileID: 704067765}
   m_BtnSelSco: {fileID: 1528103808}
@@ -1614,7 +1616,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 1701764597}
   m_OnClick:
     m_PersistentCalls:

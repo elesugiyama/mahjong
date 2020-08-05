@@ -90,6 +90,7 @@ public class Title : SceneBase {
 	}
 	// Update is called once per frame
 	protected override void Update () {
+		base.Update();
 		switch(m_Mode){
 		case TITLEMODE.tMODE_INIT:
 			DebLog("//-*tMODE_INIT");
@@ -130,6 +131,7 @@ public class Title : SceneBase {
 		if(m_BtnSelOption.ISPUSH){
 			// m_nextSceneName = SceneNameDic[SCENE_NAME.OPTION];
 			// return TITLEMODE.tMODE_NEXT_SCENE;
+			OpenOption();
 		}
 		return TITLEMODE.tMODE_MAIN;
 	}

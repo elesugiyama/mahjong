@@ -21,6 +21,7 @@ public class SceneBase : MonoBehaviour {
 		INGAME,
 		CHALLENGE,
 		GALLERY,
+		OPTION,
 		DEB_TITLE,
 		DEB_SCOSEL,
 		MAX,
@@ -35,6 +36,7 @@ public class SceneBase : MonoBehaviour {
 		{ SCENE_NAME.INGAME,	"InGame" },
 		{ SCENE_NAME.CHALLENGE,	"SelectStage" },
 		{ SCENE_NAME.GALLERY,	"Gallery" },
+		{ SCENE_NAME.OPTION,	"Option" },
 		{ SCENE_NAME.DEB_TITLE,	"DEB_Title" },
 		{ SCENE_NAME.DEB_SCOSEL,"DEB_SelectStage" },
 		{ SCENE_NAME.MAX,		"" },
@@ -43,7 +45,9 @@ public class SceneBase : MonoBehaviour {
 	[Header("暗転などの演出")]
 	[SerializeField]
 	public ScreenEffect m_screenEffect;
-
+	[Header("オプション展開中用")]
+	[SerializeField]
+	public GraphicRaycaster m_raycaster;
 	public DontDestroyData m_keepData;
 
 	private Const.Err.ERRTYPE m_errType;
@@ -53,12 +57,16 @@ public class SceneBase : MonoBehaviour {
 	public SCENE_NAME m_nextScenes = SCENE_NAME.MAX;
 	public string m_nextSceneName = SceneNameDic[SCENE_NAME.MAX];
 	//-*オプション画面
-	public bool m_isOpenOption = false;
+	public bool m_isOpenOption = false;	//-*不要になるかな？
 
 	protected virtual void Start () {}
 	protected virtual void Update () {
-		if(m_isOpenOption){
-			
+		if(m_raycaster != null){
+			if(m_keepData.IsOptionOpen){
+				m_raycaster.enabled = false;
+			}else{
+				m_raycaster.enabled = true;
+			}
 		}
 	}
 	protected virtual void Awake() {
@@ -224,10 +232,30 @@ public class SceneBase : MonoBehaviour {
 
 #region OPTION
 	public void OpenOption(){
-		m_isOpenOption = true;
+		if(m_keepData == null)return;
+		m_keepData.IsOptionOpen = true;
+		// if(m_mainSceneCanvas!= null)m_mainSceneCanvas.SetActive(false);
+		SceneManager.LoadScene(SceneNameDic[SCENE_NAME.OPTION],LoadSceneMode.Additive);
 	}
 	public void CloseOption(){
-		m_isOpenOption = false;
+		if(m_keepData == null)return;
+		// if(m_mainSceneCanvas!= null)m_mainSceneCanvas.SetActive(true);
+        StartCoroutine(CoUnload());
+		m_keepData.IsOptionOpen = false;
 	}
+ 
+    IEnumerator CoUnload()
+    {
+        //SceneAをアンロード
+        var op = SceneManager.UnloadSceneAsync("Option");
+        yield return op;
+ 
+       //アンロード後の処理を書く
+ 
+        //必要に応じて不使用アセットをアンロードしてメモリを解放する
+        //けっこう重い処理なので、別に管理するのも手
+        yield return Resources.UnloadUnusedAssets();
+     }
+
 #endregion //-*OPTION
 }

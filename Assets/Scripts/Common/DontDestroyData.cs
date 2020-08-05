@@ -12,6 +12,11 @@ public class DontDestroyData : MonoBehaviour {
 		// if (Input.GetKey (KeyCode.LeftArrow)) {
 		// 	Debug.Log("//-*********");
 		// }
+	#region OPTION
+	#if false //-*todo:作り方模索中
+		UpdateOption();
+	#endif
+	#endregion //-*OPTION
 	}
 	void Awake() {
 		// シーンまたぎに登録
@@ -24,6 +29,8 @@ public class DontDestroyData : MonoBehaviour {
 		{
 	        DontDestroyOnLoad(this);
 		} 
+
+		m_isOptionOpne = false;
 	}
 
 #region MOEMAHJONG
@@ -143,5 +150,55 @@ public class DontDestroyData : MonoBehaviour {
 	{
 		m_SoundCtl.StopBgm();
 	}
+#region OPTION
+	[SerializeField]
+	private GameObject m_optionBox;
+	[SerializeField]
+	private ButtonCtl m_BtnOptBack = null;
+	private bool m_isOptionOpne = false;
+
+	public bool IsOptionOpen
+	{
+		get{ return m_isOptionOpne;}
+		set{ m_isOptionOpne = value;}
+	}
+	public void UpdateOption(){
+		bool isOptBoxActve = m_optionBox.activeSelf;
+		if(isOptBoxActve != m_isOptionOpne){
+			m_optionBox.SetActive(m_isOptionOpne);
+			isOptBoxActve = m_optionBox.activeSelf;
+		}
+		if(!isOptBoxActve)return;
+		if(m_BtnOptBack.ISPUSH){
+			m_isOptionOpne = false;
+		}
+		// Debug.Log("UpdateOption()");
+	}
+	/// <summary>
+	/// 音量
+	/// </summary>
+	private int m_vol		=  0;
+	public int SOUND_VOLUME{
+		get {return m_vol;}
+		set {m_vol = value;}
+	}
+	/// <summary>
+	/// シナリオ速度
+	/// </summary>
+	private int m_scoSpd		=  0;
+	public int SCO_SPEED{
+		get {return m_scoSpd;}
+		set {m_scoSpd = value;}
+	}
+	/// <summary>
+	/// シナリオ自動
+	/// </summary>
+	private int m_scoAuto		=  0;
+	public int SCO_AUTO{
+		get {return m_scoAuto;}
+		set {m_scoAuto = value;}
+	}
+
+#endregion //-*OPTION
 
 }
