@@ -200,7 +200,7 @@ public class Option : SceneBase {
 		m_keepData.SCO_AUTO = no;
 		for(int btNo = 0;btNo<m_scoAutoBtnList.Count;btNo++){
 			if(m_scoAutoBtnList[btNo] == null) continue;
-			m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
+			m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
 		}
 	}
 

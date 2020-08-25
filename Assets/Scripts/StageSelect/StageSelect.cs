@@ -11,6 +11,7 @@ using MahjongDeffine;
 public class StageSelect : SceneBase {
 
 	private const int STAGEMAXNUM = 8;
+	private const int MAX_LEVEL_CPU = 6; // 敵の強さ度MAX
 	/// <summary>
 	///	チャレンジモードステージルール
 	/// </summary>
@@ -131,6 +132,7 @@ public class StageSelect : SceneBase {
 	private void UpdateNextScene()
 	{
 		m_keepData.mah_limit_num = (int)m_ruleNo;
+		m_keepData.level_cpu = MAX_LEVEL_CPU;
 		DebLog("//-*m_ruleNo:"+m_ruleNo);
 		SceneChange();
 	}

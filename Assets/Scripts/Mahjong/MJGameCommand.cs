@@ -75,7 +75,7 @@ public short TsumoMenuSel( /*MahJongRally * pMe*/ )
 	}
 #region UNITY_ORIGINAL
 		if(m_callMenuSelF || gAutoFlag != 0) {
-			DebLog(("menu_csr(TsumoMenuSel) = "+menu_csr));
+			//-*DebLog(("menu_csr(TsumoMenuSel) = "+menu_csr));
 			no = m_callMenuCsrNo;
 			m_callMenuSelF = false;
 			menu_csr = no;
@@ -152,7 +152,7 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 	#else //-*todo:キー操作
 #region UNITY_ORIGINAL
 		if(m_callMenuSelF || gAutoFlag != 0) {
-			DebLog(("menu_csr(MenuSel) = "+hai_csr));
+			//-*DebLog(("menu_csr(MenuSel) = "+hai_csr));
 			no = m_callMenuCsrNo;
 			m_callMenuSelF = false;
 			menu_csr = no;
@@ -200,7 +200,7 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 #if false //-*todo:サウンド
 		SeOnPlay( SE_ATACK, SEQ_SE);
 #endif //-*todo:サウンド
-		DebLog(("menu_csr = "+menu_csr));
+		//-*DebLog(("menu_csr = "+menu_csr));
 	}while(false);	//0
 
 	if(Optstk[no]!= (byte)OP.TAPAI/* && selFlg*/)
@@ -229,7 +229,7 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 #region UNITY_ORIGINAL
 #if true
 		if(m_haiSelF || gAutoFlag != 0) {
-			DebLog(("hai_csr = "+hai_csr));
+			//-*DebLog(("hai_csr = "+hai_csr));
 			no = m_haiCsrNo;
 			selFlg = true;
 			m_haiSelF = false;
@@ -245,7 +245,7 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 
 #else
 		if(m_haiSelF || gAutoFlag != 0) {
-			DebLog(("hai_csr = "+hai_csr));
+			//-*DebLog(("hai_csr = "+hai_csr));
 			no = m_haiCsrNo;
 			selFlg = true;
 			if(( (hai_on & (1 << no)) == 0)){
@@ -263,14 +263,14 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 	if( IS_NETWORK_MODE ) {
 		// 通信対戦時はチャットメニューとの兼ね合いを避けるためにフラグ管理。
 		if( ((D_ONEPUSH_INPUT_SELECT) && ChatFlag==OFF) || gAutoFlag != 0) {
-			DebLog(("hai_csr = %d\n",hai_csr));
+			//-*DebLog(("hai_csr = %d\n",hai_csr));
 			ResetCountDown();
 			return (no);
 		}
 	} else{
 		// スタンドアローン。
 		if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0) {
-			DebLog(("hai_csr = %d\n",hai_csr));
+			//-*DebLog(("hai_csr = %d\n",hai_csr));
 			return (no);
 		}
 	}
@@ -934,7 +934,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 			case 6: //カン選択
 				hai_csr = (short)Kanpos[NakiSelNo];
 				no = HaiSelM( (short)3 );	//menu_mode
-//				DebLog(("KAN1 no=%d,hai_csr=%d,NakiSelNo=%d,Kanpos[NakiSelNo]=%d",no,hai_csr,NakiSelNo,Kanpos[NakiSelNo]));
+//				//-*DebLog(("KAN1 no=%d,hai_csr=%d,NakiSelNo=%d,Kanpos[NakiSelNo]=%d",no,hai_csr,NakiSelNo,Kanpos[NakiSelNo]));
 
 				i = 0;
 				do{
@@ -946,7 +946,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 				//> 2006/03/14 No.179 複数槓選択時に左カーソルが効かない
 				//NakiSelNo = i;
 				//< 2006/03/14 No.179 複数槓選択時に左カーソルが効かない
-//				DebLog(("KAN2 no=%d,hai_csr=%d,NakiSelNo=%d,Kanpos[NakiSelNo]=%d",no,hai_csr,NakiSelNo,Kanpos[NakiSelNo]));
+//				//-*DebLog(("KAN2 no=%d,hai_csr=%d,NakiSelNo=%d,Kanpos[NakiSelNo]=%d",no,hai_csr,NakiSelNo,Kanpos[NakiSelNo]));
 
 				if( no < 0){
 					i = (int)SubMj.Kannum;
@@ -975,7 +975,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 						menu_mode = 9;
 
 #if true	//-*todo:
-				DebLog(("TSUMO SELECT"));
+				//-*DebLog(("TSUMO SELECT"));
 #endif	//-*todo:
 				break;
 

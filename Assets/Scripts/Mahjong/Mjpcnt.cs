@@ -88,6 +88,7 @@ public void	initppr_pcnt ( /*MahJongRally * pMe*/ ) // 1995.6.23, 7.13
 	while((x=p[p0++]) != 0) {
 		SubMj.rcenter[x]=0;
 		if(x<0x30){
+		//-*check:字牌以外
 			y=x&0x0F;
 			if(y<7)
 				SubMj.rabove[x]=SubMj.Paicnt[x+1]*SubMj.Paicnt[x+2]*vtbl[SubMj.sdv[x]]*2;
@@ -158,7 +159,7 @@ public void getppr_pcnt ( /*MahJongRally * pMe,*/ int x ) // 1995.6.15, 7.20
 				if(gsPlayerWork[i].bFrich != 0) {
 					SubMj.Ppr+=8; SubMj.Pprr+=8;	}
 				else {
-					#if true //-*todo:計算式なんだこれ？
+					#if true //-*todo
 					// Ppr+=v=1000/((rvsum-rv[i])/16+rksum[i]);
 					SubMj.Ppr+=(byte)(v=1000/((rvsum-rv[i])/16+SubMj.rksum[i]));
 					#endif //-*todo:
@@ -167,12 +168,12 @@ public void getppr_pcnt ( /*MahJongRally * pMe,*/ int x ) // 1995.6.15, 7.20
 //#else	//	Ver 1.3	BugFix	2005/12/15
 //					if(paratbl[i].chParaOri<=-5)
 //#endif	//	Ver 1.3	BugFix	2005/12/15
-					#if true //-*todo:計算式なんだこれ？
+					#if true //-*todo
 						// Pprr+=v;
 						SubMj.Pprr=(byte)(SubMj.Pprr+v);
 					#endif //-*todo:
 					else
-					#if true //-*todo:計算式なんだこれ？
+					#if true //-*todo:
 						// Pprr+=1000/((rvrsum-rv[i])/16+rkrsum[i]);
 						SubMj.Pprr+=(byte)(1000/((rvrsum-rv[i])/16+SubMj.rkrsum[i]));
 					#endif //-*todo:
@@ -191,10 +192,30 @@ public short GetPoint(/*MahJongRally * pMe,*/ int odr)
 
 public void _loadParam(/*MahJongRally * pMe,*/ int odr, TABLEMEM pTableMem)
 {
-#if false //-*todo:キャラパラメーターなんで要らない気がする
+#if true //-*キャラパラメーター
 	int	iChara	=	pTableMem.byMember;
 
-	gsPlayerWork[odr].sParamData= GetCharacterparam(iChara);	//MEMCPY((gsPlayerWork[odr].sParamData), (GetCharacterparam(iChara)), sizeof(PARA));
+	//-*gsPlayerWork[odr].sParamData = GetCharacterparam(iChara);	//MEMCPY((gsPlayerWork[odr].sParamData), (GetCharacterparam(iChara)), sizeof(PARA));
+	gsPlayerWork[odr].sParamData = MJDefine.sCharaMJParam[iChara];
+
+	//-*SUGI_DEB***************************
+	gsPlayerWork[odr].sParamData = new PARA (  0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0);
+	#if SUGI_DEB //-*todo:注デバッグ中	if(m_DebBox != null && m_DebBox.GetTumikomiNo() >= 0){
+		if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.THINK)){
+			var debPara = m_DebBox.GetDebPara();
+			if(debPara.Length >= 30){
+				PARA temp = new PARA(
+					debPara[0],debPara[1],debPara[2],debPara[3],debPara[4],debPara[5],debPara[6],debPara[7],debPara[8],debPara[9],
+					debPara[10],debPara[11],debPara[12],debPara[13],debPara[14],debPara[15],debPara[16],debPara[17],debPara[18],debPara[19],
+					debPara[20],debPara[21],debPara[22],debPara[23],debPara[24],debPara[25],debPara[26],debPara[27],debPara[28],debPara[29]
+				);
+				gsPlayerWork[odr].sParamData = temp;
+				if(odr >= gsPlayerWork.Length-1)m_DebBox.SetDebugFlagOFF(DebBoxInGame.FUNCTION_LIST.THINK);
+			}
+
+		}
+	#endif //-*todo:注デバッグ中
+	//-****************************SUGI_DEB
 #endif //-*todo:
 }
 
@@ -645,7 +666,7 @@ public void calcpcs_pcnt ( /*MahJongRally * pMe*/ ) // 1995.4.26, 6.14, 6.21, 6.
 //#else	//	Ver 1.3	BugFix	2005/12/15
 //	gpsTableData.psParam=paratbl+Order;
 //#endif	//	Ver 1.3	BugFix	2005/12/15
-	SubMj.Tleft= (byte)((MJDefine.PAI_MAX- Bpcnt- Kancnt)/ 4);		//122x
+	SubMj.Tleft= (byte)((MJDefine.PAI_MAX- Bpcnt- Kancnt)/ 4);		//122x	//-*check:([残り牌取得(牌数-牌番号[積み込み配列内の何番目か]-カン数)]/4)
 	SubMj.keiten= (short)(gpsTableData.psParam.chParaKeiten != 0 && (Order==gpsTableData.byOya ? SubMj.notflg[Order] == 0 &&
 		(Rultbl[(int)RL.NANBA] == 0 || Rultbl[(int)RL.NOTEN] != 0) : Rultbl[(int)RL.NOTEN] != 0) ? keitbl[SubMj.Tleft] : 0);
 	SubMj.ricrisk=(short)(rrtbl[SubMj.Tleft]*(8+gpsTableData.psParam.chParaRichi)*(2+Richi));

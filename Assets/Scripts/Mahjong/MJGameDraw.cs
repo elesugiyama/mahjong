@@ -97,7 +97,7 @@ static int		FaceNum= 0;		//キャラクター表情
 #endif
 public void MJ_GameDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameDraw()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameDraw()");
 	int		House=0;	// 誰から表示をするか
 	// 対家位置描画
 	House = ( game_player + 1) % (int)D_CYA.D_MENTSU_COUNT;
@@ -451,7 +451,7 @@ public const int D_MARK_BASE_Y = 3;
 public const int D_MARK_OFFSET_Y = (13+D_MARK_BASE_Y);
 public void MJ_GamePointDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GamePointDraw");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GamePointDraw");
 #if false //-*todo:描画保留
 
 	short[]		MenuPosX= { 50-D_YOUBOU_NO_80_, 75-D_YOUBOU_NO_80_, 50-D_YOUBOU_NO_80_,	5};
@@ -569,7 +569,7 @@ public void MJ_GamePointDraw( /*MahJongRally * pMe*/ )
 ===========================================================================*/
 public void MJ_ResultDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_ResultDraw()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_ResultDraw()");
 #if true//-*todo:描画保留
 	bool isFirstTime = false;
 	
@@ -720,7 +720,7 @@ public byte	DAgariNumDisp( /*MahJongRally * pMe,*/
 					   int color)
 {
 #if true//-*todo:描画保留
-	DebLog("DAgariNumDisp(int "+val+", byte "+pos+", int "+dx+", int "+dy+", byte "+place+", bool "+Flag+",	int "+color+" )");
+	//-*DebLog("DAgariNumDisp(int "+val+", byte "+pos+", int "+dx+", int "+dy+", byte "+place+", bool "+Flag+",	int "+color+" )");
 	return 0;
 #else//-*todo:描画保留
 
@@ -826,7 +826,7 @@ public byte	DAgariNumDisp( /*MahJongRally * pMe,*/
 ===========================================================================*/
 public void MJ_PointDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_PointDraw()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_PointDraw()");
 #if true //-*todo:描画保留
 
 
@@ -1587,7 +1587,7 @@ public int AgariNumDisp( int val, int x, int y, int len, int place, bool zero_fl
 public int mAgariNumDisp( /*MahJongRally * pMe,*/ int val, int x, int y, byte len, byte place, bool zero_flg, int num )
 {
 #if true//-*todo:描画保留
-DebLog("//-*MJ:GameDraw.cs:mAgariNumDisp( int "+val+", int "+x+", int "+y+", byte "+len+", byte "+place+", bool "+zero_flg+", int "+num+" )");
+//-*DebLog("//-*MJ:GameDraw.cs:mAgariNumDisp( int "+val+", int "+x+", int "+y+", byte "+len+", byte "+place+", bool "+zero_flg+", int "+num+" )");
 return 0;
 #else //-*todo:描画保留
 
@@ -1656,7 +1656,7 @@ public const int D_SUTEPAI_OFFSET_H	 = 17;	//18
 ===========================================================================*/
 public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_JicyaDraw( int "+House+" )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_JicyaDraw( int "+House+" )");
 	int i		= 0;	// ループ
 	int j		= 0;	// チーループ用。
 	int x		= 0;	// 牌UP用
@@ -1692,7 +1692,7 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 								手牌の描画
 	===========================================================================*/
 	cnt		= gsPlayerWork[House].byThcnt;							// 手牌の数を取得。
-	// DebLog("//-***************手牌************");
+	// //-*DebLog("//-***************手牌************");
 
 	for(int a=0;a<m_myHandTiles.Count;a++){
 
@@ -1721,7 +1721,7 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 
 		var tehaiDraw = m_myHandTiles[a].GetComponent<MJTIle>();
 		if(a < cnt){
-		// DebLog("//-*手牌["+a+"]:"+gsPlayerWork[House].byTehai[a]+"("+(PAI)gsPlayerWork[House].byTehai[a]+")");
+		// //-*DebLog("//-*手牌["+a+"]:"+gsPlayerWork[House].byTehai[a]+"("+(PAI)gsPlayerWork[House].byTehai[a]+")");
 			tehaiDraw.set(TILE_STATE.HAND,(PAI)gsPlayerWork[House].byTehai[a]);
 			tehaiDraw.SetCallTileePos(false);
 			if(House == 0 && x!=0){
@@ -2484,7 +2484,7 @@ public const int D_SUTEPAI_REACH_OFF			= (-4);	//(-3)
 ===========================================================================*/
 public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_ToicyaDraw( int "+House+" )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_ToicyaDraw( int "+House+" )");
 #region UNITY_ORIGINAL
 	int i		= 0;	// ループ
 	int j		= 0;	// チーループ用。
@@ -2519,7 +2519,7 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 	cnt		= gsPlayerWork[House].byThcnt+1;							// 手牌の数を取得。
 	flg = (hai_open & 0x4) != 0 ? -1 :
 		(gsPlayerWork[House].bFrich != 0 ? 1 : 0);
-	// DebLog("//-***************手牌************");
+	// //-*DebLog("//-***************手牌************");
 	for(int a=0;a<m_yourHandTiles.Count;a++){
 		var tehaiDraw = m_yourHandTiles[a].GetComponent<MJTIle>();
 		if(a < cnt){
@@ -2532,6 +2532,13 @@ public void MJ_ToicyaDraw( /*MahJongRally * pMe,*/ int House )
 				}
 
 				no = (int)PAI.URA;	//gsPlayerWork[House].byHkhai;
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+				if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.OPEN_PAI)){
+					no = (int)gsPlayerWork[House].byHkhai;
+				}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 				if( flg < 0) {
 					flg = 0;
 					no = gsPlayerWork[House].byHkhai;	// 現時点での捨てられた牌（ツモ牌）
@@ -3297,7 +3304,7 @@ public void MJ_KamicyaDraw( /*MahJongRally * pMe,*/ int House )
 #endif
 public void MJ_GameMenuDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameMenuDraw()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameMenuDraw()");
 //-********************ここから
 
 	int		i			= 0;		// ループ
@@ -3525,7 +3532,7 @@ public const int		D_WanBASE_X			= 35;		//(93)
 public const int		D_WanBASE_Y			= 113;		//(120)
 public void MJ_GameWanpaiDisp( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameWanpaiDisp()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameWanpaiDisp()");
 	if(m_WanTilesBase == null)return;
 	short i=0;
 	byte  no=0;
@@ -3676,7 +3683,7 @@ public void MJ_GameWanpaiDisp( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void	MJ_GameDrawInit( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameDrawInit");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameDrawInit");
 #if false//-*todo:描画保留
 
 	short i	= 0;
@@ -3927,7 +3934,7 @@ Debug.mem("mem");
 /************************************************************/
 public void	MJ_GameDrawFree( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameDrawFree()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameDrawFree()");
 
 #if false //-*todo:描画保留
 	short i=0;
@@ -3981,7 +3988,7 @@ Debug.mem("mem");
 /********************************************************/
 public void MJ_GameSozaiDisp( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameSozaiDisp()");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameSozaiDisp()");
 	UpdateHeaderFotter();
 #if false //-*todo:描画保留
 	
@@ -4090,7 +4097,7 @@ public void MJ_GameSozaiDisp( /*MahJongRally * pMe*/ )
 /********************************************************/
 public int	getKakarenaihai( /*MahJongRally * pMe,*/ int House )
 {
-	DebLog("//-*MJ:GameDraw.cs:getKakarenaihai( int "+House+")");
+	//-*DebLog("//-*MJ:GameDraw.cs:getKakarenaihai( int "+House+")");
 	int			i		= 0;
 	short	suteCnt = 0;
 	short	suteFlag= 0;
@@ -4118,7 +4125,7 @@ public int	getKakarenaihai( /*MahJongRally * pMe,*/ int House )
 public int	getReachLine_Toicya( /*MahJongRally * pMe,*/ int House, int Define )
 {
 #if true //-*todo:描画保留
-	DebLog("//-*MJ:GameDraw.cs:getReachLine_Toicya( int "+House+", int "+Define+")");
+	//-*DebLog("//-*MJ:GameDraw.cs:getReachLine_Toicya( int "+House+", int "+Define+")");
 	return 0;
 #else //-*todo:描画保留
 	int		i			= 0;
@@ -4168,7 +4175,7 @@ public int	getReachLine_Toicya( /*MahJongRally * pMe,*/ int House, int Define )
 public int	getReachLine_Shimocya( /*MahJongRally * pMe,*/ int House, int Define )
 {
 #if true //-*todo:描画保留
-	DebLog("//-*MJ:GameDraw.cs:getReachLine_Shimocya( int "+House+", int "+Define+")");
+	//-*DebLog("//-*MJ:GameDraw.cs:getReachLine_Shimocya( int "+House+", int "+Define+")");
 	return 0;
 #else //-*todo:描画保留
 
@@ -4248,7 +4255,7 @@ public void MJ_GameResultDraw(/*MahJongRally* pMe*/)
 {
 
 #if true //-*todo:描画保留
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameResultDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameResultDraw( )");
 	// ロジック
 	MjEndMain();
 #else //-*todo:描画保留
@@ -4363,7 +4370,7 @@ public void MJ_GameResultDraw(/*MahJongRally* pMe*/)
 /************************************************************/
 public void MJ_SeqEndPoint2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndPoint2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndPoint2( )");
 #if false //-*todo:描画保留
 	short		nPointE	= 0;	// 局終了後の得点。
 	short	ranking	= 0;	// 順位。
@@ -4398,7 +4405,7 @@ public void MJ_SeqEndPoint2( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void MJ_SeqEndTip2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndTip2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndTip2( )");
 #if false //-*todo:描画保留
 	short		nPnt		= 0;		// 局終了後の得点。
 	short	ranking		= 0;		// 順位。
@@ -4459,7 +4466,7 @@ public void MJ_SeqEndTip2( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void MJ_SeqEndDobon2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndDobon2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndDobon2( )");
 #if false //-*todo:描画保留
 	short		nPnt		= 0;		// 局終了後の得点。
 	short	ranking		= 0;		// 順位。
@@ -4517,7 +4524,7 @@ public void MJ_SeqEndDobon2( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void MJ_SeqEndUma2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndUma2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndUma2( )");
 #if false //-*todo:描画保留	short		nPnt		= 0;		// 局終了後の得点。
 	short	ranking		= 0;		// 順位。
 	int			cnt			= 0;		//
@@ -4575,7 +4582,7 @@ public void MJ_SeqEndUma2( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void MJ_SeqEndYakitori2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndYakitori2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqEndYakitori2( )");
 #if false //-*todo:描画保留
 	short		nPnt		= 0;		// 局終了後の得点。	short		nPnt		= 0;		// 局終了後の得点。
 	short	ranking		= 0;		// 順位。
@@ -4633,7 +4640,7 @@ public void MJ_SeqEndYakitori2( /*MahJongRally * pMe*/ )
 /************************************************************/
 public void MJ_SeqAgRanking2( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_SeqAgRanking2( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_SeqAgRanking2( )");
 #if false //-*todo:描画保留
 //	int			i		= 0;
 //	short	member	= 0;	// メンバー。
@@ -4680,7 +4687,7 @@ public void MJ_SeqAgRanking2( /*MahJongRally * pMe*/ )
  */
 public void MJ_GameChatDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameChatDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameChatDraw( )");
 #if false //-*todo:描画保留
 	short	i	 =0;	//
 
@@ -4731,7 +4738,7 @@ public void MJ_GameChatDraw( /*MahJongRally * pMe*/ )
 //
 public void MJ_GameChatTalkDraw(/*MahJongRally* pMe*/)
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameChatTalkDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameChatTalkDraw( )");
 #if false //-*todo:描画保留
 	short[]	MenuPosX = {	50-8,	75-16,	50-8,	5};
 	short[]	MenuPosY = { 200, 140,  20,	80};
@@ -4812,7 +4819,7 @@ public void MJ_GameChatTalkDraw(/*MahJongRally* pMe*/)
 // D_MAX_OPTION_COUNT
 public void MJ_GameModeChangeMain( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameModeChangeMain( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameModeChangeMain( )");
 #if false //-*todo:描画保留
 	// --- 音量 ---。
 	// f_info.f_optionsetting.m_OptionSel[D_OPTION_BGM]
@@ -4956,7 +4963,7 @@ public void MJ_GameModeChangeMain( /*MahJongRally * pMe*/ )
  */
 public void MJ_GameModeChangeDraw( /*MahJongRally * pMe*/ )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameModeChangeDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameModeChangeDraw( )");
 #if false //-*todo:描画保留
 #if	__MJ_CHECK
 	String str;			//char* str=0;
@@ -5022,7 +5029,7 @@ public void MJ_GameModeChangeDraw( /*MahJongRally * pMe*/ )
 public void MJ_GameChatMain( /*MahJongRally * pMe*/ )
 {
 
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameChatMain( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameChatMain( )");
 #if false //-*todo:描画保留
 	// メニューがあればﾓﾄﾞﾙ。
 	// 対話があればﾓﾄﾞﾙ。
@@ -5107,7 +5114,7 @@ public const int D_AGARI_FR_DRAW_BASE_X	17
 #endif
 public void MJ_FrJicyaDraw( /*MahJongRally * pMe,*/ int House, int D_JICYA_TEHAI_Y )
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_FrJicyaDraw( int "+House+", int "+D_JICYA_TEHAI_Y+" )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_FrJicyaDraw( int "+House+", int "+D_JICYA_TEHAI_Y+" )");
 	int Bbit		= 0;	// フーロ牌情報取得
 	int BbitBefor	= 0;	//-*todo:GameObject生成確認用
 	int Fr			= 0;	// フーロ牌チェック用
@@ -5535,7 +5542,7 @@ if(House == 0){
 // 第２引数：
 public void MJ_TenpaiDraw(/*MahJongRally* pMe*/)
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_TenpaiDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_TenpaiDraw( )");
 #if true //-*todo:描画保留
 #region  UNITY_ORIGINAL
 	short				Seki, i;
@@ -5733,7 +5740,7 @@ public AEERect		MJ_RyukyokuDraw_rect_= new AEERect();	//0508mt
 #endif
 public void MJ_RyukyokuDraw(/*MahJongRally* pMe*/)
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_RyukyokuDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_RyukyokuDraw( )");
 #if true //-*todo:描画保留
 	if( Pinch != (byte)SP.YAOCHU){
 		m_callObjRyukyoku.setCall((int)CALLDRAW.RYUKYOKU);
@@ -5792,7 +5799,7 @@ public int	draw_time_index_ = 0;
 public int pre_draw_time_index_ = 0;
 public void MJ_GameCountDown()
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameCountDown( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameCountDown( )");
 #if false //-*todo:描画保留
 	if( !IS_NETWORK_MODE )	return;//0508mt
 
@@ -5825,7 +5832,7 @@ public void MJ_GameCountDown()
  */
 public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 {
-	DebLog("//-*MJ:GameDraw.cs:MJ_GameCountDownDraw( )");
+	//-*DebLog("//-*MJ:GameDraw.cs:MJ_GameCountDownDraw( )");
 #if false //-*todo:描画保留
 	if( draw_time_index_ < D_COUNT_DOWN_MAX )
 		MpsBrewLib_DrawSprite( spCount[draw_time_index_], 180, 193 );
@@ -5876,7 +5883,7 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 									Vector3.zero,
 									Quaternion.identity);
 						if(instantObj == null){
-							DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
+							//-*DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
 							return;
 						}
 						instantObj.name = "Discarded"+String.Format("{0:00}", i);
@@ -5919,7 +5926,7 @@ public void MJ_GameCountDownDraw( /*MahJongRally *pMe*/)
 									Vector3.zero,
 									Quaternion.identity);
 						if(instantObj == null){
-							DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
+							//-*DebLogError("//-*Make TileBase Err:(DrawDiscardedTiles)No."+i);
 							return;
 						}
 						instantObj.name = "Discarded"+String.Format("{0:00}", i);

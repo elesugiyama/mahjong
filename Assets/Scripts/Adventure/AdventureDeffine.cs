@@ -11,7 +11,18 @@ namespace AdventureDefine
 {
 	public class AdvDefine
 	{
+#region	SCENARIOMSSAGE
+//-*シナリオ文表示関連
+		public static float[] MSG_SPD = new float[]
+		{//-*メッセージ送りスピード
+			0.2f,
+			0.1f,
+			0.0f,
+		};
+		public static float AUTO_WAIT_TIME = 1.0f;	//-*自動送りの待ち時間
+#endregion	//-*SCENARIOMSSAGE
 #region	SCENARIOCMMAND
+//-*シナリオコマンド関連
 		/// <summary>
 		/// シナリオコマンド種類
 		/// </summary>
@@ -68,6 +79,7 @@ namespace AdventureDefine
 #endregion	//-*SCENARIOCMMAND
 
 #region IMAGE
+//-*画像関連
 		/// <summary>
 		/// CGリスト< int:イベント番号, string:画像名 >
 		/// 旧(eventCGFileName.dat イベントCG用ファイル名)

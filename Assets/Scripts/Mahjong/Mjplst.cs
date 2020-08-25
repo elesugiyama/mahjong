@@ -42,6 +42,7 @@ public void newlst_plst ( /*MahJongRally * pMe,*/ PLST[] q )/*1995.4.19, 5.1	正
 {
 	int x=1, q0= 0;
 
+	//-*check:字牌以外(牌番号min～maxの間で繋がる)
 	do {
 		if(cntbuf[x] != 0){
 			q[q0].max=q[q0].min=x;
@@ -52,6 +53,7 @@ public void newlst_plst ( /*MahJongRally * pMe,*/ PLST[] q )/*1995.4.19, 5.1	正
 			++q0;		//++q;
 		}
 	} while(++x<=0x29);
+	//-*check:以下字牌
 	for(x=0x31; x<=0x37; x++) {
 		if(cntbuf[x] != 0){
 			q[q0].min=q[q0].max=x;

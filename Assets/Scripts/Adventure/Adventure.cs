@@ -54,6 +54,7 @@ public class Adventure : SceneBase {
 		aEFFCT_WHITEIN,			// 20
 		aEFFCT_JUMPWAIT,			// 21
 	};
+
 	[Header("選択肢")]
 	[SerializeField]
 	private GameObject m_choiceObjBase;
@@ -109,7 +110,7 @@ public class Adventure : SceneBase {
 	private int m_pageLine;			//-*1ページの〇行目
 	private int m_messageCount; 	//-*現在表示中の文字数
 	private float m_messageDelayCount; //-*1文字ずつ表示用ディレイカウント
-	private float m_pageDrawSpeed = 0.2f;	//一文字一文字の表示する速さ todo:速度を3つ定義(0.0f,0.1f,0.2f)して可変にする
+	private float m_pageDrawSpeed = AdvDefine.MSG_SPD[0];	//一文字一文字の表示する速さ
 
 
 #region FLAG
@@ -265,6 +266,12 @@ m_isSceneChange = true;
 				m_Mode = ModeSet(ADVENTUREMODE.aMODE_PAGE_WAIT);
 				break;
 			case ADVENTUREMODE.aMODE_PAGE_WAIT:
+			//-*自動メッセージ送り
+				if(m_keepData.IS_SCO_AUTO && !IsInvoking("PushNextPageButton")){
+				//-*一度だけ呼ぶ
+					Invoke("PushNextPageButton",AdvDefine.AUTO_WAIT_TIME);
+				}
+			//-*****************
 				if( !m_isPageWait ) {
 					PageInit();
 					PageWaitFin();
@@ -287,6 +294,7 @@ m_isSceneChange = true;
 				m_isEffectWait = false;
 				break;
 			case ADVENTUREMODE.aMODE_GO_TO_BATTLE:
+				m_keepData.level_cpu = 0;
 				SceneChange("InGame");
 				break;
 			case ADVENTUREMODE.aMODE_ENDING:
@@ -586,9 +594,10 @@ m_isSceneChange = true;
     {
 		m_messageCount = 0;
 		m_messageDelayCount = 0;
+		m_pageDrawSpeed = AdvDefine.MSG_SPD[m_keepData.SCO_SPEED];
         while (m_textLineData[m_pageLine].Length > m_messageCount)//文字をすべて表示していない場合ループ
         {
-			if(!m_isPageDraw)
+			if(!m_isPageDraw || m_pageDrawSpeed <= 0)
 			{
 				m_textLine[m_pageLine].text = m_textLineData[m_pageLine];
 				m_messageCount = m_textLineData[m_pageLine].Length;
@@ -813,6 +822,7 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 		if(stageAndRule != null ){
 			if(!string.IsNullOrEmpty(stageAndRule[0]) && int.TryParse(stageAndRule[0], out stNo)){
 				m_keepData.MjStage = stNo;
+				m_keepData.level_cpu = stNo; // 敵の強さ度(//-*ステージ番号が難易度)
 			}
 			if(!string.IsNullOrEmpty(stageAndRule[1]) && int.TryParse(stageAndRule[1], out ruleNo)){
 				m_keepData.mah_limit_num = ruleNo;

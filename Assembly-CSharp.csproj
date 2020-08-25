@@ -71,6 +71,7 @@
      <Compile Include="Assets\Scripts\Debug\DebBoxInGame.cs" />
      <Compile Include="Assets\Scripts\Debug\DebButtonBase.cs" />
      <Compile Include="Assets\Scripts\Debug\DebScoSelect.cs" />
+     <Compile Include="Assets\Scripts\Debug\DebThinkBox.cs" />
      <Compile Include="Assets\Scripts\Gallery\Gallery.cs" />
      <Compile Include="Assets\Scripts\Gallery\GalleryButton.cs" />
      <Compile Include="Assets\Scripts\Gallery\GalleryDeffine.cs" />

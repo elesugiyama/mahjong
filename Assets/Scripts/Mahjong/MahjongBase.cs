@@ -1519,7 +1519,7 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 	/// </summary>
 	private void UpdateHeaderFotter()
 	{
-		int		Kyoku 	= ((gpsTableData.byKyoku/ 4) & 0x01);						// 局(東南西北)。
+		int		Kyoku 	= ((gpsTableData.byKyoku/ 4) & 0x01);						// 局(東南)//-*西北)。
 		int		KyokuCnt= ((gpsTableData.byKyoku) & 0x01);						// 局数。
 		int		Renchan = (byte)(gpsTableData.byDrawRenchan % 100);	// 何本場か
 		int		House 	= (( gpsTableData.byOya+ 4- game_player) % 4) & 0x01;

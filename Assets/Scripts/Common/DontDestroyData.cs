@@ -133,7 +133,14 @@ public class DontDestroyData : MonoBehaviour {
 	/// </summary>
 	private int m_level_cpu		=  0;	// 敵の強さ度
 	public int level_cpu{
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中	
+		get {return 6;}
+#else
 		get {return m_level_cpu;}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
+
 		set {m_level_cpu = value;}
 	}
 #endregion //-*MYCANVAS
@@ -196,9 +203,16 @@ public class DontDestroyData : MonoBehaviour {
 	private int m_scoAuto		=  0;
 	public int SCO_AUTO{
 		get {return m_scoAuto;}
-		set {m_scoAuto = value;}
+		set {
+			m_scoAuto = value;
+			//-*todo:「0」がシナリオオートOFF前提(マジックナンバー注意)
+			m_isScoAuto = (m_scoAuto == 0)?false:true;
+		}
 	}
-
+	private bool m_isScoAuto = false;
+	public bool IS_SCO_AUTO{
+		get{return m_isScoAuto;}
+	}
 #endregion //-*OPTION
 
 }

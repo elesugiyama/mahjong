@@ -69,9 +69,9 @@ public bool game_free(/*MahJongRally * pMe*/)
 	gpsTableData	=	gsTableData[0];		//&gsTableData[0];
 
 	setFreeMentsu(byMentsu);											/* 面子セット */
-#if false //-*todo:よくわからんので保留
+#if false //-*todo:保留
 	gsTableData[0].sMemData[0].byMember	=	MJ_CHAR_SILHOUETTE;			/*	プレイヤーでも指導モードがあるのでキャラをセットする	*/
-#endif //-*todo;よくわからんので保留
+#endif //-*todo;保留
 
 	gsTableData[0].sMemData[1].byMember	=	(byte)sel_buf[0];
 	gsTableData[0].sMemData[2].byMember	=	(byte)sel_buf[1];
