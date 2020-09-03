@@ -148,15 +148,18 @@ public int think_think ( /*MahJongRally * pMe*/ )/*1995.6.23*2*/
 #if	__comEnfeeble	//COM思考の弱体化
 	int		NokoriPai= MJDefine.PAI_MAX- (Bpcnt+ Kancnt);	// 残り牌取得
 
-	if((NokoriPai>= tumoPassMin) && (NokoriPai<= tumoPassMax)) {
 	#if DEBUG
-	Debug.Log("com think_think pass: "+ NokoriPai);
+	Debug.Log("//-*com think_think NokoriPai("+NokoriPai+") = "+MJDefine.PAI_MAX+" - (Bpcnt("+Bpcnt+") + Kancnt("+Kancnt+"))["+(Bpcnt+ Kancnt)+"]" );
 	#endif
+	if((NokoriPai>= tumoPassMin) && (NokoriPai<= tumoPassMax)) {
+	// #if DEBUG
+	// Debug.Log("com think_think pass: "+ NokoriPai);
+	// #endif
 		return ((int )OP.TAPAI);
 	} else {
-	#if DEBUG
-	Debug.Log("com think_think true: "+ NokoriPai);
-	#endif
+	// #if DEBUG
+	// Debug.Log("com think_think true: "+ NokoriPai);
+	// #endif
 	}
 #endif
 

@@ -1548,7 +1548,7 @@ public void MjMain(/*MahJongRally * pMe*/)
 	do{
 #endif
 //#if	__LOGIC_CHECK
-DebLog("mj_sts "+mj_sts);		//aaaa
+// DebLog("mj_sts "+mj_sts);		//aaaa
 //#endif
 		switch(mj_sts) {
 			//0 と 7 は使われてない
