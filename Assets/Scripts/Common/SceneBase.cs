@@ -308,38 +308,49 @@ public class SceneBase : MonoBehaviour {
 	public bool IsKeyAxisButton(KEY_NAME keyName, bool isWait = true)
 	{
 		bool isPress = false;
+		//-*傾きの大きさ
+		float stickMagnitudeX = Mathf.Abs(m_inputStick.x);
+		float stickMagnitudeY = Mathf.Abs(m_inputStick.y);
+		
 		//-*受付拒否(受付拒否時間中,方向キー以外,傾きが一定値無い)
 		if(isWait && m_keyWaitTIme > 0)
 			return false;
 		if(keyName >= KEY_NAME.AXIS_MAX)
 			return false;
-		if( (keyName == KEY_NAME.UP || keyName == KEY_NAME.DOWN) && ( Mathf.Abs(m_inputStick.y) <= KEY_AXIS_REFUSE_INCLINE) )
+		if( (keyName == KEY_NAME.LEFT || keyName == KEY_NAME.RIGHT) && ( stickMagnitudeX <= KEY_AXIS_REFUSE_INCLINE) )
 			return false;
-		if( (keyName == KEY_NAME.LEFT || keyName == KEY_NAME.RIGHT) && ( Mathf.Abs(m_inputStick.x) <= KEY_AXIS_REFUSE_INCLINE) )
+		if( (keyName == KEY_NAME.UP || keyName == KEY_NAME.DOWN) && ( stickMagnitudeY <= KEY_AXIS_REFUSE_INCLINE) )
 			return false;
 			
-		
+		//-*上下左右の向き
 		int axisX = (m_inputStick.x > 0)? 1:-1;
 		int axisY = (m_inputStick.y > 0)? 1:-1;
+		//-*上下左右の優先度
+		bool isAxisX = (stickMagnitudeX > stickMagnitudeY)? true:false;	//-*傾きが同じなら縦(Y軸)優先
+
 		switch(keyName){
 			case KEY_NAME.UP:
-				if(axisY == -1){
+				if(axisY == -1 && !isAxisX){
 					isPress = true;
+					// Debug.Log("//-*上！！！！！！");
 				}
 				break;
 			case KEY_NAME.DOWN:
-				if(axisY == 1){
+				if(axisY == 1 && !isAxisX){
 					isPress = true;
+					// Debug.Log("//-*下！！！！！！");
 				}
 				break;
 			case KEY_NAME.LEFT:
-				if(axisX == -1){
+				if(axisX == -1 && isAxisX){
 					isPress = true;
+					// Debug.Log("//-*左！！！！！！");
 				}
 				break;
 			case KEY_NAME.RIGHT:
-				if(axisX == 1){
+				if(axisX == 1 && isAxisX){
 					isPress = true;
+					// Debug.Log("//-*右！！！！！！");
 				}
 				break;
 			default:
@@ -363,7 +374,7 @@ public class SceneBase : MonoBehaviour {
 			if( x != 0 || y != 0 ) {
 				m_inputStick.x = x;
 				m_inputStick.y = y;
-				DebLog("//-****m_InputVector:"+m_inputStick);
+				// DebLog("//-****m_InputVector:"+m_inputStick);
 			}
 		}
 		//-*キー入力受付拒否時間

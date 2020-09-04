@@ -70,17 +70,16 @@ public class Title : SceneBase {
 	private ButtonCtl m_BtnDebInGame = null;	
 #endif //-*SUGI_DEB
 
-#region KEY_TEST
-	float rotate_control_y = 0;
-	int m_menuNo = 0;
-	private enum TITLE_SELECT { // menu処理全体
+#region GAME_PAD
+	private int m_menuNo = 0;
+	private enum TITLE_SELECT { //-*タイトルメニュー
 		SEL_STORY = 0,
 		SEL_CHALLENGE,
 		SEL_GALLERY,
 		SEL_OPTION,
 		MAX,
 	};
-	private enum SCO_SELECT { // menu処理全体
+	private enum SCO_SELECT { // シナリオメニュー
 		SEL_NEW_GAME = 0,
 		SEL_CONTINUE,
 		SEL_BACK,
@@ -90,10 +89,10 @@ public class Title : SceneBase {
 	private GameObject m_titleCursol=null;
 
 	[SerializeField]
-	private List<GameObject> m_titleMenuObj = new List<GameObject>();
+	private List<GameObject> m_titleMenuObj = new List<GameObject>();		//-*TITLE_SELECTと連動させること
 	[SerializeField]
-	private List<GameObject> m_titleScoMenuObj = new List<GameObject>();
-#endregion //-*KEY_TEST
+	private List<GameObject> m_titleScoMenuObj = new List<GameObject>();	//-*SCO_SELECTと連動させること
+#endregion //-*GAME_PAD
 
 
 	// Use this for initialization
@@ -163,9 +162,9 @@ public class Title : SceneBase {
 			}else if(m_menuNo >= (int)TITLE_SELECT.MAX){
 				m_menuNo = (int)TITLE_SELECT.SEL_STORY;
 			}
+			//-*カーソル移動
 			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
-			DebLog("方向入力！上！！！！！！！"+m_menuNo+"！！！！！"+rotate_control_y);
 		}else
 		if(IsKeyAxisButton(KEY_NAME.DOWN)){
 			m_menuNo++;
@@ -174,12 +173,11 @@ public class Title : SceneBase {
 			}else if(m_menuNo >= (int)TITLE_SELECT.MAX){
 				m_menuNo = (int)TITLE_SELECT.SEL_STORY;
 			}
+			//-*カーソル移動
 			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
-			DebLog("方向入力！下！！！！！！！"+m_menuNo+"！！！！！"+rotate_control_y);
 		}
 		else if(IsKeyBtnPress(KEY_NAME.SELECT,false)){
-			DebLog("キー入力！！！！！！！！！！！！！"+m_menuNo);
 			switch(m_menuNo)
 			{
 			case (int)TITLE_SELECT.SEL_STORY:
@@ -197,6 +195,7 @@ public class Title : SceneBase {
 				return TITLEMODE.tMODE_OPTION;
 			}
 		}
+
 #endregion //-*GAME_PAD
 #region BUTTON_PUSH
 		if(m_BtnSelSco.ISPUSH){
@@ -244,7 +243,7 @@ public class Title : SceneBase {
 
 #region GAME_PAD
 		//-************
-		//-*キー入力テスト
+		//-*ゲームパッド入力
 		//-************
 		if(IsKeyAxisButton(KEY_NAME.UP)){
 			m_menuNo--;
@@ -260,7 +259,6 @@ public class Title : SceneBase {
 			}
 			m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
-			DebLog("方向入力！上！！！！！！！"+m_menuNo+"！！！！！"+rotate_control_y);
 		}else
 		if(IsKeyAxisButton(KEY_NAME.DOWN)){
 			m_menuNo++;
@@ -276,7 +274,6 @@ public class Title : SceneBase {
 			}
 			m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
-			DebLog("方向入力！下！！！！！！！"+m_menuNo+"！！！！！"+rotate_control_y);
 		}
 		else
 		if(IsKeyBtnPress(KEY_NAME.BACK,false)){
@@ -286,7 +283,6 @@ public class Title : SceneBase {
 		}
 		else
 		if(IsKeyBtnPress(KEY_NAME.SELECT,false)){
-			DebLog("キー入力！！！！！！！！！！！！！"+m_menuNo);
 			switch(m_menuNo)
 			{
 			case (int)SCO_SELECT.SEL_NEW_GAME:
