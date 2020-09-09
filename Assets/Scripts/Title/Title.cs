@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+#region GAME_PAD
+using nn.hid;
+#endregion //-*GAME_PAD
 public class Title : SceneBase {
 
 //-----------------------------------------------
@@ -31,7 +33,9 @@ public class Title : SceneBase {
 #region UNITY_ORIGINAL
 		tMODE_NEXT_SCENE,
 #endregion //-*UNITY_ORIGINAL
-
+#region KEY_TEST
+		tMODE_OPTION,
+#endregion //-*KEY_TEST
 		tMODE_MAX,		//*最大数
 	};
 
@@ -68,23 +72,50 @@ public class Title : SceneBase {
 	private ButtonCtl m_BtnDebInGame = null;	
 #endif //-*SUGI_DEB
 
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	private int m_menuNo = 0;
+	private enum TITLE_SELECT { //-*タイトルメニュー
+		SEL_STORY = 0,
+		SEL_CHALLENGE,
+		SEL_GALLERY,
+		SEL_OPTION,
+		MAX,
+	};
+	private enum SCO_SELECT { // シナリオメニュー
+		SEL_NEW_GAME = 0,
+		SEL_CONTINUE,
+		SEL_BACK,
+		MAX,
+	};
+	[SerializeField]
+	private GameObject m_titleCursol=null;
+
+	[SerializeField]
+	private List<GameObject> m_titleMenuObj = new List<GameObject>();		//-*TITLE_SELECTと連動させること
+	[SerializeField]
+	private List<GameObject> m_titleScoMenuObj = new List<GameObject>();	//-*SCO_SELECTと連動させること
+#endregion //-*GAME_PAD
+
+
 	// Use this for initialization
 	protected override void Start () {}
 	protected override void Awake()
 	{
 		base.Awake();
 		m_Mode = TITLEMODE.tMODE_INIT;
-		if(m_BtnSelSco != null) m_BtnSelSco.SetOnPointerClickCallback(BtnModeSelSco);
+		if(m_BtnSelSco != null) m_BtnSelSco.SetOnPointerClickCallback(InitModeSelSco);
 		// if(m_BtnSelChallenge != null) m_BtnSelChallenge.SetOnPointerClickCallback();
 
 		// if(m_BtnScoSelNew != null) m_BtnScoSelNew.SetOnPointerClickCallback();
 		// if(m_BtnScoSelContinue != null) m_BtnScoSelContinue.SetOnPointerClickCallback();
-		if(m_BtnScoSelBack != null) m_BtnScoSelBack.SetOnPointerClickCallback(BtnScoSelBack);
+		if(m_BtnScoSelBack != null) m_BtnScoSelBack.SetOnPointerClickCallback(InitScoSelTitle);
 
 #if SUGI_DEB
 		if(m_BtnDebSelStage != null) m_BtnDebSelStage.SetOnPointerClickCallback(DebBtnSelSco);
 		if(m_BtnDebInGame != null) m_BtnDebInGame.SetOnPointerClickCallback(DebBtnInGame);
 #endif //-*SUGI_DEB
+
 			DebLog("//-*awake");
 
 	}
@@ -110,6 +141,13 @@ public class Title : SceneBase {
 		case TITLEMODE.tMODE_NEXT_SCENE:
 			UpdateNextScene();
 			break;
+#region KEY_TEST
+		case TITLEMODE.tMODE_OPTION:
+			if(!m_keepData.IsOptionOpen){
+				m_Mode = TITLEMODE.tMODE_MAIN;
+			}
+			break;
+#endregion //-*KEY_TEST
 		default:
 			break;
 		}
@@ -117,26 +155,153 @@ public class Title : SceneBase {
 
 	private TITLEMODE UpdateModeMain()
 	{
+#region GAME_PAD
+		//-************
+		//-*キー入力テスト
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.UP)){
+			m_menuNo--;
+			if(m_menuNo < (int)TITLE_SELECT.SEL_STORY){
+				m_menuNo = (int)TITLE_SELECT.SEL_OPTION;
+			}else if(m_menuNo >= (int)TITLE_SELECT.MAX){
+				m_menuNo = (int)TITLE_SELECT.SEL_STORY;
+			}
+			//-*カーソル移動
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+		}else
+		if(IsKeyAxisButton(KEY_NAME.DOWN)){
+			m_menuNo++;
+			if(m_menuNo < (int)TITLE_SELECT.SEL_STORY){
+				m_menuNo = (int)TITLE_SELECT.SEL_OPTION;
+			}else if(m_menuNo >= (int)TITLE_SELECT.MAX){
+				m_menuNo = (int)TITLE_SELECT.SEL_STORY;
+			}
+			//-*カーソル移動
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+		}
+		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			switch(m_menuNo)
+			{
+			case (int)TITLE_SELECT.SEL_STORY:
+				m_keyWaitTImeMax = KEY_WAIT;
+				InitModeSelSco();
+				return TITLEMODE.tMODE_STORY;
+			case (int)TITLE_SELECT.SEL_CHALLENGE:
+				m_nextSceneName = SceneNameDic[SCENE_NAME.CHALLENGE];
+				return TITLEMODE.tMODE_NEXT_SCENE;
+			case (int)TITLE_SELECT.SEL_GALLERY:
+				m_nextSceneName = SceneNameDic[SCENE_NAME.GALLERY];
+				return TITLEMODE.tMODE_NEXT_SCENE;
+			case (int)TITLE_SELECT.SEL_OPTION:
+				OpenOption();
+				return TITLEMODE.tMODE_OPTION;
+			}
+		}
+
+#endregion //-*GAME_PAD
+#region BUTTON_PUSH
 		if(m_BtnSelSco.ISPUSH){
+#region KEY_TEST
+			m_menuNo = (int)TITLE_SELECT.SEL_STORY;
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
 			return TITLEMODE.tMODE_STORY;
 		}
 		if(m_BtnSelChallenge.ISPUSH){
+#region KEY_TEST
+			m_menuNo = (int)TITLE_SELECT.SEL_CHALLENGE;
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
 			m_nextSceneName = SceneNameDic[SCENE_NAME.CHALLENGE];
 			return TITLEMODE.tMODE_NEXT_SCENE;
 		}
 		if(m_BtnSelGallery.ISPUSH){
+#region KEY_TEST
+			m_menuNo = (int)TITLE_SELECT.SEL_GALLERY;
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
 			m_nextSceneName = SceneNameDic[SCENE_NAME.GALLERY];
 			return TITLEMODE.tMODE_NEXT_SCENE;
 		}
 		if(m_BtnSelOption.ISPUSH){
+#region KEY_TEST
+			m_menuNo = (int)TITLE_SELECT.SEL_OPTION;
+			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
 			// m_nextSceneName = SceneNameDic[SCENE_NAME.OPTION];
 			// return TITLEMODE.tMODE_NEXT_SCENE;
 			OpenOption();
 		}
+#endregion //-*BUTTON_PUSH
+
 		return TITLEMODE.tMODE_MAIN;
 	}
 	private TITLEMODE UpdateModeStory()
 	{
+
+#region GAME_PAD
+		//-************
+		//-*ゲームパッド入力
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.UP)){
+			m_menuNo--;
+			//-*todo:セーブの有無チェック
+			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
+			//-*なければ飛ばす
+				m_menuNo--;
+			}
+			if(m_menuNo < (int)SCO_SELECT.SEL_NEW_GAME){
+				m_menuNo = (int)SCO_SELECT.SEL_BACK;
+			}else if(m_menuNo >= (int)SCO_SELECT.MAX){
+				m_menuNo = (int)SCO_SELECT.SEL_NEW_GAME;
+			}
+			m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+		}else
+		if(IsKeyAxisButton(KEY_NAME.DOWN)){
+			m_menuNo++;
+			//-*todo:セーブの有無チェック
+			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
+			//-*なければ飛ばす
+				m_menuNo++;
+			}
+			if(m_menuNo < (int)SCO_SELECT.SEL_NEW_GAME){
+				m_menuNo = (int)SCO_SELECT.SEL_BACK;
+			}else if(m_menuNo >= (int)SCO_SELECT.MAX){
+				m_menuNo = (int)SCO_SELECT.SEL_NEW_GAME;
+			}
+			m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);
+			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+		}
+		else
+		if(IsKeyBtnPress(KEY_NAME.BACK,true)){
+			DebLog("戻る！");
+			InitScoSelTitle();
+			return TITLEMODE.tMODE_MAIN;
+		}
+		else
+		if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			switch(m_menuNo)
+			{
+			case (int)SCO_SELECT.SEL_NEW_GAME:
+				m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
+				return TITLEMODE.tMODE_NEXT_SCENE;
+			case (int)SCO_SELECT.SEL_CONTINUE:
+				return TITLEMODE.tMODE_MAIN;
+			case (int)SCO_SELECT.SEL_BACK:
+				InitScoSelTitle();
+				return TITLEMODE.tMODE_MAIN;
+			}
+		}
+
+#endregion //-*GAME_PAD
+#region BUTTON_PUSH
 		if(m_BtnScoSelNew.ISPUSH){
 			m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
 			return TITLEMODE.tMODE_NEXT_SCENE;
@@ -147,6 +312,7 @@ public class Title : SceneBase {
 		if(m_BtnScoSelBack.ISPUSH){
 			return TITLEMODE.tMODE_MAIN;
 		}
+#endregion //-*BUTTON_PUSH
 		return TITLEMODE.tMODE_STORY;
 	}
 
@@ -160,16 +326,27 @@ public class Title : SceneBase {
 	// /// クリック
 	// /// </summary>
 	// //---------------------------------------------------------
-	public void BtnModeSelSco()
+	public void InitModeSelSco()
 	{
 		m_TitleBtnModeSelect.SetActive(false);
 		m_TitleBtnScoModeSelect.SetActive(true);
 		m_BtnScoSelContinue.SetInteractable(false);
+#region KEY_TEST
+		m_menuNo = (int)TITLE_SELECT.SEL_STORY;
+		m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);
+		m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
+
 	}
-	public void BtnScoSelBack()
+	public void InitScoSelTitle()
 	{
 		m_TitleBtnModeSelect.SetActive(true);
 		m_TitleBtnScoModeSelect.SetActive(false);
+#region KEY_TEST
+		m_menuNo = (int)SCO_SELECT.SEL_NEW_GAME;
+		m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
+		m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
+#endregion //-*KEY_TEST
 	}
 
 #if SUGI_DEB
@@ -185,4 +362,6 @@ public class Title : SceneBase {
 		SceneChange("InGame");
 	}
 #endif //-*SUGI_DEB
+
+
 }

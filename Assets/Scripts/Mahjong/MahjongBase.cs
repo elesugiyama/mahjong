@@ -114,6 +114,20 @@ public partial class MahjongBase : SceneBase {
 		get{return m_nextBtnF;}
 		set{m_nextBtnF = value;}
 	}
+
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	[SerializeField]
+	private GameObject m_PaiCursol=null;
+	[SerializeField]
+	private List<GameObject> m_Obj = new List<GameObject>();		//-*TITLE_SELECTと連動させること
+	[SerializeField]
+	private GameObject m_TitleBackObj = null;
+
+	private int m_thumbnailInFrameNo = 0;
+
+
+#endregion //-*GAME_PAD	
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中
 

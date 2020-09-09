@@ -20,6 +20,10 @@ namespace GalleryDeffine
 		public const string IMAGE_THUMBNAIL_CONNECT = "_";
 		public const int EVENT_CG_NUM_MAX = 11;
 		public const int THUMBNAIL_CONTAIN_NUM = 4;	//-*1枚絵内に含まれているサムネイル数
+#region GAME_PAD
+		public const int THUMBNAI_IN_SCREEN_NUM = 3;	//-*1画面内に出るサムネイルリストの数
+		public static Vector3 CURSOL_POS = new Vector3(0.0f,400.0f,0.0f);
+#endregion //-*GAME_PAD
 
 	#region IMAGE
 		/// <summary>

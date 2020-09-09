@@ -8,8 +8,7 @@ using Const;
 using AdventureDefine;
 
 public class Adventure : SceneBase {
-//-*仮データ用
-	private const int STAGEMAXNUM_TEST = 10;
+
 //-----------------------------------------------
 // ステージセレクトメニューの定義
 //-----------------------------------------------
@@ -132,7 +131,14 @@ public class Adventure : SceneBase {
 
 #endregion //-*FLAG
 
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	[SerializeField]
+	private GameObject m_choiceCursol=null;
+	private int m_choiceNo = 0;
 
+#endregion //-*GAME_PAD	
+//-*SUGI_DEB***************************
 	//-*フェードイン
  	private bool m_effectFadeIn = false;
 
@@ -142,7 +148,7 @@ public class Adventure : SceneBase {
 		DebLog("//-*ADV_start");
 #if SUGI_DEB
 //-*デバッグ
-// m_gameData.AdvNextScoNo = "13";
+m_keepData.AdvNextScoNo = 1;
 m_isSceneChange = true;
 #endif
 		m_Mode = ModeSet(ADVENTUREMODE.aMODE_INIT);
@@ -150,7 +156,60 @@ m_isSceneChange = true;
 	}
 	
 	// Update is called once per frame
-	protected override void Update () {}
+	protected override void Update () {
+		base.Update();
+#region GAME_PAD
+		//-************
+		//-*キー入力テスト
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.UP)){
+			switch(m_Mode){
+			case ADVENTUREMODE.aMODE_CHOICE_WAIT:
+				m_choiceNo--;
+				if(m_choiceNo < 0){
+					m_choiceNo = 0;
+				}else if(m_choiceNo >= m_choiceButton.Count){
+					m_choiceNo = (m_choiceButton.Count-1);
+				}
+				//-*カーソル移動
+				m_choiceCursol.transform.SetParent(m_choiceButton[m_choiceNo].transform);
+				m_choiceCursol.transform.localPosition = AdvDefine.CURSOL_POS;
+				break;
+			default:
+				break;
+			}
+		}else
+		if(IsKeyAxisButton(KEY_NAME.DOWN)){
+			switch(m_Mode){
+			case ADVENTUREMODE.aMODE_CHOICE_WAIT:
+				m_choiceNo++;
+				if(m_choiceNo < 0){
+					m_choiceNo = 0;
+				}else if(m_choiceNo >= m_choiceButton.Count){
+					m_choiceNo = (m_choiceButton.Count-1);
+				}
+				//-*カーソル移動
+				m_choiceCursol.transform.SetParent(m_choiceButton[m_choiceNo].transform);
+				m_choiceCursol.transform.localPosition = AdvDefine.CURSOL_POS;
+				break;
+			default:
+				break;
+			}
+		}else
+		if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			switch(m_Mode){
+			case ADVENTUREMODE.aMODE_CHOICE_WAIT:
+				var choiceBtn = m_choiceButton[m_choiceNo].GetComponent<AdvChoiceButton>();
+				PushChoiceButton(choiceBtn.AdvNextScoNo);
+				break;
+			default:
+				PushNextPageButton();
+				break;
+			}
+		}
+
+#endregion //-*GAME_PAD
+	}
 
 	private IEnumerator Init(){
 		InitWaitFlags();
@@ -216,9 +275,11 @@ m_isSceneChange = true;
 
 	private IEnumerator UpdateAdventure(){
 		while(true){
+
 			if(m_isException){
 				m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_ERR);
 			}
+
 			switch(m_Mode){
 			case ADVENTUREMODE.aMODE_INIT:
 				DebLog("//-*aMODE_INIT B");
@@ -272,6 +333,7 @@ m_isSceneChange = true;
 					Invoke("PushNextPageButton",AdvDefine.AUTO_WAIT_TIME);
 				}
 			//-*****************
+
 				if( !m_isPageWait ) {
 					PageInit();
 					PageWaitFin();
@@ -642,6 +704,7 @@ m_isSceneChange = true;
 		m_choiceObjBase.SetActive(true);
 
 		m_pageWaitIcon.SetActive(true);	//-*ページ送り待ちアイコン
+
 	}
 	/// <summary>
 	/// 選択肢待機時の終了処理
@@ -805,6 +868,12 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 			}
 			m_scoLineNum++;
 		}
+#region GAME_PAD
+		m_choiceCursol.SetActive(true);
+		m_choiceNo = 0;
+		m_choiceCursol.transform.SetParent(m_choiceButton[m_choiceNo].transform);
+		m_choiceCursol.transform.localPosition = AdvDefine.CURSOL_POS;
+#endregion //-*GAME_PAD
 	}
 
 	/// <summary>

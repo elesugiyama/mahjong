@@ -54,6 +54,23 @@ public class Option : SceneBase {
 	[SerializeField]
 	private ButtonCtl m_btnHelpPrevPage;
 
+#region GAME_PAD
+	[SerializeField]
+	private GameObject m_optionCursol=null;
+	[SerializeField]
+	private List<GameObject> m_optionMenuObj = new List<GameObject>();
+	private int m_menuNo = 0;
+	private enum OPTION_SELECT { // menu処理全体
+		SEL_VOL = 0,
+		SEL_SPEED,
+		SEL_SKIP,
+		SEL_HELP,
+		MAX,
+	};
+	
+#endregion //-*GAME_PAD
+
+
 	//-*変数
 	private bool m_isOptionOpne = false;
 	private OPTIONMODE m_Mode = OPTIONMODE.tMODE_MAX;	//-*モード
@@ -68,19 +85,19 @@ public class Option : SceneBase {
 		int btNo = 0;
 		for(btNo = 0;btNo<m_volBtnList.Count;btNo++){
 			if(m_volBtnList[btNo] == null) continue;
-			m_volBtnList[btNo].SetOnPointerClickCallback(ButtonVol);
+			m_volBtnList[btNo].SetOnPointerClickCallback(SetonVol);
 			m_volBtnList[btNo].SetLabel(btNo);
 			m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
 		}
 		for(btNo = 0;btNo<m_scoSpdBtnList.Count;btNo++){
 			if(m_scoSpdBtnList[btNo] == null) continue;
-			m_scoSpdBtnList[btNo].SetOnPointerClickCallback(ButtonScoSpd);
+			m_scoSpdBtnList[btNo].SetOnPointerClickCallback(SetScoSpd);
 			m_scoSpdBtnList[btNo].SetLabel(btNo);
 			m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
 		}
 		for(btNo = 0;btNo<m_scoAutoBtnList.Count;btNo++){
 			if(m_scoAutoBtnList[btNo] == null) continue;
-			m_scoAutoBtnList[btNo].SetOnPointerClickCallback(ButtonScoAuto);
+			m_scoAutoBtnList[btNo].SetOnPointerClickCallback(SetScoAuto);
 			m_scoAutoBtnList[btNo].SetLabel(btNo);
 			m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
 		}
@@ -96,6 +113,7 @@ public class Option : SceneBase {
 	}
 	// Update is called once per frame
 	protected override void Update () {
+		base.Update();
 		switch(m_Mode){
 		case OPTIONMODE.tMODE_INIT:
 			DebLog("//-*tMODE_INIT");
@@ -129,6 +147,88 @@ public class Option : SceneBase {
 		CloseOption();
 	}
 	private OPTIONMODE UpdateOption(){
+#region GAME_PAD
+		//-************
+		//-*ゲームパッド入力
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.DOWN)){
+			m_menuNo++;
+			if(m_menuNo < (int)OPTION_SELECT.SEL_VOL){
+				m_menuNo = (int)OPTION_SELECT.SEL_HELP;
+			}else if(m_menuNo >= (int)OPTION_SELECT.MAX){
+				m_menuNo = (int)OPTION_SELECT.SEL_VOL;
+			}
+			//-*カーソル移動
+			m_optionCursol.transform.SetParent(m_optionMenuObj[m_menuNo].transform);
+			m_optionCursol.transform.localPosition = new Vector3(-270.0f,0.0f,0.0f);
+		}
+		else if(IsKeyAxisButton(KEY_NAME.UP)){
+			m_menuNo--;
+			if(m_menuNo < (int)OPTION_SELECT.SEL_VOL){
+				m_menuNo = (int)OPTION_SELECT.SEL_HELP;
+			}else if(m_menuNo >= (int)OPTION_SELECT.MAX){
+				m_menuNo = (int)OPTION_SELECT.SEL_VOL;
+			}
+			//-*カーソル移動
+			m_optionCursol.transform.SetParent(m_optionMenuObj[m_menuNo].transform);
+			m_optionCursol.transform.localPosition = new Vector3(-270.0f,0.0f,0.0f);
+		}
+		else if(IsKeyAxisButton(KEY_NAME.RIGHT)){
+			switch(m_menuNo){
+			case (int)OPTION_SELECT.SEL_VOL:
+				int vol = m_keepData.SOUND_VOLUME;
+				vol++;
+				if(vol >= m_volBtnList.Count)vol = 0;
+				SetonVol(vol);
+				break;
+			case (int)OPTION_SELECT.SEL_SPEED:
+				int spd = m_keepData.SCO_SPEED;
+				spd++;
+				if(spd >= m_scoSpdBtnList.Count)spd = 0;
+				SetScoSpd(spd);
+				break;
+			case (int)OPTION_SELECT.SEL_SKIP:
+				int auto = m_keepData.SCO_AUTO;
+				auto++;
+				if(auto >= m_scoAutoBtnList.Count)auto = 0;
+				SetScoAuto(auto);
+				break;
+			default:
+				break;
+			}
+		}
+		else if(IsKeyAxisButton(KEY_NAME.LEFT)){
+			switch(m_menuNo){
+			case (int)OPTION_SELECT.SEL_VOL:
+				int vol = m_keepData.SOUND_VOLUME;
+				vol--;
+				if(vol < 0 ) vol = (m_volBtnList.Count-1);
+				SetonVol(vol);
+				break;
+			case (int)OPTION_SELECT.SEL_SPEED:
+				int spd = m_keepData.SCO_SPEED;
+				spd--;
+				if(spd < 0) spd = (m_scoSpdBtnList.Count-1);
+				SetScoSpd(spd);
+				break;
+			case (int)OPTION_SELECT.SEL_SKIP:
+				int auto = m_keepData.SCO_AUTO;
+				auto--;
+				if(auto < 0) auto = (m_scoAutoBtnList.Count-1);
+				SetScoAuto(auto);
+				break;
+			default:
+				break;
+			}
+		}
+		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			return OPTIONMODE.tMODE_HELP_INIT;
+		}
+		else if(IsKeyBtnPress(KEY_NAME.BACK,true)){
+			return OPTIONMODE.tMODE_NEXT_SCENE;
+		}
+#endregion //-*GAME_PAD
+
 
 		if(m_btnOptHelp.ISPUSH){
 			return OPTIONMODE.tMODE_HELP_INIT;
@@ -139,7 +239,26 @@ public class Option : SceneBase {
 		return OPTIONMODE.tMODE_MAIN;
 	}
 	private OPTIONMODE UpdateOptionHelp(){
-
+#region GAME_PAD
+		//-************
+		//-*ゲームパッド入力
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.RIGHT)){
+			m_helpPageNo++;
+			m_helpPageNo = System.Math.Min(m_helpPageNo, OptDef.HELP_STR.Length-1);
+			SetHelpStr();
+		}
+		else if(IsKeyAxisButton(KEY_NAME.LEFT)){
+			m_helpPageNo--;
+			m_helpPageNo = System.Math.Max(m_helpPageNo, 0);
+			SetHelpStr();
+		}
+		else if(IsKeyBtnPress(KEY_NAME.BACK,true)){
+			m_settingBox.SetActive(true);
+			m_helpBox.SetActive(false);
+			return OPTIONMODE.tMODE_MAIN;
+		}
+#endregion //-*GAME_PAD
 		if(m_btnHelpNextPage.ISPUSH){
 			m_helpPageNo++;
 			m_helpPageNo = System.Math.Min(m_helpPageNo, OptDef.HELP_STR.Length-1);
@@ -173,7 +292,7 @@ public class Option : SceneBase {
 	// /// クリック
 	// /// </summary>
 	// //---------------------------------------------------------
-	public void ButtonVol(int no)
+	public void SetonVol(int no)
 	{
 		DebLog("//-*ButtonVol:"+no);
 		if(m_keepData == null) return;
@@ -183,7 +302,7 @@ public class Option : SceneBase {
 			m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
 		}
 	}
-	public void ButtonScoSpd(int no)
+	public void SetScoSpd(int no)
 	{
 		DebLog("//-*ButtonScoSpd:"+no);
 		if(m_keepData == null) return;
@@ -193,7 +312,7 @@ public class Option : SceneBase {
 			m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
 		}
 	}
-	public void ButtonScoAuto(int no)
+	public void SetScoAuto(int no)
 	{
 		DebLog("//-*ButtonScoAuto:"+no);
 		if(m_keepData == null) return;

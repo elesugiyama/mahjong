@@ -46,6 +46,20 @@ public class Gallery : SceneBase {
 	private bool m_isBack = false;
 	private int m_selThumbnailNo = -1;
 	
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	[SerializeField]
+	private GameObject m_galleryCursol=null;
+	[SerializeField]
+	private List<GameObject> m_thumbnailObj = new List<GameObject>();		//-*TITLE_SELECTと連動させること
+	[SerializeField]
+	private GameObject m_TitleBackObj = null;
+	[SerializeField]
+	private ScrollRect ScrollRect;
+	private int m_thumbnailInFrameNo = 0;
+
+
+#endregion //-*GAME_PAD
 	// Use this for initialization
 	protected override void Start () {
 		m_Mode = GALLERYMODE.mMODE_INIT;
@@ -72,12 +86,25 @@ public class Gallery : SceneBase {
 				int imgNo = i%GalDef.THUMBNAIL_CONTAIN_NUM;
 				BCtl[0].SetImage(i,spriteImage[imgNo]);
 			}
+#region GAME_PAD
+			m_thumbnailObj.Add(m_thumbnailButton[i].transform.gameObject);
+#endregion //-*GAME_PAD
     	}
 		if(m_BtnTitleBack != null) m_BtnTitleBack.SetOnPointerClickCallback(ButtonTitleBack);
+
+#region GAME_PAD
+		m_selThumbnailNo = 0;
+		m_thumbnailInFrameNo = 0;
+		m_galleryCursol.SetActive(true);
+		m_galleryCursol.transform.SetParent(m_thumbnailObj[m_selThumbnailNo].transform);
+		m_galleryCursol.transform.localPosition = new Vector3(0.0f,400.0f,0.0f);
+#endregion //-*GAME_PAD
 	}
 	
 	// Update is called once per frame
 	protected override void Update () {
+		base.Update();
+
 		switch(m_Mode){
 		case GALLERYMODE.mMODE_INIT:
 			DebLog("//-*mMODE_INIT");
@@ -111,6 +138,54 @@ public class Gallery : SceneBase {
 	}
 	private GALLERYMODE UpdateSelectThumbnail()
 	{
+#region GAME_PAD
+		if(IsKeyAxisButton(KEY_NAME.LEFT)){
+			m_selThumbnailNo--;
+			if(m_selThumbnailNo < 0){
+				m_selThumbnailNo = 0;
+			}else if(m_selThumbnailNo >= m_thumbnailObj.Count){
+				m_selThumbnailNo = (m_thumbnailObj.Count-1);
+			}
+//-**********
+			m_thumbnailInFrameNo--;
+			if(m_selThumbnailNo < (m_thumbnailObj.Count-GalDef.THUMBNAI_IN_SCREEN_NUM) && m_thumbnailInFrameNo < 0){
+				var scrollPos = 1f/( (float)m_thumbnailObj.Count - (float)GalDef.THUMBNAI_IN_SCREEN_NUM);
+				ScrollRect.horizontalNormalizedPosition = ScrollRect.horizontalNormalizedPosition - scrollPos ;
+			}
+			if(m_thumbnailInFrameNo < 0)m_thumbnailInFrameNo = 0;
+//-**********
+			//-*カーソル移動
+			m_galleryCursol.transform.SetParent(m_thumbnailObj[m_selThumbnailNo].transform);
+			m_galleryCursol.transform.localPosition = GalDef.CURSOL_POS;
+		}else
+		if(IsKeyAxisButton(KEY_NAME.RIGHT)){
+			m_selThumbnailNo++;
+			if(m_selThumbnailNo < 0){
+				m_selThumbnailNo = 0;
+			}else if(m_selThumbnailNo >= m_thumbnailObj.Count){
+				m_selThumbnailNo = (m_thumbnailObj.Count-1);
+			}
+//-**********			
+			m_thumbnailInFrameNo++;
+			if(m_selThumbnailNo > 2 && m_thumbnailInFrameNo > 2){
+				var scrollPos = 1f/( (float)m_thumbnailObj.Count - 3f);
+				ScrollRect.horizontalNormalizedPosition = ScrollRect.horizontalNormalizedPosition + scrollPos ;
+			}
+			if(m_thumbnailInFrameNo >= 3)m_thumbnailInFrameNo = 2;
+			//-*カーソル移動
+			m_galleryCursol.transform.SetParent(m_thumbnailObj[m_selThumbnailNo].transform);
+			m_galleryCursol.transform.localPosition = GalDef.CURSOL_POS;
+		}
+		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			m_isThumbnailSelect = true;
+		}
+		else if(IsKeyBtnPress(KEY_NAME.BACK,true)){
+			m_isBack = true;
+			ButtonTitleBack();
+		}
+#endregion //-*GAME_PAD
+
+
 		if(m_isThumbnailSelect){
 			InitEventCG();
 			return GALLERYMODE.mMODE_EVENTCG;
@@ -136,8 +211,15 @@ public class Gallery : SceneBase {
 	}
 	private GALLERYMODE UpdateEventCG()
 	{
+#region //-*GAME_PAD
+		if(IsKeyBtnPress(KEY_NAME.SELECT,true) || IsKeyBtnPress(KEY_NAME.BACK,true))
+		{
+			m_isBack = true;
+			ButtonTitleBack();
+		}
+#endregion //-*GAME_PAD
 		if(m_isBack){
-			m_selThumbnailNo = -1;	//-初期化
+			// m_selThumbnailNo = -1;	//-初期化
 			InitThumbnail();
 			return GALLERYMODE.mMODE_THUMBNAIL;
 		}
@@ -156,7 +238,7 @@ public class Gallery : SceneBase {
 	// //---------------------------------------------------------
 	public void ButtonSelectThumbnail(int a)
 	{
-		DebLog("//-*ButtonTest:"+a);
+		// DebLog("//-*ButtonTest:"+a);
 		// m_keepData.AdvNextScoNo = a;
 		// m_nextSceneName = SceneNameDic[SCENE_NAME.INGAME];
 		// m_isStageSelect = true;

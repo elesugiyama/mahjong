@@ -21,6 +21,9 @@ public class AdvChoiceButton : ButtonCtl {
 	
 	//-*選択肢で飛ぶシナリオ番号
 	private string m_advNextScoNo;
+	public string AdvNextScoNo{
+		get{return m_advNextScoNo;}
+	}
 
 	// Use this for initialization
 	void Start () {}
