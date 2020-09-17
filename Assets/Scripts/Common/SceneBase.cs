@@ -356,7 +356,6 @@ public class SceneBase : MonoBehaviour {
 		//-*傾きの大きさ
 		float stickMagnitudeX = Mathf.Abs(m_inputStick.x);
 		float stickMagnitudeY = Mathf.Abs(m_inputStick.y);
-		
 		//-*受付拒否(受付拒否時間中,方向キー以外,傾きが一定値無い)
 		if(isWait && m_keyWaitTIme > 0)
 			return false;
@@ -418,9 +417,29 @@ public class SceneBase : MonoBehaviour {
 		if( m_inputStick == Vector2.zero ) {
 			//外部コントローラー ジョイスティック
 #if N_SWITCH
+	#if false //-*元
 			AnalogStickState lStick = npadState.analogStickL;
 			var x = lStick.x;
 			var y = lStick.y;
+	#else	//-*試作
+			AnalogStickState lStick = npadState.analogStickL;
+			var x = lStick.x;
+			var y = lStick.y;
+			if(x == 0 && y == 0){
+				if(npadState.GetButtonUp(NpadButton.Right)){
+					x = 1;
+				}else
+				if(npadState.GetButtonUp(NpadButton.Left)){
+					x = -1;
+				}else
+				if(npadState.GetButtonUp(NpadButton.Up)){
+					y = 1;
+				}else
+				if(npadState.GetButtonUp(NpadButton.Down)){
+					y = -1;
+				}
+			}
+	#endif
 #else
 			var x = Input.GetAxis( "Horizontal" );
 			var y = Input.GetAxis( "Vertical" );

@@ -39,6 +39,12 @@ public bool NextButton(/*MahJongRally * pMe*/){
 	} else
 		return(FALSE);
 #else
+#region GAME_PAD
+	if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+		nextBtnF =true;
+	}
+#endregion //-*GAME_PAD
+
 	if(nextBtnF){
 	//-*次へボタンが押された
 		nextBtnF = false;	//-*フラグOFF

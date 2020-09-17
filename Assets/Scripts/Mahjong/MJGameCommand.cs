@@ -53,6 +53,8 @@ public void	DispInfo( /*MahJongRally * pMe*/ )
 		SeOnPlay( SE_TAHAI, SEQ_SE);
 		#endif //-*todo:サウンド
 		menu_mode = 9;
+		m_haiCsrNo = -1;
+		chi_hai_csr = 0;
 	}
 }
 /****************************************************************/
@@ -99,6 +101,19 @@ public short TsumoMenuSel( /*MahJongRally * pMe*/ )
 				break;
 			}
 		}
+		#else
+#region GAME_PAD
+	if(IsKeyAxisButton(KEY_NAME.DOWN,true)){
+		dat = 1;
+	}else{
+		if( IsKeyAxisButton(KEY_NAME.UP,true) ){
+			dat = -1;
+			//TRACE("hai_csr = %d\n",hai_csr);
+		}else{
+			break;
+		}
+	}
+#endregion //-*GAME_PAD
 		#endif //-*todo:キー操作
 //		do{
 			no += dat;
@@ -111,7 +126,7 @@ public short TsumoMenuSel( /*MahJongRally * pMe*/ )
 			}
 //		}while( 0 );
 
-#if false //-*todo:不要
+#if true //-*todo:不要
 		menu_csr = no;
 		// > 2006/02/26 要望No.107
 		if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) )
@@ -150,6 +165,12 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 		return (short)(Optstk[no]);
 	}
 	#else //-*todo:キー操作
+#region GAME_PAD
+	if(IsKeyBtnPress(KEY_NAME.SELECT,true) || gAutoFlag != 0) {
+		return (short)(Optstk[no]);
+	}
+#endregion //-*GAME_PAD
+
 #region UNITY_ORIGINAL
 		if(m_callMenuSelF || gAutoFlag != 0) {
 			//-*DebLog(("menu_csr(MenuSel) = "+hai_csr));
@@ -179,6 +200,21 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 				break;
 			}
 		}
+		#else
+#region GAME_PAD
+	if(menu_mode_sub == 0){
+		if(IsKeyAxisButton(KEY_NAME.DOWN,true)){
+			dat = 1;
+		}else{
+			if( IsKeyAxisButton(KEY_NAME.UP,true) ){
+				dat = -1;
+				//TRACE("hai_csr = %d\n",hai_csr);
+			}else{
+				break;
+			}
+		}
+	}
+#endregion //-*GAME_PAD
 		#endif //-*todo:キー操作
 //		do{
 			no += dat;
@@ -192,7 +228,7 @@ public short MenuSel( /*MahJongRally * pMe*/ )
 
 		menu_csr = no;
 //		if(menu_csr == 0)
-#if false //-*todo:不要
+#if true //-*todo:不要
 		if ( (menu_csr == 0) || (Optstk[no] == (byte)OP.TSUMO) )	// 2006/02/26 要望No.107
 			hai_csr = (short)gpsPlayerWork.byThcnt;	//	牌カーソルを初期値に戻す。
 #endif //-*todo:不要
@@ -225,7 +261,7 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 	//if( pd_trg & GAME_OK_BTN) return( no);
 	#if true //-*todo:キー操作
 		// スタンドアローン。
-		// if( (D_ONEPUSH_INPUT_SELECT) || gAutoFlag != 0) {
+
 #region UNITY_ORIGINAL
 #if true
 		if(m_haiSelF || gAutoFlag != 0) {
@@ -242,7 +278,6 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 				}
 			}
 		}
-
 #else
 		if(m_haiSelF || gAutoFlag != 0) {
 			//-*DebLog(("hai_csr = "+hai_csr));
@@ -276,16 +311,33 @@ public short HaiSelPD( /*MahJongRally * pMe*/)
 	}
 	#endif //-*todo:保留通信キー操作
 	do{
-	#if false //-*todo:キー操作
-		if( D_ONEPUSH_INPUT_RIGHT ){
-			add = 1;
+	#if true //-*todo:キー操作
+#region GAME_PAD
+	if(IsKeyBtnPress(KEY_NAME.SELECT,true) || gAutoFlag != 0){
+		selFlg = true;
+		return (no);
+	}
+		// if( D_ONEPUSH_INPUT_RIGHT ){
+		// 	add = 1;
+		// }else{
+		// 	if( D_ONEPUSH_INPUT_LEFT ){
+		// 		add = -1;
+		// 	}else{
+		// 		break;
+		// 	}
+		// }
+	if(IsKeyAxisButton(KEY_NAME.RIGHT,true)){
+		add = 1;
+	}else{
+		if( IsKeyAxisButton(KEY_NAME.LEFT,true) ){
+			add = -1;
+			//TRACE("hai_csr = %d\n",hai_csr);
 		}else{
-			if( D_ONEPUSH_INPUT_LEFT ){
-				add = -1;
-			}else{
-				break;
-			}
+			break;
 		}
+	}
+
+#endregion //-*GAME_PAD
 
 		do{
 
@@ -549,6 +601,36 @@ public short NakiSelPD_R( /*MahJongRally * pMe,*/ byte[] tbl, short max)
 {
 	short no;
 #if true //-*todo:保留 キー操作
+#region GAME_PAD
+	if(IsKeyBtnPress(KEY_NAME.SELECT,true) || gAutoFlag != 0) {
+		return (0);
+	}
+	no = (short)NakiSelNo;
+	do{
+		if(IsKeyAxisButton(KEY_NAME.RIGHT,true)){
+			if( (++no) == max)
+			{
+				no = 0;
+			}
+		}else if( IsKeyAxisButton(KEY_NAME.LEFT,true) ){
+			if( (--no) < 0)
+			{
+				no += max;
+			}
+		}else
+		{
+			return( -2);
+		}
+	}while( tbl[no] == 0);
+
+	if( NakiSelNo != no)
+	{
+		NakiSelNo = (byte)no;
+		#if false	//-*todo:サウンド
+		SeOnPlay( SE_ATACK, SEQ_SE);
+		#endif	//-*todo:サウンド
+	}
+#endregion //-*GAME_PAD
 		return (-1);
 #else  //-*todo:保留 キー操作
 	if( ( D_ONEPUSH_INPUT_SELECT ) || gAutoFlag != 0 )
@@ -726,7 +808,7 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 #if	Rule_2P
 
 	selFlg = false;
-	#if false //-*todo:保留キー操作
+	#if false //-*todo:キー操作
 	selFlg= D_ONEPUSH_INPUT_SELECT;
 	if( Optcnt != 0 ) {
 		if( menu_mode_sub== 0) {
@@ -737,7 +819,23 @@ Debug.Log("menu_mode 1: "+ menu_mode);
 			KeyInfo.trigger&= ~(KEY_UP2 | KEY_DOWN2);
 	}
 	#else
-	#endif //-*todo:保留キー操作
+#region GAME_PAD
+	if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+		selFlg = true;
+	}
+	if( Optcnt != 0 ) {
+		if( menu_mode_sub== 0) {
+			if( selFlg || gAutoFlag != 0){
+				menu_mode_sub= 1;
+			}
+			// KeyInfo.trigger&= ~(KEY_SELECT2 | KEY_RIGHT2 | KEY_LEFT2);
+		} else{
+			// KeyInfo.trigger&= ~(KEY_UP2 | KEY_DOWN2);
+		}
+	}
+#endregion //-*GAME_PAD
+
+	#endif //-*todo:キー操作
 #endif
 
 		switch( menu_mode) {
@@ -1128,9 +1226,7 @@ menu_mode_sub = 0;
 				no = HaiSelM( (short)1);	//menu_mode
 
 				// 2006/02/06 BugNo 30
-#if true	//-*todo:キー操作
 				hai_csr = 14;
-#endif 	//-*todo:キー操作
 
 				for( index = 0; index <= 2; ++index )
 					if( Chipsf[index] == 255 ) {
@@ -1147,7 +1243,8 @@ menu_mode_sub = 0;
 
 				index = chi_csr;
 #if true	//-*todo:キー操作
-				if(no != -1){
+				#if true
+				if(no != -1 && m_haiCsrNo != -1){
 					if(chi_hai_csr < m_haiCsrNo){
 						if( chi_min <= chi_csr && chi_csr < chi_max  ){
 							++chi_csr;
@@ -1164,6 +1261,25 @@ menu_mode_sub = 0;
 					// chi_hai_csr = m_haiCsrNo;
 					chi_hai_csr = m_haiCsrNo;
 				}
+				#endif
+#region GAME_PAD
+	if(IsKeyAxisButton(KEY_NAME.RIGHT,true)){
+		// menu_mode_sub = 0;
+		if( chi_min <= chi_csr && chi_csr < chi_max  ){
+			++chi_csr;
+		}else{
+			chi_csr = chi_min;
+		}
+	}else　if( IsKeyAxisButton(KEY_NAME.LEFT,true) ){
+		// menu_mode_sub = 0;
+		if( chi_min < chi_csr && chi_csr <= chi_max  ){
+			--chi_csr;
+		}else{
+			chi_csr = chi_max;
+		}
+	}
+
+#endregion //-*GAME_PAD
 #else	//-*todo:キー操作
 				if( D_ONEPUSH_INPUT_RIGHT ) {
 					if( chi_min <= chi_csr && chi_csr < chi_max  )
@@ -1190,8 +1306,11 @@ menu_mode_sub = 0;
 				}
 #region UNITY_ORIGINAL
 
-	#if true//-*todo:キー操作
-				if( chi_hai_csr == m_haiCsrNo) DispInfo();	//9
+	#if false//-*todo:キー操作
+				if( chi_hai_csr == m_haiCsrNo)
+				{
+					 DispInfo();	//9
+				}
 	#else
 				// 2006/02/06 BugNo 30
 				if( no >= 0) DispInfo();	//9
