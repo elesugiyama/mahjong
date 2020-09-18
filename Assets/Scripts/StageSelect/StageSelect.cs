@@ -61,6 +61,9 @@ public class StageSelect : SceneBase {
 		mMODE_INIT,			//-*初期化
 		mMODE_UPDATE,		//
 		tMODE_NEXT_SCENE,	//-*次シーンへ
+#region KEY_TEST
+		tMODE_OPTION,
+#endregion //-*KEY_TEST
 		mMODE_MAX,		//*最大数
 	};
 
@@ -77,6 +80,7 @@ public class StageSelect : SceneBase {
 	private MAH m_ruleNo;
 	public Canvas UICanvas;     //UIを表示するキャンバス
 	
+
 #region GAME_PAD
 	[Header("ゲームパッド関連")]
 	[SerializeField]
@@ -89,6 +93,7 @@ public class StageSelect : SceneBase {
 	private int m_stageNo = 0;
 	private static Vector3 STAGEOBJ_CURSOL_POS = new Vector3(-300.0f,0.0f,0.0f);
 	private static Vector3 BACKOBJ_CURSOL_POS = new Vector3(-50.0f,0.0f,0.0f);
+	private STAGESELECTMODE m_ModeTemp = STAGESELECTMODE.mMODE_INIT;	//-*モード
 
 #endregion //-*GAME_PAD
 	// Use this for initialization
@@ -128,6 +133,14 @@ public class StageSelect : SceneBase {
 	// Update is called once per frame
 	protected override void Update () {
 		base.Update();
+#region KEY_TEST
+		if(m_keepData.IsOptionOpen){
+			if(m_Mode != STAGESELECTMODE.tMODE_OPTION){
+				m_ModeTemp = m_Mode;
+			}
+			m_Mode = STAGESELECTMODE.tMODE_OPTION;
+		}
+#endregion //-*KEY_TEST
 		switch(m_Mode){
 		case STAGESELECTMODE.mMODE_INIT:
 			DebLog("//-*mMODE_INIT");
@@ -139,6 +152,13 @@ public class StageSelect : SceneBase {
 		case STAGESELECTMODE.tMODE_NEXT_SCENE:
 			UpdateNextScene();
 			break;
+#region KEY_TEST
+		case STAGESELECTMODE.tMODE_OPTION:
+			if(!m_keepData.IsOptionOpen){
+				m_Mode = m_ModeTemp;
+			}
+			break;
+#endregion //-*KEY_TEST
 		default:
 			DebLog("//-*Err:"+m_Mode);
 

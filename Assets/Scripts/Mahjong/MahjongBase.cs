@@ -679,12 +679,7 @@ public partial class MahjongBase : SceneBase {
 	}
 	private void GameStart()
 	{
-		#if false //-*todo:作ってみたけど...
-		for(int pNum=0; pNum<MJDefine.MEMBER_NUM_MAX; pNum++)
-		{
-			m_member.Add(new Member());
-		}
-		#endif //-*todo:作ってみたけど...
+
 #region MAHJONG_J
 //-*****todo
 		int	i, j;
@@ -1216,6 +1211,12 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 
 	private IEnumerator UpdateMahjong(){
 		while(true){
+#region KEY_TEST
+			while(m_keepData.IsOptionOpen){
+				yield return null;
+			}
+#endregion //-*KEY_TEST
+
 			switch(a_Mode){
 			case MAHJONGMODE.mMODE_READY:
 				GameStart();

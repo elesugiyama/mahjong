@@ -78,6 +78,11 @@ public class SceneBase : MonoBehaviour {
 		if(UpdatePadState()){
 			StickAxisUpdate();
 		}
+		//-*オプション画面を開く
+		if(IsKeyBtnPress(KEY_NAME.START,true) &&
+			!m_keepData.IsOptionOpen){
+			OpenOption();
+		}
 #else
 		StickAxisUpdate();
 #endif //-*N_SWITCH
@@ -308,6 +313,7 @@ public class SceneBase : MonoBehaviour {
 		AXIS_MAX,	//-*方向キーここまで
 		SELECT,		//-*決定	//-* = AXIS_MAX,(代入式保留)
 		BACK,		//-*戻る
+		START,
 		KEY_NAME_MAX,
 	};
 	public static Dictionary<KEY_NAME,string> GetPushKey = new Dictionary<KEY_NAME,string>()
@@ -334,6 +340,9 @@ public class SceneBase : MonoBehaviour {
 				break;
 			case KEY_NAME.BACK:
 				if(npadState.GetButtonUp(NpadButton.B)) isKeyPush = true;
+				break;
+			case KEY_NAME.START:
+				if(npadState.GetButtonUp(NpadButton.Plus)) isKeyPush = true;
 				break;
 		}
 #else
@@ -421,21 +430,21 @@ public class SceneBase : MonoBehaviour {
 			AnalogStickState lStick = npadState.analogStickL;
 			var x = lStick.x;
 			var y = lStick.y;
-	#else	//-*試作
+	#else	//-*十字キー対応晩
 			AnalogStickState lStick = npadState.analogStickL;
 			var x = lStick.x;
 			var y = lStick.y;
 			if(x == 0 && y == 0){
-				if(npadState.GetButtonUp(NpadButton.Right)){
+				if(npadState.GetButton(NpadButton.Right)){
 					x = 1;
 				}else
-				if(npadState.GetButtonUp(NpadButton.Left)){
+				if(npadState.GetButton(NpadButton.Left)){
 					x = -1;
 				}else
-				if(npadState.GetButtonUp(NpadButton.Up)){
+				if(npadState.GetButton(NpadButton.Up)){
 					y = 1;
 				}else
-				if(npadState.GetButtonUp(NpadButton.Down)){
+				if(npadState.GetButton(NpadButton.Down)){
 					y = -1;
 				}
 			}

@@ -22,6 +22,9 @@ public class Gallery : SceneBase {
 		mMODE_THUMBNAIL,	//-*サムネイル一覧
 		mMODE_EVENTCG,		//-*サムネイル一覧
 		tMODE_NEXT_SCENE,	//-*次シーンへ
+#region KEY_TEST
+		tMODE_OPTION,
+#endregion //-*KEY_TEST
 		mMODE_MAX,		//*最大数
 	};
 
@@ -58,6 +61,7 @@ public class Gallery : SceneBase {
 	private ScrollRect ScrollRect;
 	private int m_thumbnailInFrameNo = 0;
 
+	private GALLERYMODE m_ModeTemp = GALLERYMODE.mMODE_INIT;	//-*モード
 
 #endregion //-*GAME_PAD
 	// Use this for initialization
@@ -104,7 +108,14 @@ public class Gallery : SceneBase {
 	// Update is called once per frame
 	protected override void Update () {
 		base.Update();
-
+#region KEY_TEST
+		if(m_keepData.IsOptionOpen){
+			if(m_Mode != GALLERYMODE.tMODE_OPTION){
+				m_ModeTemp = m_Mode;
+			}
+			m_Mode = GALLERYMODE.tMODE_OPTION;
+		}
+#endregion //-*KEY_TEST
 		switch(m_Mode){
 		case GALLERYMODE.mMODE_INIT:
 			DebLog("//-*mMODE_INIT");
@@ -120,6 +131,13 @@ public class Gallery : SceneBase {
 		case GALLERYMODE.tMODE_NEXT_SCENE:
 			UpdateNextScene();
 			break;
+#region KEY_TEST
+		case GALLERYMODE.tMODE_OPTION:
+			if(!m_keepData.IsOptionOpen){
+				m_Mode = m_ModeTemp;
+			}
+			break;
+#endregion //-*KEY_TEST
 		default:
 			DebLog("//-*Err:"+m_Mode);
 

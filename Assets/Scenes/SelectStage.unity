@@ -261,9 +261,9 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 1024}
+  m_ReferenceResolution: {x: 800, y: 1800}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -740,7 +740,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_screenEffect: {fileID: 0}
-  m_raycaster: {fileID: 0}
+  m_raycaster: {fileID: 174196911}
   m_keepData: {fileID: 0}
   m_isSceneChange: 0
   m_nextScenes: 6

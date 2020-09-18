@@ -28,6 +28,9 @@ public class Adventure : SceneBase {
 		aMODE_GO_TO_BATTLE,		//-*麻雀へ
 		aMODE_ENDING,			//-*ゲームクリア
 		aMODE_EFFECT_ERR,		//-*エラー
+#region KEY_TEST
+		tMODE_OPTION,
+#endregion //-*KEY_TEST
 
 		aMODE_MAX,		//*最大数
 	};
@@ -279,7 +282,11 @@ m_isSceneChange = true;
 			if(m_isException){
 				m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_ERR);
 			}
-
+#region KEY_TEST
+			if(m_keepData.IsOptionOpen){
+				yield return null;
+			}
+#endregion //-*KEY_TEST
 			switch(m_Mode){
 			case ADVENTUREMODE.aMODE_INIT:
 				DebLog("//-*aMODE_INIT B");
