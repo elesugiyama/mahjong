@@ -114,6 +114,16 @@ public partial class MahjongBase : SceneBase {
 		get{return m_nextBtnF;}
 		set{m_nextBtnF = value;}
 	}
+
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	[SerializeField]
+	private GameObject m_PaiCursol=null;
+
+	private int m_handTileCursolNo = 0;
+
+
+#endregion //-*GAME_PAD	
 //-*SUGI_DEB***************************
 #if SUGI_DEB //-*todo:注デバッグ中
 
@@ -664,22 +674,19 @@ public partial class MahjongBase : SceneBase {
 	}
 	
 	// Update is called once per frame
-	protected override void Update () {}
+	protected override void Update () {
+		base.Update();
+	}
 	private void GameStart()
 	{
-		#if false //-*todo:作ってみたけど...
-		for(int pNum=0; pNum<MJDefine.MEMBER_NUM_MAX; pNum++)
-		{
-			m_member.Add(new Member());
-		}
-		#endif //-*todo:作ってみたけど...
+
 #region MAHJONG_J
 //-*****todo
 		int	i, j;
 
 		//-*ready(true);		//準備中
 		ready = false;
-
+		m_keepData.flag_res_battle = -1;	//-*勝敗フラグ初期化
 		//--------------------------------------------------
 		//変数
 	#if false //-*todo
@@ -1204,6 +1211,12 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 
 	private IEnumerator UpdateMahjong(){
 		while(true){
+#region KEY_TEST
+			while(m_keepData.IsOptionOpen){
+				yield return null;
+			}
+#endregion //-*KEY_TEST
+
 			switch(a_Mode){
 			case MAHJONGMODE.mMODE_READY:
 				GameStart();
@@ -1271,7 +1284,13 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 				break;
 			case MAHJONGMODE.mMODE_EXIT:
 			default:
-				SceneChange("Adventure");
+				if(m_keepData.IsMjChallenge){
+				//-*チャレンジモード
+					SceneChange("SelectStage");
+				}else{
+				//-*シナリオモード
+					SceneChange("Adventure");
+				}
 				yield break;
 			}
 			yield return null;

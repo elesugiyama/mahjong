@@ -99,6 +99,9 @@ namespace AdventureDefine
 			"moema_event10",	// 9:特典CG
 		};
 #endregion	//-*IMAGE
+#region GAME_PAD
+		public static Vector3 CURSOL_POS = new Vector3(-300.0f,0.0f,0.0f);
+#endregion //-*GAME_PAD
 
 	}
 }

@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 //-********
 using MahjongDeffine;
 // using MJDefsHeader;
@@ -59,6 +61,9 @@ public class StageSelect : SceneBase {
 		mMODE_INIT,			//-*初期化
 		mMODE_UPDATE,		//
 		tMODE_NEXT_SCENE,	//-*次シーンへ
+#region KEY_TEST
+		tMODE_OPTION,
+#endregion //-*KEY_TEST
 		mMODE_MAX,		//*最大数
 	};
 
@@ -75,6 +80,22 @@ public class StageSelect : SceneBase {
 	private MAH m_ruleNo;
 	public Canvas UICanvas;     //UIを表示するキャンバス
 	
+
+#region GAME_PAD
+	[Header("ゲームパッド関連")]
+	[SerializeField]
+	private GameObject m_stageSelCursol=null;
+
+	[SerializeField]
+	private GameObject m_titleBackObj=null;
+	[SerializeField]
+	private ScrollRect ScrollRect;
+	private int m_stageNo = 0;
+	private static Vector3 STAGEOBJ_CURSOL_POS = new Vector3(-300.0f,0.0f,0.0f);
+	private static Vector3 BACKOBJ_CURSOL_POS = new Vector3(-50.0f,0.0f,0.0f);
+	private STAGESELECTMODE m_ModeTemp = STAGESELECTMODE.mMODE_INIT;	//-*モード
+
+#endregion //-*GAME_PAD
 	// Use this for initialization
 	protected override void Start () {
 		m_Mode = STAGESELECTMODE.mMODE_INIT;
@@ -100,12 +121,33 @@ public class StageSelect : SceneBase {
 			}
     	}
 		if(m_BtnTitleBack != null) m_BtnTitleBack.SetOnPointerClickCallback(ButtonTitleBack);
+#region GAME_PAD
+		m_stageNo = 0;
+		m_stageSelCursol.SetActive(true);
+		m_stageSelCursol.transform.SetParent(m_StageButton[m_stageNo].transform);
+		m_stageSelCursol.transform.localPosition = STAGEOBJ_CURSOL_POS;
+#endregion //-*GAME_PAD
+
 	}
 	
 	// Update is called once per frame
 	protected override void Update () {
+		base.Update();
+#region KEY_TEST
+		if(m_keepData.IsOptionOpen){
+			if(m_Mode != STAGESELECTMODE.tMODE_OPTION){
+				m_ModeTemp = m_Mode;
+			}
+			m_Mode = STAGESELECTMODE.tMODE_OPTION;
+		}
+#endregion //-*KEY_TEST
 		switch(m_Mode){
 		case STAGESELECTMODE.mMODE_INIT:
+			if(m_keepData.flag_res_battle == 0){ // バトルで敗北していたら、コンティニュー確認へ
+				//-*初回or勝利
+				DontDestroyData.ChallengeProgress++;
+				DontDestroyData.FileWriteSlotData();
+			}
 			DebLog("//-*mMODE_INIT");
 			m_Mode = ModeSet(STAGESELECTMODE.mMODE_UPDATE);
 			break;
@@ -115,6 +157,13 @@ public class StageSelect : SceneBase {
 		case STAGESELECTMODE.tMODE_NEXT_SCENE:
 			UpdateNextScene();
 			break;
+#region KEY_TEST
+		case STAGESELECTMODE.tMODE_OPTION:
+			if(!m_keepData.IsOptionOpen){
+				m_Mode = m_ModeTemp;
+			}
+			break;
+#endregion //-*KEY_TEST
 		default:
 			DebLog("//-*Err:"+m_Mode);
 
@@ -124,6 +173,45 @@ public class StageSelect : SceneBase {
 
 	private STAGESELECTMODE UpdateSelectStage()
 	{
+#region GAME_PAD
+		//-************
+		//-*キー入力テスト
+		//-************
+		if(IsKeyAxisButton(KEY_NAME.UP)){
+			m_stageNo--;
+			if(m_stageNo < 0){
+				m_stageNo = 0;
+			}else if(m_stageNo >= m_StageButton.Length){
+				m_stageNo = (m_StageButton.Length-1);
+			}
+			//-*カーソル移動
+			m_stageSelCursol.transform.SetParent(m_StageButton[m_stageNo].transform);
+			m_stageSelCursol.transform.localPosition = STAGEOBJ_CURSOL_POS;
+		}else
+		if(IsKeyAxisButton(KEY_NAME.DOWN)){
+			m_stageNo++;
+			if(m_stageNo >= m_StageButton.Length){
+			//-*戻る
+				m_stageNo = (m_StageButton.Length);
+				//-*カーソル移動
+				m_stageSelCursol.transform.SetParent(m_titleBackObj.transform);
+				m_stageSelCursol.transform.localPosition = BACKOBJ_CURSOL_POS;
+			}else{
+				//-*カーソル移動
+				m_stageSelCursol.transform.SetParent(m_StageButton[m_stageNo].transform);
+				m_stageSelCursol.transform.localPosition = STAGEOBJ_CURSOL_POS;
+			}
+		}
+		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
+			if(m_stageNo >= m_StageButton.Length){
+				ButtonTitleBack();
+			}else{
+				ButtonSelectStageTest(m_stageNo);
+			}
+		}
+
+#endregion //-*GAME_PAD
+
 		if(m_isStageSelect){
 			return STAGESELECTMODE.tMODE_NEXT_SCENE;
 		}
@@ -149,6 +237,7 @@ public class StageSelect : SceneBase {
 		m_ruleNo = StageRule[a];
 		m_nextSceneName = SceneNameDic[SCENE_NAME.INGAME];
 		m_isStageSelect = true;
+		m_keepData.IsMjChallenge = true;	//-*チャレンジモードから麻雀へ
 		// SceneChange("InGame");
 	}
 	public void ButtonTitleBack()

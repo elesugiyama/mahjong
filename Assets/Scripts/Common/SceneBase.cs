@@ -5,6 +5,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Const;
+#if N_SWITCH
+#region GAME_PAD
+using nn.hid;
+#endregion //-*GAME_PAD
+#endif //-*N_SWITCH
 
 /// <summary>
 /// シーンベース
@@ -69,7 +74,18 @@ public class SceneBase : MonoBehaviour {
 			}
 		}
 #region KEY_TEST
+#if N_SWITCH
+		if(UpdatePadState()){
+			StickAxisUpdate();
+		}
+		//-*オプション画面を開く
+		if(IsKeyBtnPress(KEY_NAME.START,true) &&
+			!m_keepData.IsOptionOpen){
+			OpenOption();
+		}
+#else
 		StickAxisUpdate();
+#endif //-*N_SWITCH
 #endregion //-*KEY_TEST
 	}
 	protected virtual void Awake() {
@@ -87,7 +103,17 @@ public class SceneBase : MonoBehaviour {
 		//-*既にある
 			gameData = ObjList[0];
 		}
-		m_keepData = gameData;		
+		m_keepData = gameData;	
+
+//-*******
+#region GAME_PAD
+#if N_SWITCH
+		Npad.Initialize();
+		Npad.SetSupportedIdType(new NpadId[]{ NpadId.Handheld, NpadId.No1 });
+		Npad.SetSupportedStyleSet(NpadStyle.FullKey | NpadStyle.Handheld | NpadStyle.JoyDual);
+#endif //-*N_SWITCH
+#endregion //-*GAME_PAD
+//-*******			
 	}
 
 	/// <summary>
@@ -263,6 +289,11 @@ public class SceneBase : MonoBehaviour {
 #endregion //-*OPTION
 
 #region GAME_PAD
+	// [Header("ゲームパッド関連")]
+    public NpadId npadId = NpadId.Invalid;
+    public NpadStyle npadStyle = NpadStyle.Invalid;
+    public NpadState npadState = new NpadState();
+
 	public const float KEY_WAIT = 0.3f;	//-*キー入力後の受け付けない時間Delay
 	public const float KEY_AXIS_REFUSE_INCLINE = 0.5f;	//-*傾きの受付拒否幅
 	public Vector2 m_inputStick = Vector2.zero;
@@ -282,6 +313,7 @@ public class SceneBase : MonoBehaviour {
 		AXIS_MAX,	//-*方向キーここまで
 		SELECT,		//-*決定	//-* = AXIS_MAX,(代入式保留)
 		BACK,		//-*戻る
+		START,
 		KEY_NAME_MAX,
 	};
 	public static Dictionary<KEY_NAME,string> GetPushKey = new Dictionary<KEY_NAME,string>()
@@ -295,12 +327,34 @@ public class SceneBase : MonoBehaviour {
 	/// </summary>
 	public bool IsKeyBtnPress(KEY_NAME keyName, bool isWait = true)
 	{
+//-*******
 		if(isWait && m_keyWaitTIme > 0 && keyName < KEY_NAME.AXIS_MAX)
 			return false;
-		if(Input.GetKeyDown(GetPushKey[keyName])){
-			return true;
+
+		bool isKeyPush = false;
+#if N_SWITCH
+		switch(keyName)
+		{
+			case KEY_NAME.SELECT:
+				if(npadState.GetButtonUp(NpadButton.A)) isKeyPush = true;
+				break;
+			case KEY_NAME.BACK:
+				if(npadState.GetButtonUp(NpadButton.B)) isKeyPush = true;
+				break;
+			case KEY_NAME.START:
+				if(npadState.GetButtonUp(NpadButton.Plus)) isKeyPush = true;
+				break;
 		}
-		return false;
+#else
+		if(Input.GetKeyDown(GetPushKey[keyName])){
+			isKeyPush = true;
+		}
+#endif //-*N_SWITCH
+		if(isWait && isKeyPush){
+			m_keyWaitTImeMax = KEY_WAIT;
+		}
+//-*******
+		return isKeyPush;
 	}
 	/// <summary>
 	/// 方向キー入力
@@ -311,7 +365,6 @@ public class SceneBase : MonoBehaviour {
 		//-*傾きの大きさ
 		float stickMagnitudeX = Mathf.Abs(m_inputStick.x);
 		float stickMagnitudeY = Mathf.Abs(m_inputStick.y);
-		
 		//-*受付拒否(受付拒否時間中,方向キー以外,傾きが一定値無い)
 		if(isWait && m_keyWaitTIme > 0)
 			return false;
@@ -323,8 +376,13 @@ public class SceneBase : MonoBehaviour {
 			return false;
 			
 		//-*上下左右の向き
+#if N_SWITCH
+		int axisX = (m_inputStick.x > 0)? 1:-1;
+		int axisY = (m_inputStick.y > 0)? -1:1;
+#else
 		int axisX = (m_inputStick.x > 0)? 1:-1;
 		int axisY = (m_inputStick.y > 0)? 1:-1;
+#endif //-*N_SWITCH
 		//-*上下左右の優先度
 		bool isAxisX = (stickMagnitudeX > stickMagnitudeY)? true:false;	//-*傾きが同じなら縦(Y軸)優先
 
@@ -332,25 +390,25 @@ public class SceneBase : MonoBehaviour {
 			case KEY_NAME.UP:
 				if(axisY == -1 && !isAxisX){
 					isPress = true;
-					// Debug.Log("//-*上！！！！！！");
+					Debug.Log("//-*上！！！！！！");
 				}
 				break;
 			case KEY_NAME.DOWN:
 				if(axisY == 1 && !isAxisX){
 					isPress = true;
-					// Debug.Log("//-*下！！！！！！");
+					Debug.Log("//-*下！！！！！！");
 				}
 				break;
 			case KEY_NAME.LEFT:
 				if(axisX == -1 && isAxisX){
 					isPress = true;
-					// Debug.Log("//-*左！！！！！！");
+					Debug.Log("//-*左！！！！！！");
 				}
 				break;
 			case KEY_NAME.RIGHT:
 				if(axisX == 1 && isAxisX){
 					isPress = true;
-					// Debug.Log("//-*右！！！！！！");
+					Debug.Log("//-*右！！！！！！");
 				}
 				break;
 			default:
@@ -367,26 +425,111 @@ public class SceneBase : MonoBehaviour {
 
 		if( m_inputStick == Vector2.zero ) {
 			//外部コントローラー ジョイスティック
+#if N_SWITCH
+	#if false //-*元
+			AnalogStickState lStick = npadState.analogStickL;
+			var x = lStick.x;
+			var y = lStick.y;
+	#else	//-*十字キー対応晩
+			AnalogStickState lStick = npadState.analogStickL;
+			var x = lStick.x;
+			var y = lStick.y;
+			if(x == 0 && y == 0){
+				if(npadState.GetButton(NpadButton.Right)){
+					x = 1;
+				}else
+				if(npadState.GetButton(NpadButton.Left)){
+					x = -1;
+				}else
+				if(npadState.GetButton(NpadButton.Up)){
+					y = 1;
+				}else
+				if(npadState.GetButton(NpadButton.Down)){
+					y = -1;
+				}
+			}
+	#endif
+#else
 			var x = Input.GetAxis( "Horizontal" );
 			var y = Input.GetAxis( "Vertical" );
-			if( Mathf.Abs( x ) <= 0.1f ) x = 0;
-			if( Mathf.Abs( y ) <= 0.1f ) y = 0;
+#endif
+			if( Mathf.Abs( x ) <= KEY_AXIS_REFUSE_INCLINE ) x = 0;
+			if( Mathf.Abs( y ) <= KEY_AXIS_REFUSE_INCLINE ) y = 0;
+			// if( Mathf.Abs( x ) <= 0.1f ) x = 0;
+			// if( Mathf.Abs( y ) <= 0.1f ) y = 0;
 			if( x != 0 || y != 0 ) {
 				m_inputStick.x = x;
 				m_inputStick.y = y;
-				// DebLog("//-****m_InputVector:"+m_inputStick);
+				// DebLog("//-****m_InputVector:"+m_inputStick+"::"+(m_keyWaitTImeMax - m_keyWaitTIme)+" = "+m_keyWaitTImeMax+" - "+m_keyWaitTIme);
 			}
 		}
 		//-*キー入力受付拒否時間
 		m_keyWaitTIme += Time.deltaTime;
 		var isTime = m_keyWaitTImeMax - m_keyWaitTIme;
 		
-		if(isTime < 0){
+		if(isTime < 0/* || m_inputStick == Vector2.zero*/){
+			// DebLog("//-*"+m_inputStick+":"+isTime+" = "+m_keyWaitTImeMax+" - "+m_keyWaitTIme);
 			m_keyWaitTIme=0;
 			m_keyWaitTImeMax = 0;
+			isTime = 0;
 		}
 	}
 
+    public bool UpdatePadState()
+    {
+#if !N_SWITCH
+		return false;
+#else
+        NpadStyle handheldStyle = Npad.GetStyleSet(NpadId.Handheld);
+        NpadState handheldState = npadState;
+        if (handheldStyle != NpadStyle.None)
+        {
+            Npad.GetState(ref handheldState, NpadId.Handheld, handheldStyle);
+            if (handheldState.buttons != NpadButton.None)
+            {
+                npadId = NpadId.Handheld;
+                npadStyle = handheldStyle;
+                npadState = handheldState;
+                return true;
+            }
+        }
+
+        NpadStyle no1Style = Npad.GetStyleSet(NpadId.No1);
+        NpadState no1State = npadState;
+        if (no1Style != NpadStyle.None)
+        {
+            Npad.GetState(ref no1State, NpadId.No1, no1Style);
+            if (no1State.buttons != NpadButton.None)
+            {
+                npadId = NpadId.No1;
+                npadStyle = no1Style;
+                npadState = no1State;
+                return true;
+            }
+        }
+
+        if ((npadId == NpadId.Handheld) && (handheldStyle != NpadStyle.None))
+        {
+            npadId = NpadId.Handheld;
+            npadStyle = handheldStyle;
+            npadState = handheldState;
+        }
+        else if ((npadId == NpadId.No1) && (no1Style != NpadStyle.None))
+        {
+            npadId = NpadId.No1;
+            npadStyle = no1Style;
+            npadState = no1State;
+        }
+        else
+        {
+            npadId = NpadId.Invalid;
+            npadStyle = NpadStyle.Invalid;
+            npadState.Clear();
+            return false;
+        }
+        return true;
+#endif //-*N_SWITCH
+    }
 
 #endregion //-*GAME_PAD
 

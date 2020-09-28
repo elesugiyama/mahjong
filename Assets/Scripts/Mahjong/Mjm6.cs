@@ -46,7 +46,7 @@ public bool	chkchi_m6 ( /*MahJongRally * pMe*/ )/*1995.9.6*/
 
 	Chiflg = 0;
 #region UNITY_ORIGINAL
-	iThcnt = gpsPlayerWork.byThcnt;
+	Thcnt = gpsPlayerWork.byThcnt;
 #endregion //-*UNITY_ORIGINAL	
 	if (gpsPlayerWork.bFrich != 0 ) {
 		return (false);

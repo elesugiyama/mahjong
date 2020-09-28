@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+#region GAME_PAD
+using nn.hid;
+#endregion //-*GAME_PAD
 public class Title : SceneBase {
 
 //-----------------------------------------------
@@ -71,6 +73,7 @@ public class Title : SceneBase {
 #endif //-*SUGI_DEB
 
 #region GAME_PAD
+	[Header("ゲームパッド関連")]
 	private int m_menuNo = 0;
 	private enum TITLE_SELECT { //-*タイトルメニュー
 		SEL_STORY = 0,
@@ -112,6 +115,7 @@ public class Title : SceneBase {
 		if(m_BtnDebSelStage != null) m_BtnDebSelStage.SetOnPointerClickCallback(DebBtnSelSco);
 		if(m_BtnDebInGame != null) m_BtnDebInGame.SetOnPointerClickCallback(DebBtnInGame);
 #endif //-*SUGI_DEB
+
 			DebLog("//-*awake");
 
 	}
@@ -177,7 +181,7 @@ public class Title : SceneBase {
 			m_titleCursol.transform.SetParent(m_titleMenuObj[m_menuNo].transform);
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
 		}
-		else if(IsKeyBtnPress(KEY_NAME.SELECT,false)){
+		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
 			switch(m_menuNo)
 			{
 			case (int)TITLE_SELECT.SEL_STORY:
@@ -249,8 +253,10 @@ public class Title : SceneBase {
 			m_menuNo--;
 			//-*todo:セーブの有無チェック
 			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
-			//-*なければ飛ばす
-				m_menuNo--;
+			//-*現在のシナリオ番号が0(最初)ならセーブデータなし
+				if(DontDestroyData.AdvScoNo == 0){
+					m_menuNo--;
+				}
 			}
 			if(m_menuNo < (int)SCO_SELECT.SEL_NEW_GAME){
 				m_menuNo = (int)SCO_SELECT.SEL_BACK;
@@ -265,7 +271,9 @@ public class Title : SceneBase {
 			//-*todo:セーブの有無チェック
 			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
 			//-*なければ飛ばす
-				m_menuNo++;
+				if(DontDestroyData.AdvScoNo == 0){
+					m_menuNo++;
+				}
 			}
 			if(m_menuNo < (int)SCO_SELECT.SEL_NEW_GAME){
 				m_menuNo = (int)SCO_SELECT.SEL_BACK;
@@ -276,20 +284,22 @@ public class Title : SceneBase {
 			m_titleCursol.transform.localPosition = new Vector3(-60.0f,0.0f,0.0f);
 		}
 		else
-		if(IsKeyBtnPress(KEY_NAME.BACK,false)){
+		if(IsKeyBtnPress(KEY_NAME.BACK,true)){
 			DebLog("戻る！");
 			InitScoSelTitle();
 			return TITLEMODE.tMODE_MAIN;
 		}
 		else
-		if(IsKeyBtnPress(KEY_NAME.SELECT,false)){
+		if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
 			switch(m_menuNo)
 			{
 			case (int)SCO_SELECT.SEL_NEW_GAME:
 				m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
+				SetInitNewScoMode();
 				return TITLEMODE.tMODE_NEXT_SCENE;
 			case (int)SCO_SELECT.SEL_CONTINUE:
-				return TITLEMODE.tMODE_MAIN;
+				m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
+				return TITLEMODE.tMODE_NEXT_SCENE;
 			case (int)SCO_SELECT.SEL_BACK:
 				InitScoSelTitle();
 				return TITLEMODE.tMODE_MAIN;
@@ -300,10 +310,14 @@ public class Title : SceneBase {
 #region BUTTON_PUSH
 		if(m_BtnScoSelNew.ISPUSH){
 			m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
+			SetInitNewScoMode();
 			return TITLEMODE.tMODE_NEXT_SCENE;
 		}
 		if(m_BtnScoSelContinue.ISPUSH){
-			return TITLEMODE.tMODE_MAIN;
+			if(DontDestroyData.AdvScoNo == 0){
+				m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
+				return TITLEMODE.tMODE_NEXT_SCENE;
+			}
 		}
 		if(m_BtnScoSelBack.ISPUSH){
 			return TITLEMODE.tMODE_MAIN;
@@ -345,6 +359,10 @@ public class Title : SceneBase {
 #endregion //-*KEY_TEST
 	}
 
+	public void SetInitNewScoMode()
+	{
+		DontDestroyData.AdvScoNo = DontDestroyData.AdvNextScoNo = 0;
+	}
 #if SUGI_DEB
 	public void DebBtnSelSco()
 	{
@@ -358,4 +376,6 @@ public class Title : SceneBase {
 		SceneChange("InGame");
 	}
 #endif //-*SUGI_DEB
+
+
 }

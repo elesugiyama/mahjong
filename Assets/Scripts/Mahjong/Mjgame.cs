@@ -95,14 +95,14 @@ public bool chkend_game ( /*MahJongRally * pMe*/ )
 
 #if	Rule_2P
 //********ウキウキ:表情操作********
-	#if false //-*todo:描画関連
+	#if true //-*todo:描画関連
 	if( end_f) {
 		if( gpsTableData.sMemData[0].nPoint>= gpsTableData.sMemData[1].nPoint){
-			myCanvas.flag_res_battle= 0;	// 0:勝利/1:敗北
-			FaceNum = (D_FACE_12-D_FACE_00);
+			m_keepData.flag_res_battle= 0;	// 0:勝利/1:敗北
+			// FaceNum = (D_FACE_12-D_FACE_00);
 		}else{
-			myCanvas.flag_res_battle= 1;	// 0:勝利/1:敗北
-			FaceNum = (D_FACE_15-D_FACE_00);
+			m_keepData.flag_res_battle= 1;	// 0:勝利/1:敗北
+			// FaceNum = (D_FACE_15-D_FACE_00);
 		}
 	}
 	#endif //-*todo:描画関連
