@@ -89,6 +89,12 @@ public class Gallery : SceneBase {
 				var spriteImage = Resources.LoadAll<Sprite>(imageName);
 				int imgNo = i%GalDef.THUMBNAIL_CONTAIN_NUM;
 				BCtl[0].SetImage(i,spriteImage[imgNo]);
+#region SAVELOAD
+				if(!m_keepData.CheckFlagGallery(i)){
+					//-*todo:未解放時の処理
+					BCtl[0].enabled = false;
+				}
+#endregion	//-*SAVELOAD
 			}
 #region GAME_PAD
 			m_thumbnailObj.Add(m_thumbnailButton[i].transform.gameObject);
@@ -195,14 +201,24 @@ public class Gallery : SceneBase {
 			m_galleryCursol.transform.localPosition = GalDef.CURSOL_POS;
 		}
 		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
-			m_isThumbnailSelect = true;
+#region SAVELOAD
+			if(m_keepData.CheckFlagGallery(m_selThumbnailNo)){
+				//-*todo:未解放時の処理
+				m_isThumbnailSelect = true;
+			}
+#endregion	//-*SAVELOAD
 		}
 		else if(IsKeyBtnPress(KEY_NAME.BACK,true)){
+#if true
+//-*ギャラリー開放デバッグ
+			m_keepData.SetFlagGallery(m_selThumbnailNo);
+			DontDestroyData.FileWriteSlotData();
+#else
 			m_isBack = true;
 			ButtonTitleBack();
+#endif
 		}
 #endregion //-*GAME_PAD
-
 
 		if(m_isThumbnailSelect){
 			InitEventCG();

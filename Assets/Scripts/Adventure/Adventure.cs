@@ -151,8 +151,8 @@ public class Adventure : SceneBase {
 		DebLog("//-*ADV_start");
 #if SUGI_DEB
 //-*デバッグ
-m_keepData.AdvNextScoNo = 1;
-m_isSceneChange = true;
+// m_keepData.AdvNextScoNo = 0;
+// m_isSceneChange = true;
 #endif
 		m_Mode = ModeSet(ADVENTUREMODE.aMODE_INIT);
 		StartCoroutine("UpdateAdventure");
@@ -162,6 +162,7 @@ m_isSceneChange = true;
 	protected override void Update () {
 		base.Update();
 #region GAME_PAD
+		if(m_keepData.IsOptionOpen)return;	//-*オプション開いてたら以下処理しない
 		//-************
 		//-*キー入力テスト
 		//-************
@@ -215,50 +216,57 @@ m_isSceneChange = true;
 	}
 
 	private IEnumerator Init(){
-		InitWaitFlags();
+		if( !isInGameWin() ){
+		//-*敗北：todo:コンティニューへ
+			m_Mode = ModeSet(ADVENTUREMODE.aMODE_ENDING);
+		}else{
+		//-*初回or勝利
+			DontDestroyData.FileWriteSlotData();
 
-		//-*背景
-		if(m_bgObj == null){
-			GameObject objBG = (GameObject)Resources.Load("Prefabs/adventureBG");
-			m_bgObj = (GameObject)Instantiate(objBG, Vector3.zero, Quaternion.identity);
-			m_bgObj.transform.SetParent(m_bgObjBase.transform, false);
-			m_bgScript = m_bgObj.GetComponent<AdventureBg>();
-			m_bgObjBase.SetActive(false);
+			InitWaitFlags();
+
+			//-*背景
+			if(m_bgObj == null){
+				GameObject objBG = (GameObject)Resources.Load("Prefabs/adventureBG");
+				m_bgObj = (GameObject)Instantiate(objBG, Vector3.zero, Quaternion.identity);
+				m_bgObj.transform.SetParent(m_bgObjBase.transform, false);
+				m_bgScript = m_bgObj.GetComponent<AdventureBg>();
+				m_bgObjBase.SetActive(false);
+			}
+			// yield return new WaitForSeconds(1);
+
+			//-*キャラクター
+			if(m_charaObj == null){
+				GameObject objCh = (GameObject)Resources.Load("Prefabs/adventureChara");
+				m_charaObj = (GameObject)Instantiate(objCh, Vector3.zero, Quaternion.identity);
+				m_charaObj.transform.SetParent(m_charaObjBase.transform, false);
+				m_CharaScript = m_charaObj.GetComponent<AdventureChara>();
+				m_charaObjBase.SetActive(false);
+			}
+
+			yield return LoadScenarioFile();
+
+			//-*ページ送りボタン
+			m_nextButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(PushNextPageButton);
+			
+			//-*初回フェードイン
+			if(m_isSceneChange) {
+	//-***
+				// m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_OUT_BLACK);
+	//-***
+				m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_IN_BLACK);
+				ScenarioReadUpdate();
+				m_isEffectWait = true;
+				m_isSceneChange = false;
+			}
+
+			m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
+
+	#if SUGI_DEB
+	//-*デバッグ
+			m_dev_ScoFinButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(DevPushButton);
+	#endif
 		}
-		// yield return new WaitForSeconds(1);
-
-		//-*キャラクター
-		if(m_charaObj == null){
-	        GameObject objCh = (GameObject)Resources.Load("Prefabs/adventureChara");
-			m_charaObj = (GameObject)Instantiate(objCh, Vector3.zero, Quaternion.identity);
-			m_charaObj.transform.SetParent(m_charaObjBase.transform, false);
-			m_CharaScript = m_charaObj.GetComponent<AdventureChara>();
-			m_charaObjBase.SetActive(false);
-		}
-
-		yield return LoadScenarioFile();
-
-		//-*ページ送りボタン
-		m_nextButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(PushNextPageButton);
-		
-		//-*初回フェードイン
-		if(m_isSceneChange) {
-//-***
-			// m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_OUT_BLACK);
-//-***
-			m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_IN_BLACK);
-			ScenarioReadUpdate();
-			m_isEffectWait = true;
-			m_isSceneChange = false;
-		}
-
-		m_Mode = ModeSet(ADVENTUREMODE.aMODE_TEXT_READ);
-
-#if SUGI_DEB
-//-*デバッグ
-		m_dev_ScoFinButton.GetComponent<ButtonCtl>().SetOnPointerClickCallback(DevPushButton);
-#endif
-
 		DebLog("//-*INIT");
 		yield break;
 	}
@@ -283,7 +291,7 @@ m_isSceneChange = true;
 				m_Mode = ModeSet(ADVENTUREMODE.aMODE_EFFECT_ERR);
 			}
 #region KEY_TEST
-			if(m_keepData.IsOptionOpen){
+			while(m_keepData.IsOptionOpen){
 				yield return null;
 			}
 #endregion //-*KEY_TEST
@@ -335,7 +343,8 @@ m_isSceneChange = true;
 				break;
 			case ADVENTUREMODE.aMODE_PAGE_WAIT:
 			//-*自動メッセージ送り
-				if(m_keepData.IS_SCO_AUTO && !IsInvoking("PushNextPageButton")){
+				// if(m_keepData.IS_SCO_AUTO && !IsInvoking("PushNextPageButton")){
+				if(DontDestroyData.IS_SCO_AUTO && !IsInvoking("PushNextPageButton")){
 				//-*一度だけ呼ぶ
 					Invoke("PushNextPageButton",AdvDefine.AUTO_WAIT_TIME);
 				}
@@ -384,14 +393,19 @@ m_isSceneChange = true;
 	/// シナリオファイルの読み込みと中身格納
 	/// </summary>
 	private IEnumerator LoadScenarioFile() {
-		m_keepData.AdvScoNo = m_keepData.AdvNextScoNo;
-		if(m_keepData.AdvScoNo <= 0)
-		// if(string.IsNullOrEmpty(m_gameData.AdvScoNo))
+		// m_keepData.AdvScoNo = m_keepData.AdvNextScoNo;
+		// if(m_keepData.AdvScoNo <= 0)
+		// {
+		// 	m_keepData.AdvScoNo = 0;
+		// }
+		// var scenarioNo = (m_keepData.AdvScoNo).ToString();
+		// if( String.IsNullOrEmpty(scenarioNo) )yield break;
+		DontDestroyData.AdvScoNo = DontDestroyData.AdvNextScoNo;
+		if(DontDestroyData.AdvScoNo <= 0)
 		{
-			m_keepData.AdvScoNo = 0;
+			DontDestroyData.AdvScoNo = 0;
 		}
-		// int scenarioNo = m_gameData.AdvScoNo;
-		var scenarioNo = (m_keepData.AdvScoNo).ToString();
+		var scenarioNo = (DontDestroyData.AdvScoNo).ToString();
 		if( String.IsNullOrEmpty(scenarioNo) )yield break;
 //-*************ファイル読み込み
 		//-*シナリオファイル名
@@ -486,9 +500,11 @@ m_isSceneChange = true;
 				var cgNo = GetScoCmdNoInteger(scoLineText,cmd);
 				m_bgScript.SetImageEvBg( cgNo );
 				// m_bgScript.ImageChange("adventure/moema_bg00");
+				m_keepData.SetFlagGallery(cgNo); // フラグセット
 			}
 			//-*人物を非表示
 			m_charaObjBase.SetActive(false);
+
 			break;
 		case AdvDefine.CMD_TYPE.CMD_BGM:
 		// BGM再生
@@ -532,7 +548,8 @@ m_isSceneChange = true;
 			m_isBattleSceneWait = true;
 			m_screenEffect.SetEffect(ScreenEffect.EFFECTTYPE.FADE_OUT_BLACK);
 			//-*次番号のシナリオを格納
-			m_keepData.AdvNextScoNo = (m_keepData.AdvScoNo+1);
+			// m_keepData.AdvNextScoNo = (m_keepData.AdvScoNo+1);
+			DontDestroyData.AdvNextScoNo = (DontDestroyData.AdvScoNo+1);
 			break;
 		case AdvDefine.CMD_TYPE.CMD_CHOICE_START:
 		// 選択肢開始
@@ -663,7 +680,8 @@ m_isSceneChange = true;
     {
 		m_messageCount = 0;
 		m_messageDelayCount = 0;
-		m_pageDrawSpeed = AdvDefine.MSG_SPD[m_keepData.SCO_SPEED];
+		// m_pageDrawSpeed = AdvDefine.MSG_SPD[m_keepData.SCO_SPEED];
+		m_pageDrawSpeed = AdvDefine.MSG_SPD[DontDestroyData.SCO_SPEED];
         while (m_textLineData[m_pageLine].Length > m_messageCount)//文字をすべて表示していない場合ループ
         {
 			if(!m_isPageDraw || m_pageDrawSpeed <= 0)
@@ -734,7 +752,7 @@ m_isSceneChange = true;
 	public void PushChoiceButton(string a)
 	{
 		DebLog("//-*PushChoiceButton:"+a);
-		m_keepData.AdvNextScoNo = int.Parse(a);
+		DontDestroyData.AdvNextScoNo = int.Parse(a);
 		m_isChoiceWait = false;
 		// SceneManager.LoadScene ("SelectStage");
 	}
@@ -833,7 +851,7 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 		foreach( var a in nextScoNo ){
 			//-*次のシナリオ番号が有れば
 			if( int.TryParse(a, out scoNo) ){
-				m_keepData.AdvNextScoNo = scoNo;
+				DontDestroyData.AdvNextScoNo = scoNo;
 				return true;
 			}
 		}
@@ -904,11 +922,65 @@ DebLog("//-*"+scoLineText+": sentence("+sentence+"): nextScoNo("+nextScoNo.Lengt
 				m_keepData.mah_limit_num = ruleNo;
 			}
 		}
+		m_keepData.IsMjChallenge = false;	//-*シナリオモードから麻雀へ
 		DebLog("//-*(stNo:"+stNo+", ruleNo:"+ruleNo+")");
 		// Const.MahjongInGameData
 	}
 #endregion	//-*ExclusiveScenarioCommand
+#region SAVELOAD
+	private bool isInGameWin()
+	{
+		if(m_keepData.flag_res_battle == 1){ // バトルで敗北していたら、コンティニュー確認へ
+			#if false //-*todo:麻雀負け時
+				string[] bufStr = new string[]{
+					//FNAME_IMG_PARTS_SCENARIO, // メッセージ用画像パーツ
+					//FNAME_IMG_PARTS_FACE, // 顔パーツ
+					//STR_BLANK, // 場所:最初は空
+					//FNAME_IMG_BODY_DEF, // ボディのデフォルト(制服)
+					STR_BLANK, // メッセージ用画像パーツ
+					STR_BLANK, // 顔パーツ
+					STR_BLANK, // 場所:最初は空
+					STR_BLANK, // ボディのデフォルト(制服)
+					FNAME_IMG_ASC, // 確認画面用画像パーツ
+				};
+				_MEMSET(rTemp, bufStr);
+				iCHOICE_SEL = 1;
+				setReceiveSoftKey(LAB_NONE, LAB_NONE);
+				setMode(sMODE_ASC_CONTINUE);
+			#endif //-*todo:麻雀負け時
+				return false;
+			} else if(m_keepData.flag_res_battle == 0){ // 勝利していたらフラグをデフォルトに
+				m_keepData.flag_res_battle = -1;
+				#if false //-*todo:作りかけ
+				FLAG_GALLERY_KEEP |= FLAG_GALLERY_TEMP;	// 勝利時に取得CG確定
+				FLAG_GALLERY_TEMP = 0;
+				#endif //-*todo:作りかけ
+			}
+	
+			#if false //-*todo:作りかけ
+			if(0 <= flag_save){
+				if(TIME_WAIT_SAVE_PRE < m_count){
+					#if false //-*todo:保留
+					string[] bufStr = new string[]{
+						STR_BLANK,
+						STR_BLANK,
+						FNAME_IMG_PARTS_SCENARIO, // メッセージ用画像パーツ
+					};
+					_MEMSET(rTemp, bufStr);
+					m_count = 0;
+					setReceiveSoftKey(LAB_NONE, LAB_NONE);
+					#endif //-*todo:保留
+					setMode(sMODE_SAVE);
+					return true;
+				}
+				m_count++;
+				return true;
+			}		
+		#endif //-*todo:作りかけ
+		return true;
+	}
 
+#endregion	//-*SAVELOAD
 #if SUGI_DEB
 #region DEBUG
 [Header("デバッグ用")]

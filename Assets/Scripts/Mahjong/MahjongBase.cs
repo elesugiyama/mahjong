@@ -686,7 +686,7 @@ public partial class MahjongBase : SceneBase {
 
 		//-*ready(true);		//準備中
 		ready = false;
-
+		m_keepData.flag_res_battle = -1;	//-*勝敗フラグ初期化
 		//--------------------------------------------------
 		//変数
 	#if false //-*todo
@@ -1284,7 +1284,13 @@ public void MahJongRally_InitData(/*MahJongRally * pMe*/)
 				break;
 			case MAHJONGMODE.mMODE_EXIT:
 			default:
-				SceneChange("Adventure");
+				if(m_keepData.IsMjChallenge){
+				//-*チャレンジモード
+					SceneChange("SelectStage");
+				}else{
+				//-*シナリオモード
+					SceneChange("Adventure");
+				}
 				yield break;
 			}
 			yield return null;

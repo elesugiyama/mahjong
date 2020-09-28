@@ -89,7 +89,7 @@ public class DebScoSelect : SceneBase {
 	public void ButtonSelectStageTest(int a)
 	{
 		DebLog("//-*ButtonTest:"+a);
-		m_keepData.AdvNextScoNo = a;
+		DontDestroyData.AdvNextScoNo = a;
 		SceneChange("Adventure");
 	}
 }

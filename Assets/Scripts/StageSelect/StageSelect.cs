@@ -143,6 +143,11 @@ public class StageSelect : SceneBase {
 #endregion //-*KEY_TEST
 		switch(m_Mode){
 		case STAGESELECTMODE.mMODE_INIT:
+			if(m_keepData.flag_res_battle == 0){ // バトルで敗北していたら、コンティニュー確認へ
+				//-*初回or勝利
+				DontDestroyData.ChallengeProgress++;
+				DontDestroyData.FileWriteSlotData();
+			}
 			DebLog("//-*mMODE_INIT");
 			m_Mode = ModeSet(STAGESELECTMODE.mMODE_UPDATE);
 			break;
@@ -232,6 +237,7 @@ public class StageSelect : SceneBase {
 		m_ruleNo = StageRule[a];
 		m_nextSceneName = SceneNameDic[SCENE_NAME.INGAME];
 		m_isStageSelect = true;
+		m_keepData.IsMjChallenge = true;	//-*チャレンジモードから麻雀へ
 		// SceneChange("InGame");
 	}
 	public void ButtonTitleBack()

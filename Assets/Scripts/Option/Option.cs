@@ -76,30 +76,35 @@ public class Option : SceneBase {
 	private OPTIONMODE m_Mode = OPTIONMODE.tMODE_MAX;	//-*モード
 	private int m_helpPageNo = 0;
 
+	private bool m_isChangeOption = false;
 
 	protected override void Start () {}
 	protected override void Awake()
 	{
 		base.Awake();
 		m_Mode = OPTIONMODE.tMODE_INIT;
+		m_isChangeOption = false;
 		int btNo = 0;
 		for(btNo = 0;btNo<m_volBtnList.Count;btNo++){
 			if(m_volBtnList[btNo] == null) continue;
 			m_volBtnList[btNo].SetOnPointerClickCallback(SetonVol);
 			m_volBtnList[btNo].SetLabel(btNo);
-			m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
+			// m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
+			m_volBtnList[btNo].SetActive( (btNo == DontDestroyData.SOUND_VOLUME) );
 		}
 		for(btNo = 0;btNo<m_scoSpdBtnList.Count;btNo++){
 			if(m_scoSpdBtnList[btNo] == null) continue;
 			m_scoSpdBtnList[btNo].SetOnPointerClickCallback(SetScoSpd);
 			m_scoSpdBtnList[btNo].SetLabel(btNo);
-			m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
+			// m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
+			m_scoSpdBtnList[btNo].SetActive( (btNo == DontDestroyData.SCO_SPEED) );
 		}
 		for(btNo = 0;btNo<m_scoAutoBtnList.Count;btNo++){
 			if(m_scoAutoBtnList[btNo] == null) continue;
 			m_scoAutoBtnList[btNo].SetOnPointerClickCallback(SetScoAuto);
 			m_scoAutoBtnList[btNo].SetLabel(btNo);
-			m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
+			// m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
+			m_scoAutoBtnList[btNo].SetActive( (btNo == DontDestroyData.SCO_AUTO) );
 		}
 		
 		
@@ -139,6 +144,12 @@ public class Option : SceneBase {
 			break;
 
 		}
+
+		//-*オプション項目変更
+		if(m_isChangeOption){
+			DontDestroyData.FileWritePersonalData();
+			m_isChangeOption = false;
+		}
 	}
 
 	private void UpdateNextScene()
@@ -176,19 +187,22 @@ public class Option : SceneBase {
 		else if(IsKeyAxisButton(KEY_NAME.RIGHT)){
 			switch(m_menuNo){
 			case (int)OPTION_SELECT.SEL_VOL:
-				int vol = m_keepData.SOUND_VOLUME;
+				// int vol = m_keepData.SOUND_VOLUME;
+				int vol = DontDestroyData.SOUND_VOLUME;
 				vol++;
 				if(vol >= m_volBtnList.Count)vol = 0;
 				SetonVol(vol);
 				break;
 			case (int)OPTION_SELECT.SEL_SPEED:
-				int spd = m_keepData.SCO_SPEED;
+				// int spd = m_keepData.SCO_SPEED;
+				int spd = DontDestroyData.SCO_SPEED;
 				spd++;
 				if(spd >= m_scoSpdBtnList.Count)spd = 0;
 				SetScoSpd(spd);
 				break;
 			case (int)OPTION_SELECT.SEL_SKIP:
-				int auto = m_keepData.SCO_AUTO;
+				// int auto = m_keepData.SCO_AUTO;
+				int auto = DontDestroyData.SCO_AUTO;
 				auto++;
 				if(auto >= m_scoAutoBtnList.Count)auto = 0;
 				SetScoAuto(auto);
@@ -200,19 +214,22 @@ public class Option : SceneBase {
 		else if(IsKeyAxisButton(KEY_NAME.LEFT)){
 			switch(m_menuNo){
 			case (int)OPTION_SELECT.SEL_VOL:
-				int vol = m_keepData.SOUND_VOLUME;
+				// int vol = m_keepData.SOUND_VOLUME;
+				int vol = DontDestroyData.SOUND_VOLUME;
 				vol--;
 				if(vol < 0 ) vol = (m_volBtnList.Count-1);
 				SetonVol(vol);
 				break;
 			case (int)OPTION_SELECT.SEL_SPEED:
-				int spd = m_keepData.SCO_SPEED;
+				// int spd = m_keepData.SCO_SPEED;
+				int spd = DontDestroyData.SCO_SPEED;
 				spd--;
 				if(spd < 0) spd = (m_scoSpdBtnList.Count-1);
 				SetScoSpd(spd);
 				break;
 			case (int)OPTION_SELECT.SEL_SKIP:
-				int auto = m_keepData.SCO_AUTO;
+				// int auto = m_keepData.SCO_AUTO;
+				int auto = DontDestroyData.SCO_AUTO;
 				auto--;
 				if(auto < 0) auto = (m_scoAutoBtnList.Count-1);
 				SetScoAuto(auto);
@@ -222,7 +239,12 @@ public class Option : SceneBase {
 			}
 		}
 		else if(IsKeyBtnPress(KEY_NAME.SELECT,true)){
-			return OPTIONMODE.tMODE_HELP_INIT;
+			switch(m_menuNo){
+			case (int)OPTION_SELECT.SEL_HELP:
+				return OPTIONMODE.tMODE_HELP_INIT;
+			default:
+				break;
+			}
 		}
 		else if(IsKeyBtnPress(KEY_NAME.BACK,true)){
 			return OPTIONMODE.tMODE_NEXT_SCENE;
@@ -296,31 +318,40 @@ public class Option : SceneBase {
 	{
 		DebLog("//-*ButtonVol:"+no);
 		if(m_keepData == null) return;
-		m_keepData.SOUND_VOLUME = no;
+		// m_keepData.SOUND_VOLUME = no;
+		DontDestroyData.SOUND_VOLUME = no;
 		for(int btNo = 0;btNo<m_volBtnList.Count;btNo++){
 			if(m_volBtnList[btNo] == null) continue;
-			m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
+			// m_volBtnList[btNo].SetActive( (btNo == m_keepData.SOUND_VOLUME) );
+			m_volBtnList[btNo].SetActive( (btNo == DontDestroyData.SOUND_VOLUME) );
 		}
+		m_isChangeOption = true;
 	}
 	public void SetScoSpd(int no)
 	{
 		DebLog("//-*ButtonScoSpd:"+no);
 		if(m_keepData == null) return;
-		m_keepData.SCO_SPEED = no;
+		// m_keepData.SCO_SPEED = no;
+		DontDestroyData.SCO_SPEED = no;
 		for(int btNo = 0;btNo<m_scoSpdBtnList.Count;btNo++){
 			if(m_scoSpdBtnList[btNo] == null) continue;
-			m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
+			// m_scoSpdBtnList[btNo].SetActive( (btNo == m_keepData.SCO_SPEED) );
+			m_scoSpdBtnList[btNo].SetActive( (btNo == DontDestroyData.SCO_SPEED) );
 		}
+		m_isChangeOption = true;
 	}
 	public void SetScoAuto(int no)
 	{
 		DebLog("//-*ButtonScoAuto:"+no);
 		if(m_keepData == null) return;
-		m_keepData.SCO_AUTO = no;
+		// m_keepData.SCO_AUTO = no;
+		DontDestroyData.SCO_AUTO = no;
 		for(int btNo = 0;btNo<m_scoAutoBtnList.Count;btNo++){
 			if(m_scoAutoBtnList[btNo] == null) continue;
-			m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
+			// m_scoAutoBtnList[btNo].SetActive( (btNo == m_keepData.SCO_AUTO) );
+			m_scoAutoBtnList[btNo].SetActive( (btNo == DontDestroyData.SCO_AUTO) );
 		}
+		m_isChangeOption = true;
 	}
 
 #if SUGI_DEB
