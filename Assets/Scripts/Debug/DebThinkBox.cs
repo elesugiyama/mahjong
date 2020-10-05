@@ -75,7 +75,7 @@ public class DebThinkBox : MonoBehaviour {
 	// /// </summary>
 	// //---------------------------------------------------------
     public void SlideUpdate() {
-        Debug.Log("Slide");
+        Debug.Log("Slide[Think]:No."+BOX_NO+":Para = "+(int)m_target.value+"("+m_target.value+")");
 		SetValue((int)m_target.value);
     }
 

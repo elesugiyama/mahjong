@@ -1570,8 +1570,9 @@ public void MjMain(/*MahJongRally * pMe*/)
 				Optcnt = 0;					// ゲーム開始時にメニューを表示させないようにクリア。
 				MjKyokuInit();
 
-				if(MjKyokuInit_bflag == 0)
+				if(MjKyokuInit_bflag == 0){
 					mj_sts = 3;
+				}
 				break;
 			case	3:						//局処理
 //-*SUGI_DEB***************************
@@ -1663,7 +1664,56 @@ Debug.Log("* Kyoku End *");
 				DebLog(("### Hanchan End ###"));
 				#endif //-*todo:
 				break;
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:仮作成中
+			//-*運処理
+			case 99://-*mj_sts
+				if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.INITGAME,true)){
+				//-*新規局へ
+					mj_sts = 2;
+					break;
+				}
+				//-*運処理
+				// if((Bpcnt+Kancnt) == MJDefine.PAI_MAX){
+				if(game_player == Order){
+					deb_myLuckP = 3;
+					deb_yourLuckP = 1;
+					int deb_maxLuckP = (Math.Max(deb_myLuckP,deb_yourLuckP)*2);
+					int deb_startBpcnt = 79;//-*開始時の数値
+					gsPlayerWork[game_player].byPlflg = 1;	//-*手動プレイ
+					if((Bpcnt+Kancnt) <= (deb_startBpcnt+ deb_maxLuckP)){
+						Debug.Log("//-*"+game_player+","+Order+"ハイテイ！！！！！"+Math.Max(deb_myLuckP,deb_yourLuckP)+"！！！！！("+Bpcnt+"+"+Kancnt+") == "+MJDefine.PAI_MAX);
+						gsPlayerWork[game_player].byPlflg = 0;	//-*オートプレイ
+					}
+					else{
+						// mj_sts = 2;
+						// break;
+						m_DebBox.ButtonSelectStageTest((int)DebBoxInGame.FUNCTION_LIST.TUMOPOSTEST,true);
+						m_DebBox.ButtonRestart(0,true);
 
+					}
+				}
+				MjKyokuMain();
+				if(!deb_isLuckyTime)
+				{
+					mj_sts = 2;
+				}
+				if(reentry_m1_bflag== 0xFF) {
+					mj_sts = 8;
+					// オプションを0に。
+					Optcnt = 0;	// ゲーム終了後にメニューを表示させないようにクリア。
+					break;
+				}
+
+				// 2006/1/20
+				// MJ_GameDraw.cに置いてあるロジックをこちらに移動。
+				// 再接続時は行わない
+				if( is_reentry == false ) {
+					gGamePointFlag = false;
+				}
+				break;
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 		}
 #if FAST_TEST
 	} while( mj_sts== 3);

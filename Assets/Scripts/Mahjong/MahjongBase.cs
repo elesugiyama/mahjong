@@ -133,7 +133,11 @@ public partial class MahjongBase : SceneBase {
 	private DebBoxInGame m_DebBox;
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
-	private int tsumikomiNum = -1;
+	private int deb_tsumikomiNum = -1;
+	//-*運処理
+	private int deb_myLuckP = 0;		//-*自分の運
+	private int deb_yourLuckP = 0;		//-*相手の運
+	private bool deb_isLuckyTime = false;
 
 //-*****ここまでUnity用
 
@@ -1592,9 +1596,30 @@ public void SetRuleData(/*MahJongRally * pMe,*/ byte byGameID)
 	}
 
 
-//-*******************デバッグ機能
-	//-*デバッグ機能
-
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	/// <summary>
+	/// 牌数の確認
+	/// </summary>
+	public bool CheckTileLine(byte[] paiLineArray)
+	{
+		List<byte> paiList = paiLineArray.ToList();
+		bool isSafe = true;
+		//-*enum PAI を順番に
+		foreach (var i in Enum.GetValues(typeof(PAI)).Cast<PAI>())
+		{
+			int paiNum = paiList.Count(n => n==(byte)i);
+			// Debug.Log("//-*牌名："+i+"["+(byte)i+"("+(int)i+")]___枚数："+paiNum);
+			if(paiNum != MJDefine.ONE_TILES_NUM_MAX && i != PAI.URA){
+			//-*1牌が4枚でなければエラー
+				Debug.LogError("//-*牌名："+i+"["+(byte)i+"("+(int)i+")]___枚数："+paiNum);
+				isSafe = false;
+			}
+		}
+		return isSafe;
+	}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 
 #endregion //-*UNITY_ORIGINAL
 }

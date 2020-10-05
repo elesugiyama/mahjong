@@ -61,6 +61,13 @@ public class DontDestroyData : MonoBehaviour {
 	}
 
 	/// <summary>
+	/// シナリオ：セーブデータの有無(true:Saveあり)
+	/// </summary>
+	public static bool IsHaveAdvSaveData {
+		get {return (AdvScoNo != 0);}
+	}
+
+	/// <summary>
 	/// シナリオ：現在の背景番号
 	/// </summary>
 	private string m_advBgNo;
@@ -526,7 +533,6 @@ Debug.Log("//-*3");
 		nn.account.Account.TryOpenPreselectedUser(ref userHandle);
 		nn.account.Account.GetUserId(ref userId, userHandle);
 
-		Debug.Log("userId___:"+userId);
 		#if false	//-*
 		nn.Result result = nn.fs.SaveData.Mount(mountName, userId);
 		#else
@@ -536,15 +542,12 @@ Debug.Log("//-*3");
 		result.abortUnlessSuccess();
 
 		filePath = string.Format("{0}:/{1}", mountName, fileName);
-Debug.Log("//-************************/"+nn.fs.SaveData.IsExisting(userId));
-Debug.Log("//-*filePath：："+filePath);
 
 	}
 
 
 	private static void FsSave()
 	{
-Debug.Log("//-*FsSave:Start******,._.,");
 
 		byte[] data;
 		using (MemoryStream stream = new MemoryStream(saveDataSize))
@@ -552,7 +555,6 @@ Debug.Log("//-*FsSave:Start******,._.,");
 			BinaryFormatter bf = new BinaryFormatter ();
 			bf.Serialize (stream, personalData);
 			bf.Serialize (stream, slotData);
-Debug.Log("//-*FsSave:slotData:"+slotData.Length);
 			stream.Close();
 			data = stream.GetBuffer();
 			Debug.Assert(data.Length == saveDataSize);
@@ -590,13 +592,11 @@ Debug.Log("//-*FsSave:slotData:"+slotData.Length);
 // #endif
 
 		// UnityEngine.Debug.LogError("FsSave");
-Debug.Log("//-*FsSave:End******(-_-)");
 
 	}
 
 	private static void FsLoad()
 	{
-Debug.Log("//-*FsLoad:Start******,._.,");
 		nn.fs.EntryType entryType = 0;
 		nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, filePath);
 		if (nn.fs.FileSystem.ResultPathNotFound.Includes(result)) { return; }
@@ -630,7 +630,6 @@ Debug.Log("//-*FsLoad:Start******,._.,");
 		{
 			UnityEngine.Debug.LogError("ロード失敗");
 		}
-Debug.Log("//-*FsLoad:End******(-_-)");
 	}
 
 #region  MJ	
@@ -638,7 +637,6 @@ private void SetLoadOptionData(PersonalData data){
 	SOUND_VOLUME = data.vol;
 	SCO_SPEED = data.msg;
 	SCO_AUTO = (data.btn_skip)?1:0;
-	Debug.Log("//-*(-_-)人(＾－＾)"+data.cg);
 }
 private static void SetSaveOptionData(){
 	personalData.vol = SOUND_VOLUME;
@@ -650,22 +648,16 @@ private static void SetLoadSlotData(SlotData data){
 	AdvScoNo = data.scoFileNo;
 	AdvNextScoNo = AdvScoNo;
 	FlagGallery = data.cg;
-	Debug.Log("FlagGallery:"+FlagGallery+"::::AdvScoNo"+AdvScoNo);
 }
 private static void SetSaveSlotData(SlotData data){
 	slotData[0] = data;
-	Debug.Log("slotData[0]:cg("+slotData[0].cg+") Time = "+slotData[0].realTime);
 }
 public void SetFlagGallery(int a)
 {
-	Debug.Log("No."+a+"***Befor:"+FlagGallery);
 	FlagGallery|=(1<<a);                   // ギャラリー用CGフラグのセット
-	Debug.Log("(1<<a):"+(1<<a)+"***After:"+FlagGallery);
 }
 public bool CheckFlagGallery(int a)
 {
-	bool b = ((FlagGallery&(1<<a))!=0);
-	Debug.Log("//-****FlagGallery["+FlagGallery+"]**a["+a+"]***("+(1<<a)+")***"+b);
 	return ((FlagGallery&(1<<a))!=0);              // ギャラリー用CGフラグのチェック
 }
 #endregion //-*MJ

@@ -254,7 +254,7 @@ public class Title : SceneBase {
 			//-*todo:セーブの有無チェック
 			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
 			//-*現在のシナリオ番号が0(最初)ならセーブデータなし
-				if(DontDestroyData.AdvScoNo == 0){
+				if(!DontDestroyData.IsHaveAdvSaveData){
 					m_menuNo--;
 				}
 			}
@@ -271,7 +271,7 @@ public class Title : SceneBase {
 			//-*todo:セーブの有無チェック
 			if(m_menuNo == (int)SCO_SELECT.SEL_CONTINUE){
 			//-*なければ飛ばす
-				if(DontDestroyData.AdvScoNo == 0){
+				if(!DontDestroyData.IsHaveAdvSaveData){
 					m_menuNo++;
 				}
 			}
@@ -314,7 +314,7 @@ public class Title : SceneBase {
 			return TITLEMODE.tMODE_NEXT_SCENE;
 		}
 		if(m_BtnScoSelContinue.ISPUSH){
-			if(DontDestroyData.AdvScoNo == 0){
+			if(!DontDestroyData.IsHaveAdvSaveData){
 				m_nextSceneName = SceneNameDic[SCENE_NAME.ADVENTURE];
 				return TITLEMODE.tMODE_NEXT_SCENE;
 			}
@@ -340,7 +340,11 @@ public class Title : SceneBase {
 	{
 		m_TitleBtnModeSelect.SetActive(false);
 		m_TitleBtnScoModeSelect.SetActive(true);
-		m_BtnScoSelContinue.SetInteractable(false);
+		if(DontDestroyData.IsHaveAdvSaveData){
+			m_BtnScoSelContinue.SetInteractable(true);
+		}else{
+			m_BtnScoSelContinue.SetInteractable(false);
+		}
 #region KEY_TEST
 		m_menuNo = (int)TITLE_SELECT.SEL_STORY;
 		m_titleCursol.transform.SetParent(m_titleScoMenuObj[m_menuNo].transform);

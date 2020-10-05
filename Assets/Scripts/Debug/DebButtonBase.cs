@@ -11,7 +11,8 @@ public class DebButtonBase : ButtonCtl {
 
 	private const int OFF = 0;
 	private const int ON = 1;
-	private static string[] ONOFFF = {"OFF","ON"};
+	private const int NOUSE = 2;
+	private static string[] ONOFFF = {"OFF","ON",""};
 
 	[SerializeField]
 	private Text m_labelText;
@@ -20,6 +21,12 @@ public class DebButtonBase : ButtonCtl {
 	private GameObject m_buttonColorChoice;
 	[SerializeField]
 	private GameObject m_buttonColorNotChoice;
+	[SerializeField]
+	private bool m_isChangeLabel = true;
+	public bool IsChangeLabel{
+		get{return m_isChangeLabel;}
+		set{m_isChangeLabel = value;}
+	}
 	private int m_buttonNo;
 	public int ButtonNo{
 		get{return m_buttonNo;}
@@ -27,6 +34,7 @@ public class DebButtonBase : ButtonCtl {
 	private int m_buttonType;
 	private bool m_isEffective;	//-*効果中か
 	private string m_labelTextBase;
+
 
 	// Use this for initialization
 	void Start () {
@@ -50,8 +58,12 @@ public class DebButtonBase : ButtonCtl {
 	}
 	public void ChangeOnOff(bool isEffect)
 	{
+		int onoff_label = NOUSE;
+
 		m_isEffective = isEffect;
-		int onoff_label = (m_isEffective)?ON:OFF;
+		if(IsChangeLabel){
+			onoff_label = (m_isEffective)?ON:OFF;
+		}
 		m_labelText.text = m_labelTextBase+ONOFFF[onoff_label];
 	}
 	public void SwichOnOff()

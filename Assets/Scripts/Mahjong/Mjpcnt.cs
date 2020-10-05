@@ -202,7 +202,7 @@ public void _loadParam(/*MahJongRally * pMe,*/ int odr, TABLEMEM pTableMem)
 	gsPlayerWork[odr].sParamData = new PARA (  0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0);
 	#if SUGI_DEB //-*todo:注デバッグ中	if(m_DebBox != null && m_DebBox.GetTumikomiNo() >= 0){
 		if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.THINK)){
-			var debPara = m_DebBox.GetDebPara();
+			var debPara = m_DebBox.GetDebThinkPara();
 			if(debPara.Length >= 30){
 				PARA temp = new PARA(
 					debPara[0],debPara[1],debPara[2],debPara[3],debPara[4],debPara[5],debPara[6],debPara[7],debPara[8],debPara[9],

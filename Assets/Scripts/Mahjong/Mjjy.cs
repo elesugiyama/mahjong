@@ -673,8 +673,19 @@ public void jyaku_c(/*MahJongRally * pMe*/)
 	if(gpsPlayerWork.bFmenzen == 0 && (Status&(byte)ST.RON) == 0)
 		wrtyaku((int)YK.MENZE, 1);													/*	面前清ツモ	*/
 
+
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	//-デバッグ
+	if((n=cntdora_jy(true)) != 0)
+#else
+	//-*元
 	if((n=cntdora_jy()) != 0)
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
+	{
 		wrthan((int)YK.DORA, n);														/*	ドラ	*/
+	}
 }
 
 public void calfu(/*MahJongRally * pMe*/)

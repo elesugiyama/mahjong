@@ -203,6 +203,14 @@ public partial class MahjongBase : SceneBase {
 	//				IDISPLAY_ClearScreen( GETMYDISPLAY() );
 				m_Mode=INMJMODE.D_FREE_GAME_MODE;
 			}
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+			if(m_DebBox != null && m_DebBox.GetDebugFlag(DebBoxInGame.FUNCTION_LIST.TUMOPOSTEST,true)){
+				m_DebBox.DebSetTPCPaiLine(Bipai,Bpcnt);
+				m_DebBox.DebSetTPCNowHand(gsPlayerWork);
+			}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 			break;
 		}
 #if true//-*todo:描画

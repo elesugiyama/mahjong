@@ -230,7 +230,18 @@ public partial class MahjongBase : SceneBase {
 			}
 	}
 	public byte[]	cntsave= new byte [56];//0505mt	//-*todo:元char型
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	//-*デバッグ
+	/// <summary>
+	/// bool isResut:リザルト用判定
+	/// </summary>
+	public int		cntdora_jy ( /*MahJongRally * pMe*/ bool isResut = false)/*1995.4.25, 5.19	正常動作*/
+#else
+	//-*元
 	public int		cntdora_jy ( /*MahJongRally * pMe*/ )/*1995.4.25, 5.19	正常動作*/
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 	{
 		int		i, j = 0;
 		byte[]	p;
@@ -257,6 +268,29 @@ public partial class MahjongBase : SceneBase {
 				i+=cntbuf[Ura[j]];				//i+=cntbuf[p];
 			}
 		}
+
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+		//-*追加ドラ
+		if(isResut){
+			// byte[] addDraTest = new byte[5];
+			// addDraTest[0] = 0x21;
+			// addDraTest[1] = 0x22;
+			// addDraTest[2] = 0x23;
+			// addDraTest[3] = 0x24;
+			// addDraTest[4] = 0;
+			// for( j= 0; j< addDraTest.Length; j++) {
+			// 	i+=cntbuf[addDraTest[j]];
+			// }
+			if(m_DebBox != null){
+				var debAddDora = m_DebBox.GetDebAddDora();
+				foreach(byte no in debAddDora){
+					i+=cntbuf[no];
+				}
+			}
+		}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 		_MEMCPY(cntbuf, cntsave, cntsave.Length);		//MEMCPY(cntbuf, cntsave, sizeof( cntbuf));
 		return i;
 	}

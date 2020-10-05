@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -134,6 +135,16 @@ public class MJTIle : ButtonCtl {
 		//-******
 	}
 
+	/// <summary>
+	/// Dictionary[PAI, TILE_LIST] PAI_LIST　内
+	/// TILE_LIST から　PAI　を取得する
+	/// </summary>
+	public PAI GetDicPaiListValue(TILE_LIST no)
+	{
+        var pai = PAI_LIST.FirstOrDefault( c => c.Value == no );
+        var key  = pai.Key;
+		return key;
+	}
 
 	/// <summary>
 	/// 鳴き時等の牌選択用位置調整
@@ -172,4 +183,15 @@ public class MJTIle : ButtonCtl {
 			m_OnPointerClickCallbackInt(m_no);
 		}
     }
+
+	//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	//-*牌色の変更
+	public void SetImageColorTest(bool isColor){
+		m_tileImage.SetImageColor(isColor);
+	}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
+
+
 }

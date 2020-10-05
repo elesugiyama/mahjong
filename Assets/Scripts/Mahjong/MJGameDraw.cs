@@ -1733,6 +1733,19 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 				// 	}
 				// }
 			}
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+			//-*追加ドラの色変え
+			if(m_DebBox != null){
+				var addDoraList = m_DebBox.GetDebAddDora();
+				if( addDoraList.Contains( (byte)gsPlayerWork[House].byTehai[a] ) ){
+					tehaiDraw.SetImageColorTest(true);
+				}else{
+					tehaiDraw.SetImageColorTest(false);
+				}
+			}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 		}else{
 		//-*鳴き等で手牌から消えてる
 			tehaiDraw.set(TILE_STATE.NO_USE,PAI.URA);
@@ -1791,6 +1804,19 @@ public void MJ_JicyaDraw( /*MahJongRally * pMe,*/ int House )
 					D_JICYA_TEHAI0_Y-paiupY+ _y_of010);
 	#endif
 #endif //-*todo:描画
+//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+				//-*追加ドラの色変え
+				if(m_DebBox != null){
+					var addDoraList = m_DebBox.GetDebAddDora();
+					if( addDoraList.Contains( (byte)tsumopai ) ){
+						tumoDraw.SetImageColorTest(true);
+					}else{
+						tumoDraw.SetImageColorTest(false);
+					}
+				}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 			}
 		}
 	}

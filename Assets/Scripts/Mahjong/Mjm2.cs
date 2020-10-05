@@ -192,6 +192,7 @@ public void	shipai_m2 ( /*MahJongRally * pMe*/ )
 	if(m_DebBox != null && !m_DebBox.IsSameTumikomi()){
 		m_DebBox.SetTumikomiSameKyoku(Bipai);
 	}
+	CheckTileLine(Bipai);
 #endif //-*todo:注デバッグ中
 //-****************************SUGI_DEB
 
@@ -249,18 +250,23 @@ public void tsumikomi( /*MahJongRally * pMe*/ )
 #if SUGI_DEB //-*todo:注デバッグ中
 	var tumiData = MJDefine.tumiData;
 	if(m_DebBox != null && m_DebBox.GetTumikomiNo() >= 0){
-		tsumikomiNum = m_DebBox.GetTumikomiNo();
+		deb_tsumikomiNum = m_DebBox.GetTumikomiNo();
 		if(m_DebBox.IsSameTumikomi()){
 		//-*TUMIKOMI_PLUS.SAME_KYOKU
 			byte[] sameLine = m_DebBox.GetTumikomiSameKyoku();
 			for( int i= 0; i< MJDefine.HAI_MAX_NUM; i++){
 				Bipai[i]= sameLine[i];
 			}
-		}else if(tsumikomiNum < tumiData.Length){
+		}else if(deb_tsumikomiNum < tumiData.Length){
 			for( int i= 0; i< MJDefine.HAI_MAX_NUM; i++){
-				Bipai[i]= tumiData[tsumikomiNum][i];
+				Bipai[i]= tumiData[deb_tsumikomiNum][i];
 			}
+			//-*積み込み終わったら並び順を登録(同局やり直し用)
+			m_DebBox.SetTumikomiSameKyoku(Bipai);
 		}
+		#if true
+		Bipai = m_DebBox.DebGetTPCPaiLine();	//-*数巡後の手牌を格納した状態
+		#endif
 		Dicnum[0]= Dicnum[1]= 0;
 	}
 #else //-*todo:注デバッグ中

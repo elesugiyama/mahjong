@@ -80,8 +80,18 @@ public class MJTIleImage : MonoBehaviour {
 		m_tileImage.sprite = spriteImage;
 	}
 
-
-
+	//-*SUGI_DEB***************************
+#if SUGI_DEB //-*todo:注デバッグ中
+	public void SetImageColor(bool isColor = false)
+	{
+		if(isColor){
+			m_tileImage.color = new Color(255.0f,255.0f,0.0f,255.0f);
+		}else{
+			m_tileImage.color = new Color(255.0f,255.0f,255.0f,255.0f);
+		}
+	}
+#endif //-*todo:注デバッグ中
+//-****************************SUGI_DEB
 	// Use this for initialization
 	void Start () {}
 	// Update is called once per frame
